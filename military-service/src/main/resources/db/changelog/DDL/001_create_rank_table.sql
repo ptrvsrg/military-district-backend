@@ -1,0 +1,18 @@
+CREATE TABLE IF NOT EXISTS ranks
+(
+    id               SERIAL PRIMARY KEY,
+    name             VARCHAR(255) NOT NULL UNIQUE,
+    level            INTEGER      NOT NULL,
+    rank_category_id INTEGER      NOT NULL REFERENCES rank_categories (id) ON DELETE SET NULL,
+    created_at TIMESTAMPTZ NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL
+);
+
+COMMENT ON TABLE ranks IS 'Воинские звания';
+
+COMMENT ON COLUMN ranks.id IS 'ID';
+COMMENT ON COLUMN ranks.name IS 'Наименование';
+COMMENT ON COLUMN ranks.level IS 'Уровень в военной иерархии';
+COMMENT ON COLUMN ranks.rank_category_id IS 'ID категории воинских званий';
+COMMENT ON COLUMN ranks.created_at IS 'Время создания';
+COMMENT ON COLUMN ranks.updated_at IS 'Время последнего изменения';
