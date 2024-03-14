@@ -124,6 +124,7 @@ type Mutation {
     createMilitary(militaryInput: CreateMilitaryInput!): Military
     updateMilitary(mbn: String!, militaryInput: UpdateMilitaryInput!): Military
     deleteMilitary(mbn: String!): Boolean
+    deleteMilitariesByMbn(mbns: [String!]!): Boolean
 }
 
 scalar Date
