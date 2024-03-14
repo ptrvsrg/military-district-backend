@@ -51,4 +51,6 @@ public interface MilitaryRepository
   boolean existsByMbn(String mbn);
 
   void deleteByMbn(String mbn);
+
+  void deleteAllByMbnIn(List<String> mbn);
 }

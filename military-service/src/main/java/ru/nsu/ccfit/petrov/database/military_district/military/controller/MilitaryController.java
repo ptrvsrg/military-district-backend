@@ -96,10 +96,14 @@ public class MilitaryController {
   @MutationMapping
   @Transactional
   public boolean deleteMilitary(@Argument("mbn") String mbn) {
-    if (!militaryRepository.existsByMbn(mbn)) {
-      throw new MilitaryNotFoundException();
-    }
     militaryRepository.deleteByMbn(mbn);
+    return true;
+  }
+
+  @MutationMapping
+  @Transactional
+  public boolean deleteMilitariesByMbn(@Argument("mbns") List<String> mbns) {
+    militaryRepository.deleteAllByMbnIn(mbns);
     return true;
   }
 }
