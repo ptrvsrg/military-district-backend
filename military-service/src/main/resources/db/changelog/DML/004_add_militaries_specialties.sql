@@ -5,7 +5,7 @@ DECLARE
 BEGIN
     SELECT s.id
     INTO random_specialty_id
-    FROM specialties s
+    FROM military_service.specialties s
     ORDER BY RANDOM()
     LIMIT 1;
 
@@ -21,18 +21,18 @@ $$
     BEGIN
         SELECT COUNT(*)
         INTO military_count
-        FROM militaries;
+        FROM military_service.militaries;
 
         FOR i IN 1..military_count
             LOOP
                 SELECT id
                 INTO military_id
-                FROM militaries
+                FROM military_service.militaries
                 WHERE mbn = 'ВС России Э-' || LPAD(i::TEXT, 6, '0');
 
                 FOR j IN 1..5
                     LOOP
-                        INSERT INTO militaries_specialties (military_id, specialty_id)
+                        INSERT INTO military_service.militaries_specialties (military_id, specialty_id)
                         VALUES (military_id, get_random_specialty_id())
                         ON CONFLICT DO NOTHING;
                     END LOOP;

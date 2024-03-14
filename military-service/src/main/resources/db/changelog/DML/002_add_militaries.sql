@@ -6,7 +6,7 @@ BEGIN
     IF RANDOM() < 0.05 THEN
         random_rank_id := NULL;
     ELSE
-        SELECT id INTO random_rank_id FROM ranks ORDER BY RANDOM() LIMIT 1;
+        SELECT id INTO random_rank_id FROM military_service.ranks ORDER BY RANDOM() LIMIT 1;
     END IF;
 
     RETURN random_rank_id;
@@ -47,7 +47,7 @@ WITH first_names AS (SELECT *
                                    ('Кириллович'),
                                    ('Васильевич')) AS middle_name(middle_name))
 INSERT
-INTO militaries (mbn, first_name, last_name, middle_name, birth_date, avatar_url, rank_id, unit_number, created_at,
+INTO military_service.militaries (mbn, first_name, last_name, middle_name, birth_date, avatar_url, rank_id, unit_number, created_at,
                  updated_at)
 SELECT 'ВС России Э-' || LPAD((ROW_NUMBER() OVER ())::TEXT, 6, '0')                              AS mbn,
        f.first_name                                                                              AS first_name,

@@ -22,6 +22,8 @@ import jakarta.persistence.NamedSubgraph;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
+
+import java.time.Instant;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -31,6 +33,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Getter
 @Setter
@@ -38,7 +42,7 @@ import org.hibernate.annotations.Cache;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "militaries")
+@Table(name = "militaries", schema = "military_service")
 @Cacheable
 @Cache(usage = READ_WRITE)
 @NamedEntityGraphs(
@@ -89,7 +93,17 @@ public class Military {
   @ManyToMany
   @JoinTable(
       name = "militaries_specialties",
+      schema = "military_service",
       joinColumns = @JoinColumn(name = "military_id"),
       inverseJoinColumns = @JoinColumn(name = "specialty_id"))
   private Set<Specialty> specialties = new LinkedHashSet<>();
+
+  @CreationTimestamp
+  @Column(name = "created_at")
+  private Instant createdAt;
+
+  @UpdateTimestamp
+  @Column(name = "updated_at")
+  private Instant updatedAt;
+
 }

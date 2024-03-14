@@ -1,4 +1,4 @@
-INSERT INTO rank_categories (name, created_at, updated_at)
+INSERT INTO military_service.rank_categories (name, created_at, updated_at)
 SELECT rcn.name AS name,
        NOW() AS created_at,
        NOW() AS updated_at

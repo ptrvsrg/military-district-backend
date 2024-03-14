@@ -23,7 +23,7 @@ import org.hibernate.annotations.Cache;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "military_attributes")
+@Table(name = "military_attributes", schema = "military_service")
 @Cache(usage = READ_WRITE)
 public class MilitaryAttribute {
 
