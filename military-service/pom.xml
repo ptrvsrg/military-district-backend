@@ -21,6 +21,9 @@
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
         <lombok.version>1.18.20</lombok.version>
         <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
+        <graphql-datetime-spring-boot-starter.version>6.0.0</graphql-datetime-spring-boot-starter.version>
+        <redisson-hibernate-53.version>3.15.6</redisson-hibernate-53.version>
+        <spring-boot-dependencies.version>3.2.3</spring-boot-dependencies.version>
     </properties>
 
     <profiles>
@@ -69,7 +72,7 @@
         <dependency>
             <groupId>com.tailrocks.graphql</groupId>
             <artifactId>graphql-datetime-spring-boot-starter</artifactId>
-            <version>6.0.0</version>
+            <version>${graphql-datetime-spring-boot-starter.version}</version>
         </dependency>
 
         <!-- Database -->
@@ -91,7 +94,7 @@
         <dependency>
             <groupId>org.redisson</groupId>
             <artifactId>redisson-hibernate-53</artifactId>
-            <version>3.15.6</version>
+            <version>${redisson-hibernate-53.version}</version>
         </dependency>
 
         <!-- Monitoring -->
@@ -129,7 +132,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>3.2.3</version>
+                <version>${spring-boot-dependencies.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
