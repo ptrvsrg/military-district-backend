@@ -34,7 +34,7 @@ WITH specialty_codes_names AS (SELECT scn.code AS code,
                                             (999,
                                              'Ограниченно пригоден к службе в армии, но не имеет военной подготовки')) AS scn(code, name))
 INSERT
-INTO specialties (code, name, created_at, updated_at)
+INTO military_service.specialties (code, name, created_at, updated_at)
 SELECT scn.code AS code,
        scn.name AS name,
        NOW()    AS created_at,

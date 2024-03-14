@@ -1,5 +1,5 @@
 WITH rank_category_id AS (SELECT c.id AS id
-                          FROM rank_categories c
+                          FROM military_service.rank_categories c
                           WHERE name = 'Рядовой и сержантский состав'),
      rank_names_levels AS (SELECT rnl.name  AS name,
                                   rnl.level AS level
@@ -12,7 +12,7 @@ WITH rank_category_id AS (SELECT c.id AS id
                                         ('Прапорщик', 7),
                                         ('Старший прапорщик', 8)) AS rnl(name, level))
 INSERT
-INTO ranks (name, level, rank_category_id, created_at, updated_at)
+INTO military_service.ranks (name, level, rank_category_id, created_at, updated_at)
 SELECT rnl.name  AS name,
        rnl.level AS level,
        rci.id    AS rank_category_id,
@@ -23,7 +23,7 @@ FROM rank_category_id rci,
 ON CONFLICT DO NOTHING;
 
 WITH rank_category_id AS (SELECT c.id AS id
-                          FROM rank_categories c
+                          FROM military_service.rank_categories c
                           WHERE name = 'Офицерский состав'),
      rank_names_levels AS (SELECT rnl.name  AS name,
                                   rnl.level AS level
@@ -40,7 +40,7 @@ WITH rank_category_id AS (SELECT c.id AS id
                                         ('Генерал армии', 19),
                                         ('Маршал Российской Федерации', 20)) AS rnl(name, level))
 INSERT
-INTO ranks (name, level, rank_category_id, created_at, updated_at)
+INTO military_service.ranks (name, level, rank_category_id, created_at, updated_at)
 SELECT rnl.name  AS name,
        rnl.level AS level,
        rci.id    AS rank_category_id,

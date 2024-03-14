@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "military-service": {
+      "Name": "military-district-dev",
+      "Group": "Servers",
+      "Port": 5432,
+      "Host": "military-district-db-dev",
+      "Username": "user",
+      "Password": "password",
+      "MaintenanceDB": "db"
+    }
+  }
+}
