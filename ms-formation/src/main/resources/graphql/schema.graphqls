@@ -1,0 +1,310 @@
+extend schema @link(url: "https://specs.apollo.dev/federation/v2.3",
+    import: ["@key", "@shareable", "@extends", "@external"])
+
+type Address @shareable {
+    postCode: Int
+    country: String
+    state: String
+    locality: String
+    street: String
+    houseNumber: String
+}
+
+type Army @key(fields: "name") {
+    name: String!
+    commander: Military
+    brigades: [Brigade!]!
+    divisions: [Division!]!
+    corps: [Corps!]!
+}
+
+type Brigade @key(fields: "name") {
+    name: String!
+    commander: Military
+    units: [Unit!]!
+    armies: [Army!]!
+}
+
+type Company @key(fields: "name") {
+    name: String!
+    commander: Military
+    unit: Unit
+    platoons: [Platoon!]!
+}
+
+type Coordinate @shareable {
+    lat: Float!
+    lng: Float!
+}
+
+type Corps @key(fields: "name") {
+    name: String!
+    commander: Military
+    units: [Unit!]!
+    armies: [Army!]!
+}
+
+type Division @key(fields: "name") {
+    name: String!
+    commander: Military
+    units: [Unit!]!
+    armies: [Army!]!
+}
+
+type Military @key(fields: "mbn", resolvable: false) @extends {
+    mbn: String! @external
+}
+
+type Platoon @key(fields: "name") {
+    name: String!
+    commander: Military
+    company: Company
+    squads: [Squad!]!
+}
+
+type Squad @key(fields: "name") {
+    name: String!
+    commander: Military
+    platoon: Platoon
+}
+
+type Unit @key(fields: "name") {
+    name: String!
+    coordinate: Coordinate
+    address: Address
+    commander: Military
+    companies: [Company!]!
+    brigades: [Brigade!]!
+    divisions: [Division!]!
+    corps: [Corps!]!
+}
+
+type Query {
+    getArmies(
+        name: String
+        commander: String
+        page: Int
+        pageSize: Int
+        sort: String
+        sortAsc: Boolean
+    ): [Army!]
+    getArmyCount(
+        name: String
+        commander: String
+    ): Int
+    getArmy(name: String!): Army
+
+    getBrigades(
+        name: String
+        commander: String
+        page: Int
+        pageSize: Int
+        sort: String
+        sortAsc: Boolean
+    ): [Brigade!]
+    getBrigadeCount(
+        name: String
+        commander: String
+    ): Int
+    getBrigade(name: String!): Brigade
+
+    getCompanies(
+        name: String
+        commander: String
+        unit: String
+        page: Int
+        pageSize: Int
+        sort: String
+        sortAsc: Boolean
+    ): [Company!]
+    getCompanyCount(
+        name: String
+        commander: String
+        unit: String
+    ): Int
+    getCompany(name: String!): Company
+
+    getCorps(
+        name: String
+        commander: String
+        page: Int
+        pageSize: Int
+        sort: String
+        sortAsc: Boolean
+    ): [Corps!]
+    getCorpsCount(
+        name: String
+        commander: String
+    ): Int
+    getOneCorps(name: String!): Corps
+
+    getDivisions(
+        name: String
+        commander: String
+        page: Int
+        pageSize: Int
+        sort: String
+        sortAsc: Boolean
+    ): [Division!]
+    getDivisionCount(
+        name: String
+        commander: String
+    ): Int
+    getDivision(name: String!): Division
+
+    getPlatoons(
+        name: String
+        commander: String
+        company: String
+        page: Int
+        pageSize: Int
+        sort: String
+        sortAsc: Boolean
+    ): [Platoon!]
+    getPlatoonCount(
+        name: String
+        commander: String
+        company: String
+    ): Int
+    getPlatoon(name: String!): Platoon
+
+    getSquads(
+        name: String
+        commander: String
+        platoon: String
+        page: Int
+        pageSize: Int
+        sort: String
+        sortAsc: Boolean
+    ): [Squad!]
+    getSquadCount(
+        name: String
+        commander: String
+        platoon: String
+    ): Int
+    getSquad(name: String!): Army
+
+    getUnits(
+        name: String
+        address: String
+        commander: String
+        page: Int
+        pageSize: Int
+        sort: String
+        sortAsc: Boolean
+    ): [Unit!]
+    getUnitCount(
+        name: String
+        address: String
+        commander: String
+    ): Int
+    getUnit(name: String!): Unit
+}
+
+input AddressInput {
+    postCode: Int
+    country: String
+    state: String
+    locality: String
+    street: String
+    houseNumber: String
+}
+
+input ArmyInput {
+    name: String!
+    commander: String
+    brigades: [String!]
+    divisions: [String!]
+    corps: [String!]
+}
+
+input BrigadeInput {
+    name: String!
+    commander: String
+    units: [String!]
+    armies: [String!]
+}
+
+input CompanyInput {
+    name: String!
+    commander: String
+    unit: String
+    platoons: [String!]
+}
+
+input CoordinateInput {
+    lat: Float!
+    lng: Float!
+}
+
+input CorpsInput {
+    name: String!
+    commander: String
+    units: [String!]
+    armies: [String!]
+}
+
+input DivisionInput {
+    name: String!
+    commander: String
+    units: [String!]
+    armies: [String!]
+}
+
+input PlatoonInput {
+    name: String!
+    commander: String
+    company: String
+    squads: [String!]
+}
+
+input SquadInput {
+    name: String!
+    commander: String
+    platoon: String
+}
+
+input UnitInput {
+    name: String!
+    coordinate: CoordinateInput
+    address: AddressInput
+    commander: String
+    companies: [String!]
+    brigades: [String!]
+    divisions: [String!]
+    corps: [String!]
+}
+
+type Mutation {
+    createArmy(input: ArmyInput!): Army
+    updateArmy(name: String!, input: ArmyInput!): Army
+    deleteArmy(name: String!): Int
+
+    createBrigade(input: BrigadeInput!): Brigade
+    updateBrigade(name: String!, input: BrigadeInput!): Brigade
+    deleteBrigade(name: String!): Int
+
+    createCompany(input: CompanyInput!): Company
+    updateCompany(name: String!, input: CompanyInput!): Company
+    deleteCompany(name: String!): Int
+
+    createCorps(input: CorpsInput!): Corps
+    updateCorps(name: String!, input: CorpsInput!): Corps
+    deleteCorps(name: String!): Int
+
+    createDivision(input: DivisionInput!): Division
+    updateDivision(name: String!, input: DivisionInput!): Division
+    deleteDivision(name: String!): Int
+
+    createPlatoon(input: PlatoonInput!): Platoon
+    updatePlatoon(name: String!, input: PlatoonInput!): Platoon
+    deletePlatoon(name: String!): Int
+
+    createSquad(input: SquadInput!): Squad
+    updateSquad(name: String!, input: SquadInput!): Squad
+    deleteSquad(name: String!): Int
+
+    createUnit(input: UnitInput!): Unit
+    updateUnit(name: String!, input: UnitInput!): Unit
+    deleteUnit(name: String!): Int
+}
