@@ -38,8 +38,12 @@ env:
 	@cp $(SAMPLE_ENV_FILE) $(ENV_FILE)
 
 .PHONY: deploy
-deploy: build
+deploy:
+ifeq ($(shell [ -e ./.env ] && echo 1 || echo 0), 1)
 	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -p military-district up -d
+else
+	$(DOCKER_COMPOSE) -p military-district up -d
+endif
 
 .PHONY: help
 help:
