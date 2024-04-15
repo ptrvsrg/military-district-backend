@@ -113,6 +113,7 @@ replay_pid*
 
 ### dotenv template
 .env
+.env.development
 
 ### Linux template
 *~
