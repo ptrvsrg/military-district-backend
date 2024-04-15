@@ -1,0 +1,52 @@
+server:
+  port: 58081
+spring:
+  application:
+    name: ms-military
+  datasource:
+    url: jdbc:postgresql://${MILITARY_DISTRICT_MS_MILITARY_DB_URL}
+    username: ${MILITARY_DISTRICT_MS_MILITARY_DB_USER}
+    password: ${MILITARY_DISTRICT_MS_MILITARY_DB_PASSWORD}
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        cache:
+          use_second_level_cache: true
+          use_query_cache: true
+          region:
+            factory_class: ru.nsu.ccfit.petrov.database.military_district.military.config.ClusterRedissonRegionFactory
+          redisson:
+            query:
+              expiration:
+                time_to_live: 60000
+                max_idle_time: 30000
+            timestamp:
+              expiration:
+                time_to_live: 60000
+                max_idle_time: 30000
+            password: ${MILITARY_DISTRICT_MS_MILITARY_REDIS_PASSWORD}
+            node_addresses: ${MILITARY_DISTRICT_MS_MILITARY_REDIS_NODES}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${MILITARY_DISTRICT_MS_MILITARY_OAUTH2_CERT_URL}
+  graphql:
+    graphiql:
+      enabled: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  metrics:
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
