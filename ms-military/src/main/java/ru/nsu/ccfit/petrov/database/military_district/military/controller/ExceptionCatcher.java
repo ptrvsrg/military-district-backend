@@ -104,11 +104,11 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
   }
 
   private GraphQLError handleAccessDeniedException(
-          AccessDeniedException e, DataFetchingEnvironment env) {
+      AccessDeniedException e, DataFetchingEnvironment env) {
     return GraphQLError.newError()
-            .errorType(FORBIDDEN)
-            .message(getMessage("exception.access-denied", env))
-            .build();
+        .errorType(FORBIDDEN)
+        .message(getMessage("exception.access-denied", env))
+        .build();
   }
 
   private GraphQLError handleException(Throwable e, DataFetchingEnvironment env) {
