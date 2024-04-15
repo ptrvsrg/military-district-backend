@@ -1,0 +1,102 @@
+extend schema @link(url: "https://specs.apollo.dev/federation/v2.3",
+    import: ["@key", "@shareable", "@extends", "@external"])
+
+type Address {
+    postCode: Int @shareable
+    country: String @shareable
+    state: String @shareable
+    locality: String @shareable
+    street: String @shareable
+    houseNumber: String @shareable
+}
+
+type Attribute @shareable {
+    name: String!
+    value: String!
+}
+
+type Building {
+    name: String!
+    coordinate: Coordinate
+    address: Address
+    unit: Unit
+    attributes: [Attribute!]!
+    companies: [Company!]!
+    platoons: [Platoon!]!
+    squads: [Squad!]!
+}
+
+type Company @key(fields: "name", resolvable: false) @extends {
+    name: String! @external
+}
+
+type Coordinate {
+    lat: Float! @shareable
+    lng: Float! @shareable
+}
+
+type Platoon @key(fields: "name", resolvable: false) @extends {
+    name: String! @external
+}
+
+type Squad @key(fields: "name", resolvable: false) @extends {
+    name: String! @external
+}
+
+type Unit @key(fields: "name", resolvable: false) @extends {
+    name: String! @external
+}
+
+type Query {
+    getBuildings(
+        name: String
+        address: String
+        unit: String
+        page: Int
+        pageSize: Int
+        sort: String
+        sortAsc: Boolean
+    ): [Building!]
+    getBuildingCount(
+        name: String
+        address: String
+        unit: String
+    ): Int
+    getBuilding(name: String!, unit: String): Building
+}
+
+input AddressInput {
+    postCode: Int
+    country: String
+    state: String
+    locality: String
+    street: String
+    houseNumber: String
+}
+
+input AttributeInput {
+    name: String!
+    value: String!
+}
+
+input BuildingInput {
+    name: String!
+    coordinate: CoordinateInput
+    address: AddressInput
+    unit: String
+    attributes: [AttributeInput!]
+    companies: [String!]
+    platoons: [String!]
+    squads: [String!]
+}
+
+input CoordinateInput {
+    lat: Float!
+    lng: Float!
+}
+
+type Mutation {
+    createBuilding(input: BuildingInput!): Building
+    updateBuilding(name: String!, unit: String, input: BuildingInput!): Building
+    deleteBuilding(name: String!, unit: String): Int
+}
