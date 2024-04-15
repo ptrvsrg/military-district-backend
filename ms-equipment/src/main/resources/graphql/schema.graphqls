@@ -1,0 +1,103 @@
+extend schema @link(url: "https://specs.apollo.dev/federation/v2.3",
+    import: ["@key", "@shareable", "@extends", "@external"])
+
+type Attribute {
+    name: String! @shareable
+    value: String! @shareable
+}
+
+type CombatEquipmentCategory @key(fields: "name") {
+    name: String!
+}
+
+type CombatEquipment @key(fields: "serialNumber") {
+    serialNumber: String!
+    type: CombatEquipmentType
+    unit: Unit
+}
+
+type CombatEquipmentType @key(fields: "id") {
+    id: ID!
+    name: String!
+    category: CombatEquipmentCategory!
+    attributes: [Attribute!]
+}
+
+type Unit @key(fields: "name", resolvable: false) @extends {
+    name: String! @external
+}
+
+type Query {
+    getCombatEquipments(
+        type: String
+        category: String
+        unit: String
+        page: Int
+        pageSize: Int
+        sort: String
+        sortAsc: Boolean
+    ): [CombatEquipment!]
+    getCombatEquipmentCount(
+        type: String
+        category: String
+        unit: String
+    ): Int
+    getCombatEquipment(serialNumber: String!): CombatEquipment
+
+    getCombatEquipmentTypes(
+        name: String
+        category: String
+        page: Int
+        pageSize: Int
+        sort: String
+        sortAsc: Boolean
+    ): [CombatEquipmentType!]
+    getCombatEquipmentTypeCount(
+        name: String
+        category: String
+    ): Int
+    getCombatEquipmentType(
+        name: String!
+        category: String!
+    ): CombatEquipmentType
+
+    getCombatEquipmentCategories(
+        page: Int
+        pageSize: Int
+        sort: String
+        sortAsc: Boolean
+    ): [CombatEquipmentCategory!]
+    getCombatEquipmentCategoryCount: Int
+    getCombatEquipmentCategory(name: String!): CombatEquipmentCategory
+}
+
+input AttributeInput {
+    name: String!
+    value: String!
+}
+
+input CombatEquipmentInput {
+    serialNumber: String!
+    type: String
+    unit: String
+}
+
+input CombatEquipmentTypeInput {
+    name: String!
+    category: String!
+    attributes: [AttributeInput!]
+}
+
+type Mutation {
+    createCombatEquipment(input: CombatEquipmentInput!): CombatEquipment
+    updateCombatEquipment(serialNumber: String!, input: CombatEquipmentInput!): CombatEquipment
+    deleteCombatEquipment(serialNumber: String!): Int
+
+    createCombatEquipmentType(input: CombatEquipmentTypeInput!): CombatEquipmentType
+    updateCombatEquipmentType(name: String!, category: String!, input: CombatEquipmentTypeInput!): CombatEquipmentType
+    deleteCombatEquipmentType(name: String!, category: String!): Int
+
+    createCombatEquipmentCategory(input: String!): CombatEquipmentCategory
+    updateCombatEquipmentCategory(name: String!, input: String!): CombatEquipmentCategory
+    deleteCombatEquipmentCategory(name: String!): Int
+}
