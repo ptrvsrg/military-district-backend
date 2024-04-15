@@ -9,14 +9,14 @@ DOCKER_COMPOSE = docker compose
 
 define build_module_image
 $(DOCKER) build \
--t ptrvsrg/$(1):latest \
--t ptrvsrg/$(1):$(shell $(MAVEN) help:evaluate -Dexpression=project.version -q -DforceStdout) \
+-t $(2)$(1):latest \
+-t $(2)$(1):$(shell $(MAVEN) help:evaluate -Dexpression=project.version -q -DforceStdout) \
 $(HOME_DIR)/$(1);
 endef
 
 define build_apollo_module_image
 $(DOCKER) build \
--t ptrvsrg/apollographql-$(1):latest \
+-t $(2)apollographql-$(1):latest \
 $(HOME_DIR)/$(1);
 endef
 
@@ -30,8 +30,8 @@ build:
 
 .PHONY: build-images
 build-images: build
-	$(foreach module,$(MODULES),$(call build_module_image,$(module)))
-	$(foreach module,$(APOLLO_MODULES),$(call build_apollo_module_image,$(module)))
+	$(foreach module,$(MODULES),$(call build_module_image,$(module),$(IMAGE_PREFIX)))
+	$(foreach module,$(APOLLO_MODULES),$(call build_apollo_module_image,$(module),$(IMAGE_PREFIX)))
 
 .PHONY: env
 env:
@@ -48,7 +48,7 @@ help:
 	@echo "        Clean generated files"
 	@echo "    make build"
 	@echo "        Build the JAR files"
-	@echo "    make build-images"
+	@echo "    make build-images IMAGE_PREFIX=<image prefix>"
 	@echo "        Build the Docker images"
 	@echo "    make env"
 	@echo "        Create template .env file"
