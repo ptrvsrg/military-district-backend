@@ -1,0 +1,26 @@
+supergraph:
+  listen: 0.0.0.0:8080
+  path: /graphql
+  introspection: true
+cors:
+  allow_any_origin: true
+headers:
+  all:
+    request:
+      - propagate:
+          matching: .*
+health_check:
+  enabled: true
+  listen: 0.0.0.0:8088
+homepage:
+  enabled: false
+sandbox:
+  enabled: true
+include_subgraph_errors:
+  all: true
+telemetry:
+  metrics:
+    prometheus:
+      enabled: true
+      listen: 0.0.0.0:9090
+      path: /metrics
