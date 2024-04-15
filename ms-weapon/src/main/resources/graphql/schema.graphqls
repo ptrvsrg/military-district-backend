@@ -1,0 +1,102 @@
+extend schema @link(url: "https://specs.apollo.dev/federation/v2.3",
+    import: ["@key", "@shareable", "@extends", "@external"])
+
+type Attribute {
+    name: String! @shareable
+    value: String! @shareable
+}
+
+type Unit @key(fields: "name", resolvable: false) @extends {
+    name: String! @external
+}
+
+type Weapon @key(fields: "serialNumber") {
+    serialNumber: String!
+    type: WeaponType
+    unit: Unit
+}
+
+type WeaponCategory @key(fields: "name") {
+    name: String!
+}
+
+type WeaponType {
+    name: String!
+    category: WeaponCategory!
+    attributes: [Attribute!]
+}
+
+type Query {
+    getWeapons(
+        type: String
+        category: String
+        unit: String
+        page: Int
+        pageSize: Int
+        sort: String
+        sortAsc: Boolean
+    ): [Weapon!]
+    getWeaponCount(
+        type: String
+        category: String
+        unit: String
+    ): Int
+    getWeapon(serialNumber: String!): Weapon
+
+    getWeaponTypes(
+        name: String
+        category: String
+        page: Int
+        pageSize: Int
+        sort: String
+        sortAsc: Boolean
+    ): [WeaponType!]
+    getWeaponTypeCount(
+        name: String
+        category: String
+    ): Int
+    getWeaponType(
+        name: String!
+        category: String!
+    ): WeaponType
+
+    getWeaponCategories(
+        page: Int
+        pageSize: Int
+        sort: String
+        sortAsc: Boolean
+    ): [WeaponCategory!]
+    getWeaponCategoryCount: Int
+    getWeaponCategory(name: String!): WeaponCategory
+}
+
+input AttributeInput {
+    name: String!
+    value: String!
+}
+
+input WeaponInput {
+    serialNumber: String!
+    type: String
+    unit: String
+}
+
+input WeaponTypeInput {
+    name: String!
+    category: String!
+    attributes: [AttributeInput!]
+}
+
+type Mutation {
+    createWeapon(input: WeaponInput!): Weapon
+    updateWeapon(serialNumber: String!, input: WeaponInput!): Weapon
+    deleteWeapon(serialNumber: String!): Int
+
+    createWeaponType(input: WeaponTypeInput!): WeaponType
+    updateWeaponType(name: String!, category: String!, input: WeaponTypeInput!): WeaponType
+    deleteWeaponType(name: String!, category: String!): Int
+
+    createWeaponCategory(input: String!): WeaponCategory
+    updateWeaponCategory(name: String!, input: String!): WeaponCategory
+    deleteWeaponCategory(name: String!): Int
+}

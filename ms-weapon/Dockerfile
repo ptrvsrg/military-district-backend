@@ -38,9 +38,11 @@ ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
 WORKDIR /opt/workspace
 COPY --from=correto-jre $JRE_PATH $JAVA_HOME
-COPY target/*.jar military-service.jar
+COPY target/*.jar ms-weapon.jar
 
 RUN addgroup -S admin && adduser -S admin -G admin
 USER admin
 
-ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=prod", "military-service.jar"]
+EXPOSE 8085
+
+ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=prod", "ms-weapon.jar"]
