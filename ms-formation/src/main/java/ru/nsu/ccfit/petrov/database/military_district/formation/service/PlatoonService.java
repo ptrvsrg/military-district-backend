@@ -1,18 +1,21 @@
 package ru.nsu.ccfit.petrov.database.military_district.formation.service;
 
 import static ru.nsu.ccfit.petrov.database.military_district.formation.util.SpecPageSortUtils.generatePageable;
+import static ru.nsu.ccfit.petrov.database.military_district.formation.util.SpecPageSortUtils.generatePlatoonSpec;
 import static ru.nsu.ccfit.petrov.database.military_district.formation.util.SpecPageSortUtils.generateSort;
 
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.domain.Specification;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.nsu.ccfit.petrov.database.military_district.formation.dto.PlatoonDto;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.Pagination;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.PlatoonFilter;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.PlatoonInput;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.Sorting;
 import ru.nsu.ccfit.petrov.database.military_district.formation.exception.CompanyNotFoundException;
 import ru.nsu.ccfit.petrov.database.military_district.formation.exception.PlatoonAlreadyExistsException;
 import ru.nsu.ccfit.petrov.database.military_district.formation.exception.PlatoonNotFoundException;
@@ -25,6 +28,7 @@ import ru.nsu.ccfit.petrov.database.military_district.formation.persistence.repo
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class PlatoonService implements GraphQLService {
 
   private static final List<String> availableSortFields =
@@ -35,61 +39,56 @@ public class PlatoonService implements GraphQLService {
   private final SquadRepository squadRepository;
   private final PlatoonMapper platoonMapper;
 
-  public List<Platoon> getAll(
-      String name,
-      String commander,
-      String company,
-      Integer page,
-      Integer pageSize,
-      String sortField,
-      Boolean sortAsc) {
-    var sort = generateSort(sortField, sortAsc, availableSortFields);
-    var pageable = generatePageable(page, pageSize, sort);
-    var spec = generateSpecification(name, commander, company);
+  public List<Platoon> getAll(PlatoonFilter filter, Pagination pagination, List<Sorting> sorts) {
+    log.info("Get all platoons: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
+    var sort = generateSort(sorts, availableSortFields);
+    var pageable = generatePageable(pagination, sort);
+    var spec = generatePlatoonSpec(filter);
     return platoonRepository.findAll(spec, pageable, sort);
   }
 
-  public long getAllCount(String name, String commander, String company) {
-    var spec = generateSpecification(name, commander, company);
-    if (spec == null) {
-      return platoonRepository.count();
-    }
+  public long getAllCount(PlatoonFilter filter) {
+    log.info("Get all platoons count: filter={}", filter);
+    var spec = generatePlatoonSpec(filter);
     return platoonRepository.count(spec);
   }
 
   public Platoon getByName(@NonNull String name) {
+    log.info("Get platoon by name: {}", name);
     return platoonRepository.findByName(name).orElse(null);
   }
 
   @Transactional
-  public Platoon create(@Valid @NonNull PlatoonDto platoonDto) {
-    if (platoonRepository.existsByName(platoonDto.getName())) {
+  public Platoon create(@Valid @NonNull PlatoonInput platoonInput) {
+    log.info("Create platoon: input={}", platoonInput);
+    if (platoonRepository.existsByName(platoonInput.getName())) {
       throw new PlatoonAlreadyExistsException();
     }
 
-    var platoon = platoonMapper.toEntity(platoonDto);
-    platoon.setSquads(squadRepository.findByNameIn(platoonDto.getSquads()));
+    var platoon = platoonMapper.toEntity(platoonInput);
+    platoon.setSquads(squadRepository.findByNameIn(platoonInput.getSquads()));
     platoon.setCompany(
         companyRepository
-            .findByName(platoonDto.getCompany())
+            .findByName(platoonInput.getCompany())
             .orElseThrow(CompanyNotFoundException::new));
 
     return platoonRepository.save(platoon);
   }
 
   @Transactional
-  public Platoon update(@NonNull String name, @Valid @NonNull PlatoonDto platoonDto) {
+  public Platoon update(@NonNull String name, @Valid @NonNull PlatoonInput platoonInput) {
+    log.info("Update platoon: name={}, input={}", name, platoonInput);
     var platoon = platoonRepository.findByName(name).orElseThrow(PlatoonNotFoundException::new);
-    if (!name.equals(platoonDto.getName())
-        && platoonRepository.existsByName(platoonDto.getName())) {
+    if (!name.equals(platoonInput.getName())
+        && platoonRepository.existsByName(platoonInput.getName())) {
       throw new PlatoonAlreadyExistsException();
     }
 
-    platoonMapper.partialUpdate(platoonDto, platoon);
-    platoon.setSquads(squadRepository.findByNameIn(platoonDto.getSquads()));
+    platoonMapper.partialUpdate(platoonInput, platoon);
+    platoon.setSquads(squadRepository.findByNameIn(platoonInput.getSquads()));
     platoon.setCompany(
         companyRepository
-            .findByName(platoonDto.getCompany())
+            .findByName(platoonInput.getCompany())
             .orElseThrow(CompanyNotFoundException::new));
 
     return platoonRepository.save(platoon);
@@ -97,30 +96,13 @@ public class PlatoonService implements GraphQLService {
 
   @Transactional
   public long delete(@NonNull String name) {
+    log.info("Delete platoon: name={}", name);
     return platoonRepository.deleteByName(name);
-  }
-
-  private Specification<Platoon> generateSpecification(
-      String name, String commander, String company) {
-    Specification<Platoon> spec = null;
-    if (Objects.nonNull(name)) {
-      spec = (root, query, builder) -> builder.like(root.get("name"), "%" + name + "%");
-    }
-    if (Objects.nonNull(commander)) {
-      Specification<Platoon> newSpec =
-          (root, query, builder) -> builder.like(root.get("commander.mbn"), "%" + commander + "%");
-      spec = Objects.isNull(spec) ? newSpec : spec.and(newSpec);
-    }
-    if (Objects.nonNull(company)) {
-      Specification<Platoon> newSpec =
-          (root, query, builder) -> builder.like(root.get("company.name"), "%" + company + "%");
-      spec = Objects.isNull(spec) ? newSpec : spec.and(newSpec);
-    }
-    return spec;
   }
 
   @Override
   public Object resolveReference(@NonNull Map<String, Object> reference) {
+    log.info("Resolve reference: reference={}", reference);
     if (reference.get("name") instanceof String name) {
       return getByName(name);
     }

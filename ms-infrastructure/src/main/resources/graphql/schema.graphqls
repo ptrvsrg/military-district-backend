@@ -1,13 +1,13 @@
 extend schema @link(url: "https://specs.apollo.dev/federation/v2.3",
     import: ["@key", "@shareable", "@extends", "@external"])
 
-type Address {
-    postCode: Int @shareable
-    country: String @shareable
-    state: String @shareable
-    locality: String @shareable
-    street: String @shareable
-    houseNumber: String @shareable
+type Address @shareable {
+    postCode: Int
+    country: String
+    state: String
+    locality: String
+    street: String
+    houseNumber: String
 }
 
 type Attribute @shareable {
@@ -30,9 +30,9 @@ type Company @key(fields: "name", resolvable: false) @extends {
     name: String! @external
 }
 
-type Coordinate {
-    lat: Float! @shareable
-    lng: Float! @shareable
+type Coordinate @shareable {
+    lat: Float!
+    lng: Float!
 }
 
 type Platoon @key(fields: "name", resolvable: false) @extends {
@@ -47,20 +47,30 @@ type Unit @key(fields: "name", resolvable: false) @extends {
     name: String! @external
 }
 
+input BuildingFilter {
+    name: String
+    address: String
+    unit: String
+}
+
+input Pagination {
+    page: Int!
+    pageSize: Int!
+}
+
+input Sort {
+    field: String!
+    sortAsc: Boolean!
+}
+
 type Query {
     getBuildings(
-        name: String
-        address: String
-        unit: String
-        page: Int
-        pageSize: Int
-        sort: String
-        sortAsc: Boolean
+        filter: BuildingFilter
+        pagination: Pagination
+        sorts: [Sort!]
     ): [Building!]
     getBuildingCount(
-        name: String
-        address: String
-        unit: String
+        filter: BuildingFilter
     ): Int
     getBuilding(name: String!, unit: String): Building
 }

@@ -73,6 +73,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleConstraintViolationException(
       ConstraintViolationException e, DataFetchingEnvironment env) {
+    log.warn("handleConstraintViolationException: ", e);
     var errors =
         e.getConstraintViolations().stream()
             .map(ConstraintViolation::getMessage)
@@ -83,6 +84,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleCombatEquipmentAlreadyExistsException(
       CombatEquipmentAlreadyExistsException e, DataFetchingEnvironment env) {
+    log.warn("handleCombatEquipmentAlreadyExistsException: ", e);
     return GraphQLError.newError()
         .errorType(BAD_REQUEST)
         .message(getMessage("exception.combat-equipment.already-exists", env))
@@ -91,6 +93,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleCombatEquipmentTypeAlreadyExistsException(
       CombatEquipmentTypeAlreadyExistsException e, DataFetchingEnvironment env) {
+    log.warn("handleCombatEquipmentTypeAlreadyExistsException: ", e);
     return GraphQLError.newError()
         .errorType(BAD_REQUEST)
         .message(getMessage("exception.combat-equipment-type.already-exists", env))
@@ -99,6 +102,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleCombatEquipmentNotFoundException(
       CombatEquipmentNotFoundException e, DataFetchingEnvironment env) {
+    log.warn("handleCombatEquipmentNotFoundException: ", e);
     return GraphQLError.newError()
         .errorType(NOT_FOUND)
         .message(getMessage("exception.combat-equipment.not-found", env))
@@ -107,6 +111,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleCombatEquipmentTypeNotFoundException(
       CombatEquipmentTypeNotFoundException e, DataFetchingEnvironment env) {
+    log.warn("handleCombatEquipmentTypeNotFoundException: ", e);
     return GraphQLError.newError()
         .errorType(NOT_FOUND)
         .message(getMessage("exception.combat-equipment-type.not-found", env))
@@ -115,6 +120,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleCombatEquipmentCategoryAlreadyExistsException(
       CombatEquipmentCategoryAlreadyExistsException e, DataFetchingEnvironment env) {
+    log.warn("handleCombatEquipmentCategoryAlreadyExistsException: ", e);
     return GraphQLError.newError()
         .errorType(BAD_REQUEST)
         .message(getMessage("exception.combat-equipment-category.already-exists", env))
@@ -123,6 +129,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleCombatEquipmentCategoryNotFoundException(
       CombatEquipmentCategoryNotFoundException e, DataFetchingEnvironment env) {
+    log.warn("handleCombatEquipmentCategoryNotFoundException: ", e);
     return GraphQLError.newError()
         .errorType(NOT_FOUND)
         .message(getMessage("exception.combat-equipment-category.not-found", env))
@@ -135,7 +142,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
       return handleException(e, env);
     }
 
-    log.error(e.getMessage());
+    log.error("handleDataIntegrityViolationException: ", e);
     var sql = ((org.hibernate.exception.ConstraintViolationException) e.getCause()).getSQL();
     return GraphQLError.newError()
         .errorType(getErrorTypeBySql(sql))
@@ -145,6 +152,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleAccessDeniedException(
       AccessDeniedException e, DataFetchingEnvironment env) {
+    log.warn("handleAccessDeniedException: ", e);
     return GraphQLError.newError()
         .errorType(FORBIDDEN)
         .message(getMessage("exception.access-denied", env))
@@ -152,7 +160,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
   }
 
   private GraphQLError handleException(Throwable e, DataFetchingEnvironment env) {
-    log.error(e.getMessage(), e);
+    log.error("handleException: ", e);
     return GraphQLError.newError()
         .errorType(INTERNAL_ERROR)
         .message(getMessage("exception.internal-server-error", env))

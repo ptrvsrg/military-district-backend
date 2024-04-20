@@ -6,7 +6,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
-import ru.nsu.ccfit.petrov.database.military_district.formation.dto.BrigadeDto;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.BrigadeInput;
 import ru.nsu.ccfit.petrov.database.military_district.formation.persistence.entity.Brigade;
 
 @Mapper(
@@ -17,8 +17,8 @@ public interface BrigadeMapper {
   @Mapping(target = "armies", ignore = true)
   @Mapping(target = "units", ignore = true)
   @Mapping(source = "commander", target = "commander.mbn")
-  Brigade toEntity(BrigadeDto brigadeDto);
+  Brigade toEntity(BrigadeInput brigadeInput);
 
   @InheritConfiguration(name = "toEntity")
-  void partialUpdate(BrigadeDto brigadeDto, @MappingTarget Brigade brigade);
+  void partialUpdate(BrigadeInput brigadeInput, @MappingTarget Brigade brigade);
 }

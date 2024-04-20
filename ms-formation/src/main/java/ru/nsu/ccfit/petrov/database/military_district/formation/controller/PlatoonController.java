@@ -9,7 +9,10 @@ import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import ru.nsu.ccfit.petrov.database.military_district.formation.dto.PlatoonDto;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.Pagination;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.PlatoonFilter;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.PlatoonInput;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.Sorting;
 import ru.nsu.ccfit.petrov.database.military_district.formation.persistence.entity.Platoon;
 import ru.nsu.ccfit.petrov.database.military_district.formation.service.PlatoonService;
 
@@ -22,23 +25,16 @@ public class PlatoonController {
   @QueryMapping
   @PreAuthorize("hasAuthority('READ_FORMATIONS')")
   public List<Platoon> getPlatoons(
-      @Argument("name") String name,
-      @Argument("commander") String commander,
-      @Argument("company") String company,
-      @Argument("page") Integer page,
-      @Argument("pageSize") Integer pageSize,
-      @Argument("sort") String sortField,
-      @Argument("sortAsc") Boolean sortAsc) {
-    return platoonService.getAll(name, commander, company, page, pageSize, sortField, sortAsc);
+      @Argument("filter") PlatoonFilter filter,
+      @Argument("pagination") Pagination pagination,
+      @Argument("sorts") List<Sorting> sorts) {
+    return platoonService.getAll(filter, pagination, sorts);
   }
 
   @QueryMapping
   @PreAuthorize("hasAuthority('READ_FORMATIONS')")
-  public long getPlatoonCount(
-      @Argument("name") String name,
-      @Argument("commander") String commander,
-      @Argument("company") String company) {
-    return platoonService.getAllCount(name, commander, company);
+  public long getPlatoonCount(@Argument("filter") PlatoonFilter filter) {
+    return platoonService.getAllCount(filter);
   }
 
   @QueryMapping
@@ -49,16 +45,16 @@ public class PlatoonController {
 
   @MutationMapping
   @PreAuthorize("hasAuthority('WRITE_FORMATIONS')")
-  public Platoon createPlatoon(@Argument("input") @Valid @NonNull PlatoonDto platoonDto) {
-    return platoonService.create(platoonDto);
+  public Platoon createPlatoon(@Argument("input") @Valid @NonNull PlatoonInput platoonInput) {
+    return platoonService.create(platoonInput);
   }
 
   @MutationMapping
   @PreAuthorize("hasAuthority('WRITE_FORMATIONS')")
   public Platoon updatePlatoon(
       @Argument("name") @NonNull String name,
-      @Argument("input") @Valid @NonNull PlatoonDto platoonDto) {
-    return platoonService.update(name, platoonDto);
+      @Argument("input") @Valid @NonNull PlatoonInput platoonInput) {
+    return platoonService.update(name, platoonInput);
   }
 
   @MutationMapping

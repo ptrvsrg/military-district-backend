@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
-import ru.nsu.ccfit.petrov.database.military_district.formation.dto.AddressDto;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.AddressInput;
 import ru.nsu.ccfit.petrov.database.military_district.formation.persistence.entity.Address;
 
 @Mapper(
@@ -12,7 +12,7 @@ import ru.nsu.ccfit.petrov.database.military_district.formation.persistence.enti
     componentModel = MappingConstants.ComponentModel.SPRING)
 public interface AddressMapper {
 
-  Address toEntity(AddressDto addressDto);
+  Address toEntity(AddressInput addressInput);
 
-  void partialUpdate(AddressDto addressDto, @MappingTarget Address address);
+  void partialUpdate(AddressInput addressInput, @MappingTarget Address address);
 }

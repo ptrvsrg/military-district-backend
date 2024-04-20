@@ -1,21 +1,24 @@
 package ru.nsu.ccfit.petrov.database.military_district.military.service;
 
-import static ru.nsu.ccfit.petrov.database.military_district.military.util.PageSortUtils.generatePageable;
-import static ru.nsu.ccfit.petrov.database.military_district.military.util.PageSortUtils.generateSort;
+import static ru.nsu.ccfit.petrov.database.military_district.military.util.SpecPageSortUtils.generateMilitarySpec;
+import static ru.nsu.ccfit.petrov.database.military_district.military.util.SpecPageSortUtils.generatePageable;
+import static ru.nsu.ccfit.petrov.database.military_district.military.util.SpecPageSortUtils.generateSort;
 
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.domain.Specification;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.nsu.ccfit.petrov.database.military_district.military.dto.AttributeDto;
-import ru.nsu.ccfit.petrov.database.military_district.military.dto.MilitaryDto;
+import ru.nsu.ccfit.petrov.database.military_district.military.dto.AttributeInput;
+import ru.nsu.ccfit.petrov.database.military_district.military.dto.MilitaryFilter;
+import ru.nsu.ccfit.petrov.database.military_district.military.dto.MilitaryInput;
+import ru.nsu.ccfit.petrov.database.military_district.military.dto.Pagination;
+import ru.nsu.ccfit.petrov.database.military_district.military.dto.Sorting;
 import ru.nsu.ccfit.petrov.database.military_district.military.exception.MilitaryAlreadyExistsException;
 import ru.nsu.ccfit.petrov.database.military_district.military.exception.MilitaryNotFoundException;
 import ru.nsu.ccfit.petrov.database.military_district.military.exception.RankNotFoundException;
@@ -31,6 +34,7 @@ import ru.nsu.ccfit.petrov.database.military_district.military.persistence.repos
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class MilitaryService implements GraphQLService {
 
   private static final List<String> availableSortFields =
@@ -43,49 +47,42 @@ public class MilitaryService implements GraphQLService {
   private final MilitaryMapper militaryMapper;
   private final AttributeMapper attributeMapper;
 
-  public List<Military> getAll(
-      String firstName,
-      String lastName,
-      String middleName,
-      String rank,
-      String unit,
-      Integer page,
-      Integer pageSize,
-      String sortField,
-      Boolean sortAsc) {
-    var sort = generateSort(sortField, sortAsc, availableSortFields);
-    var pageable = generatePageable(page, pageSize, sort);
-    var spec = generateSpecification(firstName, lastName, middleName, rank, unit);
+  public List<Military> getAll(MilitaryFilter filter, Pagination pagination, List<Sorting> sorts) {
+    log.info("Get all militaries: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
+    var sort = generateSort(sorts, availableSortFields);
+    var pageable = generatePageable(pagination, sort);
+    var spec = generateMilitarySpec(filter);
     return militaryRepository.findAll(spec, pageable, sort);
   }
 
-  public long getAllCount(
-      String firstName, String lastName, String middleName, String rank, String unit) {
-    var spec = generateSpecification(firstName, lastName, middleName, rank, unit);
-    if (spec == null) {
-      return militaryRepository.count();
-    }
+  public long getAllCount(MilitaryFilter filter) {
+    log.info("Get all military count: filter={}", filter);
+    var spec = generateMilitarySpec(filter);
     return militaryRepository.count(spec);
   }
 
   public Military getByMbn(@NonNull String mbn) {
+    log.info("Get military: mbn={}", mbn);
     return militaryRepository.findByMbn(mbn).orElse(null);
   }
 
   @Transactional
-  public Military create(@Valid @NonNull MilitaryDto militaryDto) {
-    if (militaryRepository.existsByMbn(militaryDto.getMbn())) {
+  public Military create(@Valid @NonNull MilitaryInput militaryInput) {
+    log.info("Create military: input={}", militaryInput);
+    if (militaryRepository.existsByMbn(militaryInput.getMbn())) {
       throw new MilitaryAlreadyExistsException();
     }
 
-    var military = militaryMapper.toEntity(militaryDto);
-    if (militaryDto.getRank() != null) {
+    var military = militaryMapper.toEntity(militaryInput);
+    if (militaryInput.getRank() != null) {
       military.setRank(
-          rankRepository.findByName(militaryDto.getRank()).orElseThrow(RankNotFoundException::new));
+          rankRepository
+              .findByName(militaryInput.getRank())
+              .orElseThrow(RankNotFoundException::new));
     }
-    military.setSpecialties(specialtyRepository.findAllByCodeIn(militaryDto.getSpecialties()));
+    military.setSpecialties(specialtyRepository.findAllByCodeIn(militaryInput.getSpecialties()));
 
-    var attributes = toEntities(militaryDto.getAttributes());
+    var attributes = toEntities(militaryInput.getAttributes());
     attributes.forEach(attribute -> attribute.setMilitary(military));
     military.setAttributes(attributes);
 
@@ -93,18 +90,21 @@ public class MilitaryService implements GraphQLService {
   }
 
   @Transactional
-  public Military update(@NonNull String mbn, @Valid @NonNull MilitaryDto militaryDto) {
+  public Military update(@NonNull String mbn, @Valid @NonNull MilitaryInput militaryInput) {
+    log.info("Update military: mbn={}, input={}", mbn, militaryInput);
     var military = militaryRepository.findByMbn(mbn).orElseThrow(MilitaryNotFoundException::new);
 
-    militaryMapper.partialUpdate(militaryDto, military);
-    if (militaryDto.getRank() != null) {
+    militaryMapper.partialUpdate(militaryInput, military);
+    if (militaryInput.getRank() != null) {
       military.setRank(
-          rankRepository.findByName(militaryDto.getRank()).orElseThrow(RankNotFoundException::new));
+          rankRepository
+              .findByName(militaryInput.getRank())
+              .orElseThrow(RankNotFoundException::new));
     }
-    military.setSpecialties(specialtyRepository.findAllByCodeIn(militaryDto.getSpecialties()));
+    military.setSpecialties(specialtyRepository.findAllByCodeIn(militaryInput.getSpecialties()));
 
     attributeRepository.deleteAllInBatch(military.getAttributes());
-    var attributes = toEntities(militaryDto.getAttributes());
+    var attributes = toEntities(militaryInput.getAttributes());
     attributes.forEach(attribute -> attribute.setMilitary(military));
     military.setAttributes(attributes);
 
@@ -113,54 +113,29 @@ public class MilitaryService implements GraphQLService {
 
   @Transactional
   public long delete(@NonNull String mbn) {
+    log.info("Delete military: mbn={}", mbn);
     return militaryRepository.deleteByMbn(mbn);
-  }
-
-  private Specification<Military> generateSpecification(
-      String firstName, String lastName, String middleName, String rank, String unit) {
-    Specification<Military> spec = null;
-    if (Objects.nonNull(firstName)) {
-      spec = (root, query, builder) -> builder.like(root.get("firstName"), "%" + firstName + "%");
-    }
-    if (Objects.nonNull(lastName)) {
-      Specification<Military> newSpec =
-          (root, query, builder) -> builder.like(root.get("lastName"), "%" + lastName + "%");
-      spec = Objects.isNull(spec) ? newSpec : spec.and(newSpec);
-    }
-    if (Objects.nonNull(middleName)) {
-      Specification<Military> newSpec =
-          (root, query, builder) -> builder.like(root.get("middleName"), "%" + middleName + "%");
-      spec = Objects.isNull(spec) ? newSpec : spec.and(newSpec);
-    }
-    if (Objects.nonNull(rank)) {
-      Specification<Military> newSpec =
-          (root, query, builder) -> builder.like(root.get("rank").get("name"), "%" + rank + "%");
-      spec = Objects.isNull(spec) ? newSpec : spec.and(newSpec);
-    }
-    if (Objects.nonNull(unit)) {
-      Specification<Military> newSpec =
-          (root, query, builder) -> builder.like(root.get("unit").get("name"), "%" + unit + "%");
-      spec = Objects.isNull(spec) ? newSpec : spec.and(newSpec);
-    }
-    return spec;
-  }
-
-  private Set<Attribute> toEntities(Set<AttributeDto> attributeDtos) {
-    return attributeDtos.stream().map(this::toEntity).collect(Collectors.toSet());
-  }
-
-  private Attribute toEntity(AttributeDto attributeDto) {
-    var attribute = attributeMapper.toEntity(attributeDto);
-    attribute.setRank(
-        rankRepository.findByName(attributeDto.getRank()).orElseThrow(RankNotFoundException::new));
-    return attribute;
   }
 
   @Override
   public Object resolveReference(@NonNull Map<String, Object> reference) {
+    log.info("Resolve reference: reference={}", reference);
     if (reference.get("mbn") instanceof String mbn) {
       return getByMbn(mbn);
     }
     return null;
+  }
+
+  private Set<Attribute> toEntities(Set<AttributeInput> attributeInputs) {
+    return attributeInputs.stream().map(this::toEntity).collect(Collectors.toSet());
+  }
+
+  private Attribute toEntity(AttributeInput attributeInput) {
+    var attribute = attributeMapper.toEntity(attributeInput);
+    attribute.setRank(
+        rankRepository
+            .findByName(attributeInput.getRank())
+            .orElseThrow(RankNotFoundException::new));
+    return attribute;
   }
 }

@@ -6,7 +6,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
-import ru.nsu.ccfit.petrov.database.military_district.weapon.dto.WeaponTypeDto;
+import ru.nsu.ccfit.petrov.database.military_district.weapon.dto.WeaponTypeInput;
 import ru.nsu.ccfit.petrov.database.military_district.weapon.persistence.entity.WeaponType;
 
 @Mapper(
@@ -16,8 +16,8 @@ public interface WeaponTypeMapper {
 
   @Mapping(target = "category", ignore = true)
   @Mapping(target = "attributes", ignore = true)
-  WeaponType toEntity(WeaponTypeDto weaponTypeDto);
+  WeaponType toEntity(WeaponTypeInput weaponTypeInput);
 
   @InheritConfiguration(name = "toEntity")
-  void partialUpdate(WeaponTypeDto weaponTypeDto, @MappingTarget WeaponType weaponType);
+  void partialUpdate(WeaponTypeInput weaponTypeInput, @MappingTarget WeaponType weaponType);
 }

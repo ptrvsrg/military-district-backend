@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
-import ru.nsu.ccfit.petrov.database.military_district.formation.dto.CoordinateDto;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.CoordinateInput;
 import ru.nsu.ccfit.petrov.database.military_district.formation.persistence.entity.Coordinate;
 
 @Mapper(
@@ -12,7 +12,7 @@ import ru.nsu.ccfit.petrov.database.military_district.formation.persistence.enti
     componentModel = MappingConstants.ComponentModel.SPRING)
 public interface CoordinateMapper {
 
-  Coordinate toEntity(CoordinateDto coordinateDto);
+  Coordinate toEntity(CoordinateInput coordinateInput);
 
-  void partialUpdate(CoordinateDto coordinateDto, @MappingTarget Coordinate coordinate);
+  void partialUpdate(CoordinateInput coordinateInput, @MappingTarget Coordinate coordinate);
 }

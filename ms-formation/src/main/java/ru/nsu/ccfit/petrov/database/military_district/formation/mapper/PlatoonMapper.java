@@ -6,7 +6,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
-import ru.nsu.ccfit.petrov.database.military_district.formation.dto.PlatoonDto;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.PlatoonInput;
 import ru.nsu.ccfit.petrov.database.military_district.formation.persistence.entity.Platoon;
 
 @Mapper(
@@ -17,8 +17,8 @@ public interface PlatoonMapper {
   @Mapping(target = "squads", ignore = true)
   @Mapping(source = "company", target = "company.name")
   @Mapping(source = "commander", target = "commander.mbn")
-  Platoon toEntity(PlatoonDto platoonDto);
+  Platoon toEntity(PlatoonInput platoonInput);
 
   @InheritConfiguration(name = "toEntity")
-  void partialUpdate(PlatoonDto platoonDto, @MappingTarget Platoon platoon);
+  void partialUpdate(PlatoonInput platoonInput, @MappingTarget Platoon platoon);
 }

@@ -8,7 +8,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
-import ru.nsu.ccfit.petrov.database.military_district.infrastructure.dto.BuildingDto;
+import ru.nsu.ccfit.petrov.database.military_district.infrastructure.dto.BuildingInput;
 import ru.nsu.ccfit.petrov.database.military_district.infrastructure.persistence.entity.Building;
 import ru.nsu.ccfit.petrov.database.military_district.infrastructure.persistence.entity.Formation;
 
@@ -26,7 +26,7 @@ public interface BuildingMapper {
       target = "platoons",
       expression = "java(platoonNamesToPlatoons(buildingDto.getPlatoons()))")
   @Mapping(target = "squads", expression = "java(squadNamesToSquads(buildingDto.getSquads()))")
-  Building toEntity(BuildingDto buildingDto);
+  Building toEntity(BuildingInput buildingInput);
 
   @AfterMapping
   default void linkBuildingToAttributes(@MappingTarget Building building) {
@@ -42,7 +42,7 @@ public interface BuildingMapper {
       expression = "java(platoonNamesToPlatoons(buildingDto.getPlatoons()))")
   @Mapping(target = "squads", expression = "java(squadNamesToSquads(buildingDto.getSquads()))")
   @Mapping(target = "attributes", ignore = true)
-  void partialUpdate(BuildingDto buildingDto, @MappingTarget Building building);
+  void partialUpdate(BuildingInput buildingInput, @MappingTarget Building building);
 
   default Set<Formation> companyNamesToCompanies(Set<String> companies) {
     return companies.stream()

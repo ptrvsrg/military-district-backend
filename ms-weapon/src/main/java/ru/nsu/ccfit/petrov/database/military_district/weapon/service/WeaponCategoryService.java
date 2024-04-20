@@ -7,8 +7,11 @@ import java.util.List;
 import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.nsu.ccfit.petrov.database.military_district.weapon.dto.Pagination;
+import ru.nsu.ccfit.petrov.database.military_district.weapon.dto.Sorting;
 import ru.nsu.ccfit.petrov.database.military_district.weapon.exception.WeaponCategoryAlreadyExistsException;
 import ru.nsu.ccfit.petrov.database.military_district.weapon.exception.WeaponCategoryNotFoundException;
 import ru.nsu.ccfit.petrov.database.military_district.weapon.persistence.entity.WeaponCategory;
@@ -17,29 +20,33 @@ import ru.nsu.ccfit.petrov.database.military_district.weapon.persistence.reposit
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class WeaponCategoryService implements GraphQLService {
 
   private static final List<String> availableSortFields = List.of("name");
 
   private final WeaponCategoryRepository weaponCategoryRepository;
 
-  public List<WeaponCategory> getAll(
-      Integer page, Integer pageSize, String sortField, Boolean sortAsc) {
-    var sort = generateSort(sortField, sortAsc, availableSortFields);
-    var pageable = generatePageable(page, pageSize, sort);
+  public List<WeaponCategory> getAll(Pagination pagination, List<Sorting> sorts) {
+    log.info("Get all weapon categories: pagination={}, sorts={}", pagination, sorts);
+    var sort = generateSort(sorts, availableSortFields);
+    var pageable = generatePageable(pagination, sort);
     return weaponCategoryRepository.findAll(null, pageable, sort);
   }
 
   public long getAllCount() {
+    log.info("Get all weapon categories count");
     return weaponCategoryRepository.count();
   }
 
   public WeaponCategory getByName(@NonNull String name) {
+    log.info("Get weapon category by name: name={}", name);
     return weaponCategoryRepository.findByName(name).orElse(null);
   }
 
   @Transactional
   public WeaponCategory create(@NonNull String category) {
+    log.info("Create weapon category: input={}", category);
     if (weaponCategoryRepository.existsByName(category)) {
       throw new WeaponCategoryAlreadyExistsException();
     }
@@ -52,6 +59,7 @@ public class WeaponCategoryService implements GraphQLService {
 
   @Transactional
   public WeaponCategory update(@NonNull String name, @NonNull String category) {
+    log.info("Update weapon category: name={}, input={}", name, category);
     var entity =
         weaponCategoryRepository.findByName(name).orElseThrow(WeaponCategoryNotFoundException::new);
 
@@ -65,11 +73,13 @@ public class WeaponCategoryService implements GraphQLService {
 
   @Transactional
   public long delete(@NonNull String name) {
+    log.info("Delete weapon category: name={}", name);
     return weaponCategoryRepository.deleteByName(name);
   }
 
   @Override
   public WeaponCategory resolveReference(@NonNull Map<String, Object> reference) {
+    log.info("Resolve reference: reference={}", reference);
     if (reference.get("name") instanceof String name) {
       return getByName(name);
     }
