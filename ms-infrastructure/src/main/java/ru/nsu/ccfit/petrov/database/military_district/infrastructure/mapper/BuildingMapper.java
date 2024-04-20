@@ -21,11 +21,11 @@ public interface BuildingMapper {
   @Mapping(source = "unit", target = "unit.name")
   @Mapping(
       target = "companies",
-      expression = "java(companyNamesToCompanies(buildingDto.getCompanies()))")
+      expression = "java(companyNamesToCompanies(buildingInput.getCompanies()))")
   @Mapping(
       target = "platoons",
-      expression = "java(platoonNamesToPlatoons(buildingDto.getPlatoons()))")
-  @Mapping(target = "squads", expression = "java(squadNamesToSquads(buildingDto.getSquads()))")
+      expression = "java(platoonNamesToPlatoons(buildingInput.getPlatoons()))")
+  @Mapping(target = "squads", expression = "java(squadNamesToSquads(buildingInput.getSquads()))")
   Building toEntity(BuildingInput buildingInput);
 
   @AfterMapping
@@ -36,11 +36,11 @@ public interface BuildingMapper {
   @Mapping(source = "unit", target = "unit.name")
   @Mapping(
       target = "companies",
-      expression = "java(companyNamesToCompanies(buildingDto.getCompanies()))")
+      expression = "java(companyNamesToCompanies(buildingInput.getCompanies()))")
   @Mapping(
       target = "platoons",
-      expression = "java(platoonNamesToPlatoons(buildingDto.getPlatoons()))")
-  @Mapping(target = "squads", expression = "java(squadNamesToSquads(buildingDto.getSquads()))")
+      expression = "java(platoonNamesToPlatoons(buildingInput.getPlatoons()))")
+  @Mapping(target = "squads", expression = "java(squadNamesToSquads(buildingInput.getSquads()))")
   @Mapping(target = "attributes", ignore = true)
   void partialUpdate(BuildingInput buildingInput, @MappingTarget Building building);
 
