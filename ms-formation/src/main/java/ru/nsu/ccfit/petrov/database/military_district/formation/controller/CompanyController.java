@@ -9,7 +9,10 @@ import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import ru.nsu.ccfit.petrov.database.military_district.formation.dto.CompanyDto;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.CompanyFilter;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.CompanyInput;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.Pagination;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.Sorting;
 import ru.nsu.ccfit.petrov.database.military_district.formation.persistence.entity.Company;
 import ru.nsu.ccfit.petrov.database.military_district.formation.service.CompanyService;
 
@@ -22,23 +25,16 @@ public class CompanyController {
   @QueryMapping
   @PreAuthorize("hasAuthority('READ_FORMATIONS')")
   public List<Company> getCompanies(
-      @Argument("name") String name,
-      @Argument("commander") String commander,
-      @Argument("unit") String unit,
-      @Argument("page") Integer page,
-      @Argument("pageSize") Integer pageSize,
-      @Argument("sort") String sortField,
-      @Argument("sortAsc") Boolean sortAsc) {
-    return companyService.getAll(name, commander, unit, page, pageSize, sortField, sortAsc);
+      @Argument("filter") CompanyFilter filter,
+      @Argument("pagination") Pagination pagination,
+      @Argument("sorts") List<Sorting> sorts) {
+    return companyService.getAll(filter, pagination, sorts);
   }
 
   @QueryMapping
   @PreAuthorize("hasAuthority('READ_FORMATIONS')")
-  public long getCompanyCount(
-      @Argument("name") String name,
-      @Argument("commander") String commander,
-      @Argument("unit") String unit) {
-    return companyService.getAllCount(name, commander, unit);
+  public long getCompanyCount(@Argument("filter") CompanyFilter filter) {
+    return companyService.getAllCount(filter);
   }
 
   @QueryMapping
@@ -49,16 +45,16 @@ public class CompanyController {
 
   @MutationMapping
   @PreAuthorize("hasAuthority('WRITE_FORMATIONS')")
-  public Company createCompany(@Argument("input") @Valid @NonNull CompanyDto companyDto) {
-    return companyService.create(companyDto);
+  public Company createCompany(@Argument("input") @Valid @NonNull CompanyInput companyInput) {
+    return companyService.create(companyInput);
   }
 
   @MutationMapping
   @PreAuthorize("hasAuthority('WRITE_FORMATIONS')")
   public Company updateCompany(
       @Argument("name") @NonNull String name,
-      @Argument("input") @Valid @NonNull CompanyDto companyDto) {
-    return companyService.update(name, companyDto);
+      @Argument("input") @Valid @NonNull CompanyInput companyInput) {
+    return companyService.update(name, companyInput);
   }
 
   @MutationMapping

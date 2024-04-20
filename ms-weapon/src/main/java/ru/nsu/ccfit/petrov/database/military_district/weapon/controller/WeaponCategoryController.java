@@ -8,6 +8,8 @@ import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import ru.nsu.ccfit.petrov.database.military_district.weapon.dto.Pagination;
+import ru.nsu.ccfit.petrov.database.military_district.weapon.dto.Sorting;
 import ru.nsu.ccfit.petrov.database.military_district.weapon.persistence.entity.WeaponCategory;
 import ru.nsu.ccfit.petrov.database.military_district.weapon.service.WeaponCategoryService;
 
@@ -20,11 +22,8 @@ public class WeaponCategoryController {
   @QueryMapping
   @PreAuthorize("hasAuthority('READ_WEAPONS')")
   public List<WeaponCategory> getWeaponCategories(
-      @Argument("page") Integer page,
-      @Argument("pageSize") Integer pageSize,
-      @Argument("sort") String sortField,
-      @Argument("sortAsc") Boolean sortAsc) {
-    return weaponCategoryService.getAll(page, pageSize, sortField, sortAsc);
+      @Argument("pagination") Pagination pagination, @Argument("sorts") List<Sorting> sorts) {
+    return weaponCategoryService.getAll(pagination, sorts);
   }
 
   @QueryMapping

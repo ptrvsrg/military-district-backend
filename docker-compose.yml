@@ -354,7 +354,7 @@ services:
       timeout: 5s
       retries: 50
     ports:
-      - ${MILITARY_DISTRICT_REDIS_0_PORT:-56379}:6379
+      - ${MILITARY_DISTRICT_REDIS_0_PORT:-16379}:6379
     volumes:
       - ./deploy/redis-cluster/redis.conf:/etc/redis.conf
     networks:
@@ -369,7 +369,7 @@ services:
       timeout: 5s
       retries: 50
     ports:
-      - ${MILITARY_DISTRICT_REDIS_1_PORT:-56380}:6379
+      - ${MILITARY_DISTRICT_REDIS_1_PORT:-16380}:6379
     volumes:
       - ./deploy/redis-cluster/redis.conf:/etc/redis.conf
     networks:
@@ -384,7 +384,7 @@ services:
       timeout: 5s
       retries: 50
     ports:
-      - ${MILITARY_DISTRICT_REDIS_2_PORT:-56381}:6379
+      - ${MILITARY_DISTRICT_REDIS_2_PORT:-16381}:6379
     volumes:
       - ./deploy/redis-cluster/redis.conf:/etc/redis.conf
     networks:

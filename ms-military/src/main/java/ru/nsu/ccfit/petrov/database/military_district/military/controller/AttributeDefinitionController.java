@@ -6,6 +6,7 @@ import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import ru.nsu.ccfit.petrov.database.military_district.military.dto.AttributeDefinitionFilter;
 import ru.nsu.ccfit.petrov.database.military_district.military.persistence.entity.Attribute;
 import ru.nsu.ccfit.petrov.database.military_district.military.service.AttributeDefinitionService;
 
@@ -17,7 +18,8 @@ public class AttributeDefinitionController {
 
   @QueryMapping
   @PreAuthorize("hasAuthority('READ_MILITARIES')")
-  public List<Attribute> getMilitaryAttributeDefinitions(@Argument("rank") String rank) {
-    return attributeDefinitionService.getAll(rank);
+  public List<Attribute> getMilitaryAttributeDefinitions(
+      @Argument("filter") AttributeDefinitionFilter filter) {
+    return attributeDefinitionService.getAll(filter);
   }
 }

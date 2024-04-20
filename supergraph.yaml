@@ -1,0 +1,22 @@
+federation_version: =2.3.5
+subgraphs:
+  ms-military:
+    routing_url: http://ms-military:8081/graphql
+    schema:
+      file: ./ms-military/src/main/resources/graphql/schema.graphqls
+  ms-formation:
+    routing_url: http://ms-formation:8082/graphql
+    schema:
+      file: ./ms-formation/src/main/resources/graphql/schema.graphqls
+  ms-infrastructure:
+    routing_url: http://ms-infrastructure:8083/graphql
+    schema:
+      file: ./ms-infrastructure/src/main/resources/graphql/schema.graphqls
+  ms-equipment:
+    routing_url: http://ms-equipment:8084/graphql
+    schema:
+      file: ./ms-equipment/src/main/resources/graphql/schema.graphqls
+  ms-weapon:
+    routing_url: http://ms-weapon:8085/graphql
+    schema:
+      file: ./ms-weapon/src/main/resources/graphql/schema.graphqls

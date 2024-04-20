@@ -6,7 +6,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
-import ru.nsu.ccfit.petrov.database.military_district.military.dto.MilitaryDto;
+import ru.nsu.ccfit.petrov.database.military_district.military.dto.MilitaryInput;
 import ru.nsu.ccfit.petrov.database.military_district.military.persistence.entity.Military;
 
 @Mapper(
@@ -18,8 +18,8 @@ public interface MilitaryMapper {
   @Mapping(target = "rank", ignore = true)
   @Mapping(target = "specialties", ignore = true)
   @Mapping(target = "attributes", ignore = true)
-  Military toEntity(MilitaryDto militaryDto);
+  Military toEntity(MilitaryInput militaryInput);
 
   @InheritConfiguration(name = "toEntity")
-  void partialUpdate(MilitaryDto militaryDto, @MappingTarget Military military);
+  void partialUpdate(MilitaryInput militaryInput, @MappingTarget Military military);
 }

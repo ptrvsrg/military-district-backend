@@ -56,6 +56,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleConstraintViolationException(
       ConstraintViolationException e, DataFetchingEnvironment env) {
+    log.warn("handleConstraintViolationException", e);
     var errors =
         e.getConstraintViolations().stream()
             .map(ConstraintViolation::getMessage)
@@ -66,6 +67,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleMilitaryAlreadyExistsException(
       MilitaryAlreadyExistsException e, DataFetchingEnvironment env) {
+    log.warn("handleMilitaryAlreadyExistsException", e);
     return GraphQLError.newError()
         .errorType(BAD_REQUEST)
         .message(
@@ -75,6 +77,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleMilitaryNotFoundException(
       MilitaryNotFoundException e, DataFetchingEnvironment env) {
+    log.warn("handleMilitaryNotFoundException", e);
     return GraphQLError.newError()
         .errorType(NOT_FOUND)
         .message(messageSource.getMessage("exception.military-not-found", null, env.getLocale()))
@@ -83,6 +86,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleRankNotFoundException(
       RankNotFoundException e, DataFetchingEnvironment env) {
+    log.warn("handleRankNotFoundException", e);
     return GraphQLError.newError()
         .errorType(NOT_FOUND)
         .message(getMessage("exception.rank-not-found", env))
@@ -95,7 +99,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
       return handleException(e, env);
     }
 
-    log.error(e.getMessage());
+    log.error("handleDataIntegrityViolationException", e);
     var sql = ((org.hibernate.exception.ConstraintViolationException) e.getCause()).getSQL();
     return GraphQLError.newError()
         .errorType(getErrorTypeBySql(sql))
@@ -105,6 +109,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleAccessDeniedException(
       AccessDeniedException e, DataFetchingEnvironment env) {
+    log.warn("handleAccessDeniedException", e);
     return GraphQLError.newError()
         .errorType(FORBIDDEN)
         .message(getMessage("exception.access-denied", env))
@@ -112,7 +117,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
   }
 
   private GraphQLError handleException(Throwable e, DataFetchingEnvironment env) {
-    log.error(e.getMessage(), e);
+    log.error("handleException", e);
     return GraphQLError.newError()
         .errorType(INTERNAL_ERROR)
         .message(getMessage("exception.internal-server-error", env))

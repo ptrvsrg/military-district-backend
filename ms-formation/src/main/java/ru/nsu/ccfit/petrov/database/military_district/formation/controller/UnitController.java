@@ -9,7 +9,10 @@ import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import ru.nsu.ccfit.petrov.database.military_district.formation.dto.UnitDto;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.Pagination;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.Sorting;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.UnitFilter;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.UnitInput;
 import ru.nsu.ccfit.petrov.database.military_district.formation.persistence.entity.Unit;
 import ru.nsu.ccfit.petrov.database.military_district.formation.service.UnitService;
 
@@ -22,23 +25,16 @@ public class UnitController {
   @QueryMapping
   @PreAuthorize("hasAuthority('READ_FORMATIONS')")
   public List<Unit> getUnits(
-      @Argument("name") String name,
-      @Argument("address") String address,
-      @Argument("commander") String commander,
-      @Argument("page") Integer page,
-      @Argument("pageSize") Integer pageSize,
-      @Argument("sort") String sortField,
-      @Argument("sortAsc") Boolean sortAsc) {
-    return unitService.getAll(name, address, commander, page, pageSize, sortField, sortAsc);
+      @Argument("filter") UnitFilter filter,
+      @Argument("pagination") Pagination pagination,
+      @Argument("sorts") List<Sorting> sorts) {
+    return unitService.getAll(filter, pagination, sorts);
   }
 
   @QueryMapping
   @PreAuthorize("hasAuthority('READ_FORMATIONS')")
-  public long getUnitCount(
-      @Argument("name") String name,
-      @Argument("commander") String commander,
-      @Argument("address") String address) {
-    return unitService.getAllCount(name, address, commander);
+  public long getUnitCount(@Argument("filter") UnitFilter filter) {
+    return unitService.getAllCount(filter);
   }
 
   @QueryMapping
@@ -49,15 +45,16 @@ public class UnitController {
 
   @MutationMapping
   @PreAuthorize("hasAuthority('WRITE_FORMATIONS')")
-  public Unit createUnit(@Argument("input") @Valid @NonNull UnitDto unitDto) {
-    return unitService.create(unitDto);
+  public Unit createUnit(@Argument("input") @Valid @NonNull UnitInput unitInput) {
+    return unitService.create(unitInput);
   }
 
   @MutationMapping
   @PreAuthorize("hasAuthority('WRITE_FORMATIONS')")
   public Unit updateUnit(
-      @Argument("name") @NonNull String name, @Argument("input") @Valid @NonNull UnitDto unitDto) {
-    return unitService.update(name, unitDto);
+      @Argument("name") @NonNull String name,
+      @Argument("input") @Valid @NonNull UnitInput unitInput) {
+    return unitService.update(name, unitInput);
   }
 
   @MutationMapping

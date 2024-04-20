@@ -9,7 +9,10 @@ import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import ru.nsu.ccfit.petrov.database.military_district.formation.dto.CorpsDto;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.CorpsFilter;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.CorpsInput;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.Pagination;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.Sorting;
 import ru.nsu.ccfit.petrov.database.military_district.formation.persistence.entity.Corps;
 import ru.nsu.ccfit.petrov.database.military_district.formation.service.CorpsService;
 
@@ -22,20 +25,16 @@ public class CorpsController {
   @QueryMapping
   @PreAuthorize("hasAuthority('READ_FORMATIONS')")
   public List<Corps> getCorps(
-      @Argument("name") String name,
-      @Argument("commander") String commander,
-      @Argument("page") Integer page,
-      @Argument("pageSize") Integer pageSize,
-      @Argument("sort") String sortField,
-      @Argument("sortAsc") Boolean sortAsc) {
-    return corpsService.getAll(name, commander, page, pageSize, sortField, sortAsc);
+      @Argument("filter") CorpsFilter filter,
+      @Argument("pagination") Pagination pagination,
+      @Argument("sorts") List<Sorting> sorts) {
+    return corpsService.getAll(filter, pagination, sorts);
   }
 
   @QueryMapping
   @PreAuthorize("hasAuthority('READ_FORMATIONS')")
-  public long getCorpsCount(
-      @Argument("name") String name, @Argument("commander") String commander) {
-    return corpsService.getAllCount(name, commander);
+  public long getCorpsCount(@Argument("filter") CorpsFilter filter) {
+    return corpsService.getAllCount(filter);
   }
 
   @QueryMapping
@@ -46,16 +45,16 @@ public class CorpsController {
 
   @MutationMapping
   @PreAuthorize("hasAuthority('WRITE_FORMATIONS')")
-  public Corps createCorps(@Argument("input") @Valid @NonNull CorpsDto corpsDto) {
-    return corpsService.create(corpsDto);
+  public Corps createCorps(@Argument("input") @Valid @NonNull CorpsInput corpsInput) {
+    return corpsService.create(corpsInput);
   }
 
   @MutationMapping
   @PreAuthorize("hasAuthority('WRITE_FORMATIONS')")
   public Corps updateCorps(
       @Argument("name") @NonNull String name,
-      @Argument("input") @Valid @NonNull CorpsDto corpsDto) {
-    return corpsService.update(name, corpsDto);
+      @Argument("input") @Valid @NonNull CorpsInput corpsInput) {
+    return corpsService.update(name, corpsInput);
   }
 
   @MutationMapping

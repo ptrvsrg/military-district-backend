@@ -9,7 +9,10 @@ import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import ru.nsu.ccfit.petrov.database.military_district.military.dto.MilitaryDto;
+import ru.nsu.ccfit.petrov.database.military_district.military.dto.MilitaryFilter;
+import ru.nsu.ccfit.petrov.database.military_district.military.dto.MilitaryInput;
+import ru.nsu.ccfit.petrov.database.military_district.military.dto.Pagination;
+import ru.nsu.ccfit.petrov.database.military_district.military.dto.Sorting;
 import ru.nsu.ccfit.petrov.database.military_district.military.persistence.entity.Military;
 import ru.nsu.ccfit.petrov.database.military_district.military.service.MilitaryService;
 
@@ -22,28 +25,16 @@ public class MilitaryController {
   @QueryMapping
   @PreAuthorize("hasAuthority('READ_MILITARIES')")
   public List<Military> getMilitaries(
-      @Argument("firstName") String firstName,
-      @Argument("lastName") String lastName,
-      @Argument("middleName") String middleName,
-      @Argument("rank") String rank,
-      @Argument("unit") String unit,
-      @Argument("page") Integer page,
-      @Argument("pageSize") Integer pageSize,
-      @Argument("sort") String sortField,
-      @Argument("sortAsc") Boolean sortAsc) {
-    return militaryService.getAll(
-        firstName, lastName, middleName, rank, unit, page, pageSize, sortField, sortAsc);
+      @Argument("filter") MilitaryFilter filter,
+      @Argument("pagination") Pagination pagination,
+      @Argument("sorts") List<Sorting> sorts) {
+    return militaryService.getAll(filter, pagination, sorts);
   }
 
   @QueryMapping
   @PreAuthorize("hasAuthority('READ_MILITARIES')")
-  public long getMilitaryCount(
-      @Argument("firstName") String firstName,
-      @Argument("lastName") String lastName,
-      @Argument("middleName") String middleName,
-      @Argument("rank") String rank,
-      @Argument("unit") String unit) {
-    return militaryService.getAllCount(firstName, lastName, middleName, rank, unit);
+  public long getMilitaryCount(@Argument("filter") MilitaryFilter filter) {
+    return militaryService.getAllCount(filter);
   }
 
   @QueryMapping
@@ -54,16 +45,16 @@ public class MilitaryController {
 
   @MutationMapping
   @PreAuthorize("hasAuthority('WRITE_MILITARIES')")
-  public Military createMilitary(@Argument("input") @Valid @NonNull MilitaryDto militaryDto) {
-    return militaryService.create(militaryDto);
+  public Military createMilitary(@Argument("input") @Valid @NonNull MilitaryInput militaryInput) {
+    return militaryService.create(militaryInput);
   }
 
   @MutationMapping
   @PreAuthorize("hasAuthority('WRITE_MILITARIES')")
   public Military updateMilitary(
       @Argument("mbn") @NonNull String mbn,
-      @Argument("input") @Valid @NonNull MilitaryDto militaryDto) {
-    return militaryService.update(mbn, militaryDto);
+      @Argument("input") @Valid @NonNull MilitaryInput militaryInput) {
+    return militaryService.update(mbn, militaryInput);
   }
 
   @MutationMapping

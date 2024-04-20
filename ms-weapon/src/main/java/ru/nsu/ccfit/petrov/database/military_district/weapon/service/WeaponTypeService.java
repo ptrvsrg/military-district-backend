@@ -2,20 +2,23 @@ package ru.nsu.ccfit.petrov.database.military_district.weapon.service;
 
 import static ru.nsu.ccfit.petrov.database.military_district.weapon.util.SpecPageSortUtils.generatePageable;
 import static ru.nsu.ccfit.petrov.database.military_district.weapon.util.SpecPageSortUtils.generateSort;
+import static ru.nsu.ccfit.petrov.database.military_district.weapon.util.SpecPageSortUtils.generateWeaponTypeSpec;
 
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.domain.Specification;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import ru.nsu.ccfit.petrov.database.military_district.weapon.dto.AttributeDto;
-import ru.nsu.ccfit.petrov.database.military_district.weapon.dto.WeaponTypeDto;
+import ru.nsu.ccfit.petrov.database.military_district.weapon.dto.AttributeInput;
+import ru.nsu.ccfit.petrov.database.military_district.weapon.dto.Pagination;
+import ru.nsu.ccfit.petrov.database.military_district.weapon.dto.Sorting;
+import ru.nsu.ccfit.petrov.database.military_district.weapon.dto.WeaponTypeFilter;
+import ru.nsu.ccfit.petrov.database.military_district.weapon.dto.WeaponTypeInput;
 import ru.nsu.ccfit.petrov.database.military_district.weapon.exception.WeaponCategoryNotFoundException;
 import ru.nsu.ccfit.petrov.database.military_district.weapon.exception.WeaponTypeAlreadyExistsException;
 import ru.nsu.ccfit.petrov.database.military_district.weapon.exception.WeaponTypeNotFoundException;
@@ -30,6 +33,7 @@ import ru.nsu.ccfit.petrov.database.military_district.weapon.persistence.reposit
 @Controller
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class WeaponTypeService implements GraphQLService {
 
   private static final List<String> availableSortFields = List.of("name", "category.name");
@@ -41,32 +45,28 @@ public class WeaponTypeService implements GraphQLService {
   private final AttributeMapper attributeMapper;
 
   public List<WeaponType> getAll(
-      String name,
-      String category,
-      Integer page,
-      Integer pageSize,
-      String sortField,
-      Boolean sortAsc) {
-    var sort = generateSort(sortField, sortAsc, availableSortFields);
-    var pageable = generatePageable(page, pageSize, sort);
-    var spec = generateSpecification(name, category);
+      WeaponTypeFilter filter, Pagination pagination, List<Sorting> sorts) {
+    log.info("Get all weapon types: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
+    var sort = generateSort(sorts, availableSortFields);
+    var pageable = generatePageable(pagination, sort);
+    var spec = generateWeaponTypeSpec(filter);
     return weaponTypeRepository.findAll(spec, pageable, sort);
   }
 
-  public long getAllCount(String name, String category) {
-    var spec = generateSpecification(name, category);
-    if (spec == null) {
-      return weaponTypeRepository.count();
-    }
+  public long getAllCount(WeaponTypeFilter filter) {
+    log.info("Get all weapon types count: filter={}", filter);
+    var spec = generateWeaponTypeSpec(filter);
     return weaponTypeRepository.count(spec);
   }
 
   public WeaponType getByNameAndCategory(@NonNull String name, @NonNull String category) {
+    log.info("Get weapon type: name={}, category={}", name, category);
     return weaponTypeRepository.findByNameAndCategory_Name(name, category).orElse(null);
   }
 
   @Transactional
-  public WeaponType create(@Valid @NonNull WeaponTypeDto typeDto) {
+  public WeaponType create(@Valid @NonNull WeaponTypeInput typeDto) {
+    log.info("Create weapon type: input={}", typeDto);
     if (weaponTypeRepository.existsByNameAndCategory_Name(
         typeDto.getName(), typeDto.getCategory())) {
       throw new WeaponTypeAlreadyExistsException();
@@ -86,7 +86,8 @@ public class WeaponTypeService implements GraphQLService {
 
   @Transactional
   public WeaponType update(
-      @NonNull String name, @NonNull String category, @Valid @NonNull WeaponTypeDto typeDto) {
+      @NonNull String name, @NonNull String category, @Valid @NonNull WeaponTypeInput typeDto) {
+    log.info("Update weapon type: name={}, category={}, input={}", name, category, typeDto);
     var type =
         weaponTypeRepository
             .findByNameAndCategory_Name(name, category)
@@ -107,41 +108,29 @@ public class WeaponTypeService implements GraphQLService {
 
   @Transactional
   public long delete(@NonNull String name, @NonNull String category) {
+    log.info("Delete weapon type: name={}, category={}", name, category);
     return weaponTypeRepository.deleteByNameAndCategory_Name(name, category);
-  }
-
-  private Specification<WeaponType> generateSpecification(String name, String category) {
-    Specification<WeaponType> spec = null;
-    if (Objects.nonNull(name)) {
-      spec = (root, query, builder) -> builder.like(root.get("name"), "%" + name + "%");
-    }
-    if (Objects.nonNull(category)) {
-      Specification<WeaponType> newSpec =
-          (root, query, builder) ->
-              builder.like(root.get("category").get("name"), "%" + category + "%");
-      spec = Objects.isNull(spec) ? newSpec : spec.and(newSpec);
-    }
-    return spec;
-  }
-
-  private Set<WeaponAttribute> toEntities(Set<AttributeDto> attributeDtos, WeaponType type) {
-    return attributeDtos.stream()
-        .map(attributeDto -> toEntity(attributeDto, type))
-        .collect(Collectors.toSet());
-  }
-
-  private WeaponAttribute toEntity(AttributeDto attributeDto, WeaponType type) {
-    var attribute = attributeMapper.toEntity(attributeDto);
-    attribute.setType(type);
-    return attribute;
   }
 
   @Override
   public Object resolveReference(@NonNull Map<String, Object> reference) {
+    log.info("Resolve reference: reference={}", reference);
     if (reference.get("name") instanceof String name
         && reference.get("category") instanceof String category) {
       return getByNameAndCategory(name, category);
     }
     return null;
+  }
+
+  private Set<WeaponAttribute> toEntities(Set<AttributeInput> attributeInputs, WeaponType type) {
+    return attributeInputs.stream()
+        .map(attributeInput -> toEntity(attributeInput, type))
+        .collect(Collectors.toSet());
+  }
+
+  private WeaponAttribute toEntity(AttributeInput attributeInput, WeaponType type) {
+    var attribute = attributeMapper.toEntity(attributeInput);
+    attribute.setType(type);
+    return attribute;
   }
 }

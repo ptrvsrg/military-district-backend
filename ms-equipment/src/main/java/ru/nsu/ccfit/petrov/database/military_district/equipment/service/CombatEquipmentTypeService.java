@@ -1,21 +1,24 @@
 package ru.nsu.ccfit.petrov.database.military_district.equipment.service;
 
+import static ru.nsu.ccfit.petrov.database.military_district.equipment.util.SpecPageSortUtils.generateCombatEquipmentTypeSpec;
 import static ru.nsu.ccfit.petrov.database.military_district.equipment.util.SpecPageSortUtils.generatePageable;
 import static ru.nsu.ccfit.petrov.database.military_district.equipment.util.SpecPageSortUtils.generateSort;
 
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.domain.Specification;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import ru.nsu.ccfit.petrov.database.military_district.equipment.dto.AttributeDto;
-import ru.nsu.ccfit.petrov.database.military_district.equipment.dto.CombatEquipmentTypeDto;
+import ru.nsu.ccfit.petrov.database.military_district.equipment.dto.AttributeInput;
+import ru.nsu.ccfit.petrov.database.military_district.equipment.dto.CombatEquipmentTypeFilter;
+import ru.nsu.ccfit.petrov.database.military_district.equipment.dto.CombatEquipmentTypeInput;
+import ru.nsu.ccfit.petrov.database.military_district.equipment.dto.Pagination;
+import ru.nsu.ccfit.petrov.database.military_district.equipment.dto.Sorting;
 import ru.nsu.ccfit.petrov.database.military_district.equipment.exception.CombatEquipmentCategoryNotFoundException;
 import ru.nsu.ccfit.petrov.database.military_district.equipment.exception.CombatEquipmentTypeAlreadyExistsException;
 import ru.nsu.ccfit.petrov.database.military_district.equipment.exception.CombatEquipmentTypeNotFoundException;
@@ -30,6 +33,7 @@ import ru.nsu.ccfit.petrov.database.military_district.equipment.persistence.repo
 @Controller
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class CombatEquipmentTypeService implements GraphQLService {
 
   private static final List<String> availableSortFields = List.of("name", "category.name");
@@ -41,44 +45,44 @@ public class CombatEquipmentTypeService implements GraphQLService {
   private final AttributeMapper attributeMapper;
 
   public List<CombatEquipmentType> getAll(
-      String name,
-      String category,
-      Integer page,
-      Integer pageSize,
-      String sortField,
-      Boolean sortAsc) {
-    var sort = generateSort(sortField, sortAsc, availableSortFields);
-    var pageable = generatePageable(page, pageSize, sort);
-    var spec = generateSpecification(name, category);
+      CombatEquipmentTypeFilter filter, Pagination pagination, List<Sorting> sorts) {
+    log.info(
+        "Get combat equipment types: filter={}, pagination={}, sorts={}",
+        filter,
+        pagination,
+        sorts);
+    var sort = generateSort(sorts, availableSortFields);
+    var pageable = generatePageable(pagination, sort);
+    var spec = generateCombatEquipmentTypeSpec(filter);
     return combatEquipmentTypeRepository.findAll(spec, pageable, sort);
   }
 
-  public long getAllCount(String name, String category) {
-    var spec = generateSpecification(name, category);
-    if (spec == null) {
-      return combatEquipmentTypeRepository.count();
-    }
+  public long getAllCount(CombatEquipmentTypeFilter filter) {
+    log.info("Get combat equipment types count: filter={}", filter);
+    var spec = generateCombatEquipmentTypeSpec(filter);
     return combatEquipmentTypeRepository.count(spec);
   }
 
   public CombatEquipmentType getByNameAndCategory(@NonNull String name, @NonNull String category) {
+    log.info("Get combat equipment type: name={}, category={}", name, category);
     return combatEquipmentTypeRepository.findByNameAndCategory_Name(name, category).orElse(null);
   }
 
   @Transactional
-  public CombatEquipmentType create(@Valid @NonNull CombatEquipmentTypeDto typeDto) {
+  public CombatEquipmentType create(@Valid @NonNull CombatEquipmentTypeInput input) {
+    log.info("Create combat equipment type: input={}", input);
     if (combatEquipmentTypeRepository.existsByNameAndCategory_Name(
-        typeDto.getName(), typeDto.getCategory())) {
+        input.getName(), input.getCategory())) {
       throw new CombatEquipmentTypeAlreadyExistsException();
     }
 
-    var type = combatEquipmentTypeMapper.toEntity(typeDto);
+    var type = combatEquipmentTypeMapper.toEntity(input);
     type.setCategory(
         combatEquipmentCategoryRepository
-            .findByName(typeDto.getCategory())
+            .findByName(input.getCategory())
             .orElseThrow(CombatEquipmentCategoryNotFoundException::new));
 
-    var attributes = toEntities(typeDto.getAttributes(), type);
+    var attributes = toEntities(input.getAttributes(), type);
     type.setAttributes(attributes);
 
     return combatEquipmentTypeRepository.save(type);
@@ -88,20 +92,21 @@ public class CombatEquipmentTypeService implements GraphQLService {
   public CombatEquipmentType update(
       @NonNull String name,
       @NonNull String category,
-      @Valid @NonNull CombatEquipmentTypeDto typeDto) {
+      @Valid @NonNull CombatEquipmentTypeInput input) {
+    log.info("Update combat equipment type: name={}, category={}, input={}", name, category, input);
     var type =
         combatEquipmentTypeRepository
             .findByNameAndCategory_Name(name, category)
             .orElseThrow(CombatEquipmentTypeNotFoundException::new);
 
-    combatEquipmentTypeMapper.partialUpdate(typeDto, type);
+    combatEquipmentTypeMapper.partialUpdate(input, type);
     type.setCategory(
         combatEquipmentCategoryRepository
-            .findByName(typeDto.getCategory())
+            .findByName(input.getCategory())
             .orElseThrow(CombatEquipmentCategoryNotFoundException::new));
 
     combatEquipmentAttributeRepository.deleteAllInBatch(type.getAttributes());
-    var attributes = toEntities(typeDto.getAttributes(), type);
+    var attributes = toEntities(input.getAttributes(), type);
     type.setAttributes(attributes);
 
     return combatEquipmentTypeRepository.save(type);
@@ -109,38 +114,27 @@ public class CombatEquipmentTypeService implements GraphQLService {
 
   @Transactional
   public long delete(@NonNull String name, @NonNull String category) {
+    log.info("Delete combat equipment type: name={}, category={}", name, category);
     return combatEquipmentTypeRepository.deleteByNameAndCategory_Name(name, category);
   }
 
-  private Specification<CombatEquipmentType> generateSpecification(String name, String category) {
-    Specification<CombatEquipmentType> spec = null;
-    if (Objects.nonNull(name)) {
-      spec = (root, query, builder) -> builder.like(root.get("name"), "%" + name + "%");
-    }
-    if (Objects.nonNull(category)) {
-      Specification<CombatEquipmentType> newSpec =
-          (root, query, builder) ->
-              builder.like(root.get("category").get("name"), "%" + category + "%");
-      spec = Objects.isNull(spec) ? newSpec : spec.and(newSpec);
-    }
-    return spec;
-  }
-
   private Set<CombatEquipmentAttribute> toEntities(
-      Set<AttributeDto> attributeDtos, CombatEquipmentType type) {
-    return attributeDtos.stream()
+      Set<AttributeInput> attributeInputs, CombatEquipmentType type) {
+    return attributeInputs.stream()
         .map(attributeDto -> toEntity(attributeDto, type))
         .collect(Collectors.toSet());
   }
 
-  private CombatEquipmentAttribute toEntity(AttributeDto attributeDto, CombatEquipmentType type) {
-    var attribute = attributeMapper.toEntity(attributeDto);
+  private CombatEquipmentAttribute toEntity(
+      AttributeInput attributeInput, CombatEquipmentType type) {
+    var attribute = attributeMapper.toEntity(attributeInput);
     attribute.setType(type);
     return attribute;
   }
 
   @Override
   public Object resolveReference(@NonNull Map<String, Object> reference) {
+    log.info("Resolve combat equipment reference: reference={}", reference);
     if (reference.get("name") instanceof String name
         && reference.get("category") instanceof String category) {
       return getByNameAndCategory(name, category);

@@ -108,6 +108,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleConstraintViolationException(
       ConstraintViolationException e, DataFetchingEnvironment env) {
+    log.warn("handleConstraintViolationException: ", e);
     var errors =
         e.getConstraintViolations().stream()
             .map(ConstraintViolation::getMessage)
@@ -118,6 +119,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleArmyAlreadyExistsException(
       ArmyAlreadyExistsException e, DataFetchingEnvironment env) {
+    log.warn("handleArmyAlreadyExistsException: ", e);
     return GraphQLError.newError()
         .errorType(BAD_REQUEST)
         .message(getMessage("exception.army-already-exists", env))
@@ -126,6 +128,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleArmyNotFoundException(
       ArmyNotFoundException e, DataFetchingEnvironment env) {
+    log.warn("handleArmyNotFoundException: ", e);
     return GraphQLError.newError()
         .errorType(NOT_FOUND)
         .message(getMessage("exception.army-not-found", env))
@@ -134,6 +137,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleBrigadeAlreadyExistsException(
       BrigadeAlreadyExistsException e, DataFetchingEnvironment env) {
+    log.warn("handleBrigadeAlreadyExistsException: ", e);
     return GraphQLError.newError()
         .errorType(BAD_REQUEST)
         .message(getMessage("exception.brigade-already-exists", env))
@@ -142,6 +146,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleBrigadeNotFoundException(
       BrigadeNotFoundException e, DataFetchingEnvironment env) {
+    log.warn("handleBrigadeNotFoundException: ", e);
     return GraphQLError.newError()
         .errorType(NOT_FOUND)
         .message(getMessage("exception.brigade-not-found", env))
@@ -150,6 +155,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleCompanyAlreadyExistsException(
       CompanyAlreadyExistsException e, DataFetchingEnvironment env) {
+    log.warn("handleCompanyAlreadyExistsException: ", e);
     return GraphQLError.newError()
         .errorType(BAD_REQUEST)
         .message(getMessage("exception.company-already-exists", env))
@@ -158,6 +164,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleCompanyNotFoundException(
       CompanyNotFoundException e, DataFetchingEnvironment env) {
+    log.warn("handleCompanyNotFoundException: ", e);
     return GraphQLError.newError()
         .errorType(NOT_FOUND)
         .message(getMessage("exception.company-not-found", env))
@@ -166,6 +173,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleCorpsAlreadyExistsException(
       CorpsAlreadyExistsException e, DataFetchingEnvironment env) {
+    log.warn("handleCorpsAlreadyExistsException: ", e);
     return GraphQLError.newError()
         .errorType(BAD_REQUEST)
         .message(getMessage("exception.corps-already-exists", env))
@@ -174,6 +182,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleCorpsNotFoundException(
       CorpsNotFoundException e, DataFetchingEnvironment env) {
+    log.warn("handleCorpsNotFoundException: ", e);
     return GraphQLError.newError()
         .errorType(NOT_FOUND)
         .message(getMessage("exception.corps-not-found", env))
@@ -182,6 +191,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleDivisionAlreadyExistsException(
       DivisionAlreadyExistsException e, DataFetchingEnvironment env) {
+    log.warn("handleDivisionAlreadyExistsException: ", e);
     return GraphQLError.newError()
         .errorType(BAD_REQUEST)
         .message(getMessage("exception.division-already-exists", env))
@@ -190,6 +200,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleDivisionNotFoundException(
       DivisionNotFoundException e, DataFetchingEnvironment env) {
+    log.warn("handleDivisionNotFoundException: ", e);
     return GraphQLError.newError()
         .errorType(NOT_FOUND)
         .message(getMessage("exception.division-not-found", env))
@@ -198,6 +209,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handlePlatoonAlreadyExistsException(
       PlatoonAlreadyExistsException e, DataFetchingEnvironment env) {
+    log.warn("handlePlatoonAlreadyExistsException: ", e);
     return GraphQLError.newError()
         .errorType(BAD_REQUEST)
         .message(getMessage("exception.platoon-already-exists", env))
@@ -206,6 +218,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handlePlatoonNotFoundException(
       PlatoonNotFoundException e, DataFetchingEnvironment env) {
+    log.warn("handlePlatoonNotFoundException: ", e);
     return GraphQLError.newError()
         .errorType(NOT_FOUND)
         .message(getMessage("exception.platoon-not-found", env))
@@ -214,6 +227,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleSquadAlreadyExistsException(
       SquadAlreadyExistsException e, DataFetchingEnvironment env) {
+    log.warn("handleSquadAlreadyExistsException: ", e);
     return GraphQLError.newError()
         .errorType(BAD_REQUEST)
         .message(getMessage("exception.squad-already-exists", env))
@@ -222,6 +236,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleSquadNotFoundException(
       SquadNotFoundException e, DataFetchingEnvironment env) {
+    log.warn("handleSquadNotFoundException: ", e);
     return GraphQLError.newError()
         .errorType(NOT_FOUND)
         .message(getMessage("exception.squad-not-found", env))
@@ -230,6 +245,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleUnitAlreadyExistsException(
       UnitAlreadyExistsException e, DataFetchingEnvironment env) {
+    log.warn("handleUnitAlreadyExistsException: ", e);
     return GraphQLError.newError()
         .errorType(BAD_REQUEST)
         .message(getMessage("exception.unit-already-exists", env))
@@ -238,6 +254,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleUnitNotFoundException(
       UnitNotFoundException e, DataFetchingEnvironment env) {
+    log.warn("handleUnitNotFoundException: ", e);
     return GraphQLError.newError()
         .errorType(NOT_FOUND)
         .message(getMessage("exception.unit-not-found", env))
@@ -250,7 +267,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
       return handleException(e, env);
     }
 
-    log.error(e.getMessage());
+    log.error("handleDataIntegrityViolationException: ", e);
     var sql = ((org.hibernate.exception.ConstraintViolationException) e.getCause()).getSQL();
     return GraphQLError.newError()
         .errorType(getErrorTypeBySql(sql))
@@ -260,6 +277,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleAccessDeniedException(
       AccessDeniedException e, DataFetchingEnvironment env) {
+    log.warn("handleAccessDeniedException: ", e);
     return GraphQLError.newError()
         .errorType(FORBIDDEN)
         .message(getMessage("exception.access-denied", env))
@@ -267,7 +285,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
   }
 
   private GraphQLError handleException(Throwable e, DataFetchingEnvironment env) {
-    log.error(e.getMessage(), e);
+    log.error("handleException: ", e);
     return GraphQLError.newError()
         .errorType(INTERNAL_ERROR)
         .message(getMessage("exception.internal-server-error", env))

@@ -9,7 +9,10 @@ import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import ru.nsu.ccfit.petrov.database.military_district.equipment.dto.CombatEquipmentDto;
+import ru.nsu.ccfit.petrov.database.military_district.equipment.dto.CombatEquipmentFilter;
+import ru.nsu.ccfit.petrov.database.military_district.equipment.dto.CombatEquipmentInput;
+import ru.nsu.ccfit.petrov.database.military_district.equipment.dto.Pagination;
+import ru.nsu.ccfit.petrov.database.military_district.equipment.dto.Sorting;
 import ru.nsu.ccfit.petrov.database.military_district.equipment.persistence.entity.CombatEquipment;
 import ru.nsu.ccfit.petrov.database.military_district.equipment.service.CombatEquipmentService;
 
@@ -22,23 +25,16 @@ public class CombatEquipmentController {
   @QueryMapping
   @PreAuthorize("hasAuthority('READ_EQUIPMENTS')")
   public List<CombatEquipment> getCombatEquipments(
-      @Argument("type") String type,
-      @Argument("category") String category,
-      @Argument("unit") String unit,
-      @Argument("page") Integer page,
-      @Argument("pageSize") Integer pageSize,
-      @Argument("sort") String sortField,
-      @Argument("sortAsc") Boolean sortAsc) {
-    return combatEquipmentService.getAll(type, category, unit, page, pageSize, sortField, sortAsc);
+      @Argument("filter") CombatEquipmentFilter filter,
+      @Argument("pagination") Pagination pagination,
+      @Argument("sorts") List<Sorting> sorts) {
+    return combatEquipmentService.getAll(filter, pagination, sorts);
   }
 
   @QueryMapping
   @PreAuthorize("hasAuthority('READ_EQUIPMENTS')")
-  public long getCombatEquipmentCount(
-      @Argument("type") String type,
-      @Argument("category") String category,
-      @Argument("unit") String unit) {
-    return combatEquipmentService.getAllCount(type, category, unit);
+  public long getCombatEquipmentCount(@Argument("filter") CombatEquipmentFilter filter) {
+    return combatEquipmentService.getAllCount(filter);
   }
 
   @QueryMapping
@@ -51,16 +47,16 @@ public class CombatEquipmentController {
   @MutationMapping
   @PreAuthorize("hasAuthority('WRITE_EQUIPMENTS')")
   public CombatEquipment createCombatEquipment(
-      @Argument("input") @Valid @NonNull CombatEquipmentDto combatEquipmentDto) {
-    return combatEquipmentService.create(combatEquipmentDto);
+      @Argument("input") @Valid @NonNull CombatEquipmentInput combatEquipmentInput) {
+    return combatEquipmentService.create(combatEquipmentInput);
   }
 
   @MutationMapping
   @PreAuthorize("hasAuthority('WRITE_EQUIPMENTS')")
   public CombatEquipment updateCombatEquipment(
       @Argument("serialNumber") @NonNull String serialNumber,
-      @Argument("input") @Valid @NonNull CombatEquipmentDto combatEquipmentDto) {
-    return combatEquipmentService.update(serialNumber, combatEquipmentDto);
+      @Argument("input") @Valid @NonNull CombatEquipmentInput combatEquipmentInput) {
+    return combatEquipmentService.update(serialNumber, combatEquipmentInput);
   }
 
   @MutationMapping

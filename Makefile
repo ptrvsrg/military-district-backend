@@ -37,6 +37,14 @@ build-images: build
 env:
 	@cp $(SAMPLE_ENV_FILE) $(ENV_FILE)
 
+.PHONY: supergraph
+supergraph:
+	$(DOCKER) run \
+	-v ./:/data ptrvsrg/apollographql-rover:latest \
+	supergraph compose --config /data/supergraph.yaml --output /data/supergraph.graphqls --elv2-license=accept;
+	sudo chown $(shell whoami):$(shell whoami) ./supergraph.graphqls
+
+
 .PHONY: deploy
 deploy:
 ifeq ($(shell [ -e ./.env ] && echo 1 || echo 0), 1)
@@ -56,6 +64,8 @@ help:
 	@echo "        Build the Docker images"
 	@echo "    make env"
 	@echo "        Create template .env file"
+	@echo "    make supergraph"
+	@echo "        Generate supergraph schema"
 	@echo "    make deploy"
 	@echo "        Deploy to Docker"
 	@echo "    make help"
