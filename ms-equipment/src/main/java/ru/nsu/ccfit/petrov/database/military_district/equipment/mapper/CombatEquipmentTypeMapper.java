@@ -6,7 +6,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
-import ru.nsu.ccfit.petrov.database.military_district.equipment.dto.CombatEquipmentTypeDto;
+import ru.nsu.ccfit.petrov.database.military_district.equipment.dto.CombatEquipmentTypeInput;
 import ru.nsu.ccfit.petrov.database.military_district.equipment.persistence.entity.CombatEquipmentType;
 
 @Mapper(
@@ -16,10 +16,10 @@ public interface CombatEquipmentTypeMapper {
 
   @Mapping(target = "category", ignore = true)
   @Mapping(target = "attributes", ignore = true)
-  CombatEquipmentType toEntity(CombatEquipmentTypeDto combatEquipmentTypeDto);
+  CombatEquipmentType toEntity(CombatEquipmentTypeInput combatEquipmentTypeInput);
 
   @InheritConfiguration(name = "toEntity")
   void partialUpdate(
-      CombatEquipmentTypeDto combatEquipmentTypeDto,
+      CombatEquipmentTypeInput combatEquipmentTypeInput,
       @MappingTarget CombatEquipmentType combatEquipmentType);
 }

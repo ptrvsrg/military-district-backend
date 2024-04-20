@@ -27,34 +27,44 @@ type Unit @key(fields: "name", resolvable: false) @extends {
     name: String! @external
 }
 
+input CombatEquipmentFilter {
+    type: String
+    unit: String
+}
+
+input CombatEquipmentTypeFilter {
+    name: String
+    category: String
+}
+
+input Pagination {
+    page: Int!
+    pageSize: Int!
+}
+
+input Sort {
+    field: String!
+    sortAsc: Boolean!
+}
+
 type Query {
     getCombatEquipments(
-        type: String
-        category: String
-        unit: String
-        page: Int
-        pageSize: Int
-        sort: String
-        sortAsc: Boolean
+        filter: CombatEquipmentFilter
+        pagination: Pagination
+        sorts: [Sort!]
     ): [CombatEquipment!]
     getCombatEquipmentCount(
-        type: String
-        category: String
-        unit: String
+        filter: CombatEquipmentFilter
     ): Int
     getCombatEquipment(serialNumber: String!): CombatEquipment
 
     getCombatEquipmentTypes(
-        name: String
-        category: String
-        page: Int
-        pageSize: Int
-        sort: String
-        sortAsc: Boolean
+        filter: CombatEquipmentTypeFilter
+        pagination: Pagination
+        sorts: [Sort!]
     ): [CombatEquipmentType!]
     getCombatEquipmentTypeCount(
-        name: String
-        category: String
+        filter: CombatEquipmentTypeFilter
     ): Int
     getCombatEquipmentType(
         name: String!
@@ -62,10 +72,8 @@ type Query {
     ): CombatEquipmentType
 
     getCombatEquipmentCategories(
-        page: Int
-        pageSize: Int
-        sort: String
-        sortAsc: Boolean
+        pagination: Pagination
+        sorts: [Sort!]
     ): [CombatEquipmentCategory!]
     getCombatEquipmentCategoryCount: Int
     getCombatEquipmentCategory(name: String!): CombatEquipmentCategory

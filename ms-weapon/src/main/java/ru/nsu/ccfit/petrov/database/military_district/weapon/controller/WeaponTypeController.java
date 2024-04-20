@@ -9,7 +9,10 @@ import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import ru.nsu.ccfit.petrov.database.military_district.weapon.dto.WeaponTypeDto;
+import ru.nsu.ccfit.petrov.database.military_district.weapon.dto.Pagination;
+import ru.nsu.ccfit.petrov.database.military_district.weapon.dto.Sorting;
+import ru.nsu.ccfit.petrov.database.military_district.weapon.dto.WeaponTypeFilter;
+import ru.nsu.ccfit.petrov.database.military_district.weapon.dto.WeaponTypeInput;
 import ru.nsu.ccfit.petrov.database.military_district.weapon.persistence.entity.WeaponType;
 import ru.nsu.ccfit.petrov.database.military_district.weapon.service.WeaponTypeService;
 
@@ -22,20 +25,16 @@ public class WeaponTypeController {
   @QueryMapping
   @PreAuthorize("hasAuthority('READ_WEAPONS')")
   public List<WeaponType> getWeaponTypes(
-      @Argument("name") String name,
-      @Argument("category") String category,
-      @Argument("page") Integer page,
-      @Argument("pageSize") Integer pageSize,
-      @Argument("sort") String sortField,
-      @Argument("sortAsc") Boolean sortAsc) {
-    return weaponTypeService.getAll(name, category, page, pageSize, sortField, sortAsc);
+      @Argument("filter") WeaponTypeFilter filter,
+      @Argument("pagination") Pagination pagination,
+      @Argument("sorts") List<Sorting> sorts) {
+    return weaponTypeService.getAll(filter, pagination, sorts);
   }
 
   @QueryMapping
   @PreAuthorize("hasAuthority('READ_WEAPONS')")
-  public long getWeaponTypeCount(
-      @Argument("name") String name, @Argument("category") String category) {
-    return weaponTypeService.getAllCount(name, category);
+  public long getWeaponTypeCount(@Argument("filter") WeaponTypeFilter filter) {
+    return weaponTypeService.getAllCount(filter);
   }
 
   @QueryMapping
@@ -47,7 +46,7 @@ public class WeaponTypeController {
 
   @MutationMapping
   @PreAuthorize("hasAuthority('WRITE_WEAPONS')")
-  public WeaponType createWeaponType(@Argument("input") @Valid @NonNull WeaponTypeDto typeDto) {
+  public WeaponType createWeaponType(@Argument("input") @Valid @NonNull WeaponTypeInput typeDto) {
     return weaponTypeService.create(typeDto);
   }
 
@@ -56,7 +55,7 @@ public class WeaponTypeController {
   public WeaponType updateWeaponType(
       @Argument("name") @NonNull String name,
       @Argument("category") @NonNull String category,
-      @Argument("input") @Valid @NonNull WeaponTypeDto typeDto) {
+      @Argument("input") @Valid @NonNull WeaponTypeInput typeDto) {
     return weaponTypeService.update(name, category, typeDto);
   }
 

@@ -45,26 +45,50 @@ type Unit @key(fields: "name", resolvable: false) @extends {
     name: String! @external
 }
 
+input MilitaryFilter {
+    firstName: String
+    lastName: String
+    middleName: String
+    rank: String
+    unit: String
+}
+
+input MilitaryAttributeDefinitionFilter {
+    rank: String
+}
+
+input RankFilter {
+    name: String
+}
+
+input Pagination {
+    page: Int!
+    pageSize: Int!
+}
+
+input Sort {
+    field: String!
+    sortAsc: Boolean!
+}
+
 type Query {
     getMilitaries(
-        firstName: String
-        lastName: String
-        middleName: String
-        rank: String
-        page: Int
-        pageSize: Int
-        sort: String
-        sortAsc: Boolean): [Military!]
+        filter: MilitaryFilter
+        pagination: Pagination
+        sorts: [Sort!]
+    ): [Military!]
     getMilitaryCount(
-        firstName: String
-        lastName: String
-        middleName: String
-        rank: String): Int
+        filter: MilitaryFilter
+    ): Int
     getMilitary(mbn: String!): Military
 
-    getMilitaryAttributeDefinitions(rank: String): [MilitaryAttributeDefinition!]
+    getMilitaryAttributeDefinitions(
+        filter: MilitaryAttributeDefinitionFilter
+    ): [MilitaryAttributeDefinition!]
 
-    getRanks(category: String): [Rank!]
+    getRanks(
+        filter: RankFilter
+    ): [Rank!]
 
     getRankCategories: [RankCategory!]
 

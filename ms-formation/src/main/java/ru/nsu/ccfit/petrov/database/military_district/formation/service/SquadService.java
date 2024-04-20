@@ -2,17 +2,20 @@ package ru.nsu.ccfit.petrov.database.military_district.formation.service;
 
 import static ru.nsu.ccfit.petrov.database.military_district.formation.util.SpecPageSortUtils.generatePageable;
 import static ru.nsu.ccfit.petrov.database.military_district.formation.util.SpecPageSortUtils.generateSort;
+import static ru.nsu.ccfit.petrov.database.military_district.formation.util.SpecPageSortUtils.generateSquadSpec;
 
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.domain.Specification;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.nsu.ccfit.petrov.database.military_district.formation.dto.SquadDto;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.Pagination;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.Sorting;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.SquadFilter;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.SquadInput;
 import ru.nsu.ccfit.petrov.database.military_district.formation.exception.PlatoonNotFoundException;
 import ru.nsu.ccfit.petrov.database.military_district.formation.exception.SquadAlreadyExistsException;
 import ru.nsu.ccfit.petrov.database.military_district.formation.exception.SquadNotFoundException;
@@ -24,6 +27,7 @@ import ru.nsu.ccfit.petrov.database.military_district.formation.persistence.repo
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class SquadService implements GraphQLService {
 
   private static final List<String> availableSortFields =
@@ -33,58 +37,53 @@ public class SquadService implements GraphQLService {
   private final PlatoonRepository platoonRepository;
   private final SquadMapper squadMapper;
 
-  public List<Squad> getAll(
-      String name,
-      String commander,
-      String platoon,
-      Integer page,
-      Integer pageSize,
-      String sortField,
-      Boolean sortAsc) {
-    var sort = generateSort(sortField, sortAsc, availableSortFields);
-    var pageable = generatePageable(page, pageSize, sort);
-    var spec = generateSpecification(name, commander, platoon);
+  public List<Squad> getAll(SquadFilter filter, Pagination pagination, List<Sorting> sorts) {
+    log.info("Get all squads: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
+    var sort = generateSort(sorts, availableSortFields);
+    var pageable = generatePageable(pagination, sort);
+    var spec = generateSquadSpec(filter);
     return squadRepository.findAll(spec, pageable, sort);
   }
 
-  public long getAllCount(String name, String commander, String platoon) {
-    var spec = generateSpecification(name, commander, platoon);
-    if (spec == null) {
-      return squadRepository.count();
-    }
+  public long getAllCount(SquadFilter filter) {
+    log.info("Get all squads count: filter={}", filter);
+    var spec = generateSquadSpec(filter);
     return squadRepository.count(spec);
   }
 
   public Squad getByName(@NonNull String name) {
+    log.info("Get squad by name: name={}", name);
     return squadRepository.findByName(name).orElse(null);
   }
 
   @Transactional
-  public Squad create(@Valid @NonNull SquadDto squadDto) {
-    if (squadRepository.existsByName(squadDto.getName())) {
+  public Squad create(@Valid @NonNull SquadInput squadInput) {
+    log.info("Create squad: input={}", squadInput);
+    if (squadRepository.existsByName(squadInput.getName())) {
       throw new SquadAlreadyExistsException();
     }
 
-    var squad = squadMapper.toEntity(squadDto);
+    var squad = squadMapper.toEntity(squadInput);
     squad.setPlatoon(
         platoonRepository
-            .findByName(squadDto.getPlatoon())
+            .findByName(squadInput.getPlatoon())
             .orElseThrow(PlatoonNotFoundException::new));
 
     return squadRepository.save(squad);
   }
 
   @Transactional
-  public Squad update(@NonNull String name, @Valid @NonNull SquadDto squadDto) {
+  public Squad update(@NonNull String name, @Valid @NonNull SquadInput squadInput) {
+    log.info("Update squad: name={}, input={}", name, squadInput);
     var squad = squadRepository.findByName(name).orElseThrow(SquadNotFoundException::new);
-    if (!name.equals(squadDto.getName()) && squadRepository.existsByName(squadDto.getName())) {
+    if (!name.equals(squadInput.getName()) && squadRepository.existsByName(squadInput.getName())) {
       throw new SquadAlreadyExistsException();
     }
 
-    squadMapper.partialUpdate(squadDto, squad);
+    squadMapper.partialUpdate(squadInput, squad);
     squad.setPlatoon(
         platoonRepository
-            .findByName(squadDto.getPlatoon())
+            .findByName(squadInput.getPlatoon())
             .orElseThrow(PlatoonNotFoundException::new));
 
     return squadRepository.save(squad);
@@ -92,30 +91,13 @@ public class SquadService implements GraphQLService {
 
   @Transactional
   public long delete(@NonNull String name) {
+    log.info("Delete squad: name={}", name);
     return squadRepository.deleteByName(name);
-  }
-
-  private Specification<Squad> generateSpecification(
-      String name, String commander, String platoon) {
-    Specification<Squad> spec = null;
-    if (Objects.nonNull(name)) {
-      spec = (root, query, builder) -> builder.like(root.get("name"), "%" + name + "%");
-    }
-    if (Objects.nonNull(commander)) {
-      Specification<Squad> newSpec =
-          (root, query, builder) -> builder.like(root.get("commander.mbn"), "%" + commander + "%");
-      spec = Objects.isNull(spec) ? newSpec : spec.and(newSpec);
-    }
-    if (Objects.nonNull(platoon)) {
-      Specification<Squad> newSpec =
-          (root, query, builder) -> builder.like(root.get("platoon.name"), "%" + platoon + "%");
-      spec = Objects.isNull(spec) ? newSpec : spec.and(newSpec);
-    }
-    return spec;
   }
 
   @Override
   public Object resolveReference(@NonNull Map<String, Object> reference) {
+    log.info("Resolve reference: reference={}", reference);
     if (reference.get("name") instanceof String name) {
       return getByName(name);
     }

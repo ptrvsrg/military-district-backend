@@ -1,18 +1,21 @@
 package ru.nsu.ccfit.petrov.database.military_district.equipment.service;
 
+import static ru.nsu.ccfit.petrov.database.military_district.equipment.util.SpecPageSortUtils.generateCombatEquipmentSpec;
 import static ru.nsu.ccfit.petrov.database.military_district.equipment.util.SpecPageSortUtils.generatePageable;
 import static ru.nsu.ccfit.petrov.database.military_district.equipment.util.SpecPageSortUtils.generateSort;
 
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.domain.Specification;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.nsu.ccfit.petrov.database.military_district.equipment.dto.CombatEquipmentDto;
+import ru.nsu.ccfit.petrov.database.military_district.equipment.dto.CombatEquipmentFilter;
+import ru.nsu.ccfit.petrov.database.military_district.equipment.dto.CombatEquipmentInput;
+import ru.nsu.ccfit.petrov.database.military_district.equipment.dto.Pagination;
+import ru.nsu.ccfit.petrov.database.military_district.equipment.dto.Sorting;
 import ru.nsu.ccfit.petrov.database.military_district.equipment.exception.CombatEquipmentAlreadyExistsException;
 import ru.nsu.ccfit.petrov.database.military_district.equipment.exception.CombatEquipmentNotFoundException;
 import ru.nsu.ccfit.petrov.database.military_district.equipment.exception.CombatEquipmentTypeNotFoundException;
@@ -24,6 +27,7 @@ import ru.nsu.ccfit.petrov.database.military_district.equipment.persistence.repo
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class CombatEquipmentService implements GraphQLService {
 
   private static final List<String> availableSortFields =
@@ -34,42 +38,38 @@ public class CombatEquipmentService implements GraphQLService {
   private final CombatEquipmentMapper combatEquipmentMapper;
 
   public List<CombatEquipment> getAll(
-      String type,
-      String category,
-      String unit,
-      Integer page,
-      Integer pageSize,
-      String sortField,
-      Boolean sortAsc) {
-    var sort = generateSort(sortField, sortAsc, availableSortFields);
-    var pageable = generatePageable(page, pageSize, sort);
-    var spec = generateSpecification(type, category, unit);
+      CombatEquipmentFilter filter, Pagination pagination, List<Sorting> sorts) {
+    log.info(
+        "Get all combat equipments: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
+    var sort = generateSort(sorts, availableSortFields);
+    var pageable = generatePageable(pagination, sort);
+    var spec = generateCombatEquipmentSpec(filter);
     return combatEquipmentRepository.findAll(spec, pageable, sort);
   }
 
-  public long getAllCount(String type, String category, String unit) {
-    var spec = generateSpecification(type, category, unit);
-    if (spec == null) {
-      return combatEquipmentRepository.count();
-    }
+  public long getAllCount(CombatEquipmentFilter filter) {
+    log.info("Get all combat equipments count: filter={}", filter);
+    var spec = generateCombatEquipmentSpec(filter);
     return combatEquipmentRepository.count(spec);
   }
 
   public CombatEquipment getBySerialNumber(@NonNull String serialNumber) {
+    log.info("Get combat equipment by serial number: serialNumber={}", serialNumber);
     return combatEquipmentRepository.findBySerialNumber(serialNumber).orElse(null);
   }
 
   @Transactional
-  public CombatEquipment create(@Valid @NonNull CombatEquipmentDto combatEquipmentDto) {
-    if (combatEquipmentRepository.existsBySerialNumber(combatEquipmentDto.getSerialNumber())) {
+  public CombatEquipment create(@Valid @NonNull CombatEquipmentInput combatEquipmentInput) {
+    log.info("Create combat equipment: input={}", combatEquipmentInput);
+    if (combatEquipmentRepository.existsBySerialNumber(combatEquipmentInput.getSerialNumber())) {
       throw new CombatEquipmentAlreadyExistsException();
     }
 
-    var combatEquipment = combatEquipmentMapper.toEntity(combatEquipmentDto);
-    if (combatEquipmentDto.getType() != null) {
+    var combatEquipment = combatEquipmentMapper.toEntity(combatEquipmentInput);
+    if (combatEquipmentInput.getType() != null) {
       combatEquipment.setType(
           combatEquipmentTypeRepository
-              .findByName(combatEquipmentDto.getType())
+              .findByName(combatEquipmentInput.getType())
               .orElseThrow(CombatEquipmentTypeNotFoundException::new));
     }
 
@@ -78,17 +78,19 @@ public class CombatEquipmentService implements GraphQLService {
 
   @Transactional
   public CombatEquipment update(
-      @NonNull String serialNumber, @Valid @NonNull CombatEquipmentDto combatEquipmentDto) {
+      @NonNull String serialNumber, @Valid @NonNull CombatEquipmentInput combatEquipmentInput) {
+    log.info(
+        "Update combat equipment: serialNumber={}, input={}", serialNumber, combatEquipmentInput);
     var combatEquipment =
         combatEquipmentRepository
             .findBySerialNumber(serialNumber)
             .orElseThrow(CombatEquipmentNotFoundException::new);
 
-    combatEquipmentMapper.partialUpdate(combatEquipmentDto, combatEquipment);
-    if (combatEquipmentDto.getType() != null) {
+    combatEquipmentMapper.partialUpdate(combatEquipmentInput, combatEquipment);
+    if (combatEquipmentInput.getType() != null) {
       combatEquipment.setType(
           combatEquipmentTypeRepository
-              .findByName(combatEquipmentDto.getType())
+              .findByName(combatEquipmentInput.getType())
               .orElseThrow(CombatEquipmentTypeNotFoundException::new));
     }
 
@@ -97,31 +99,13 @@ public class CombatEquipmentService implements GraphQLService {
 
   @Transactional
   public long delete(@NonNull String serialNumber) {
+    log.info("Delete combat equipment: serialNumber={}", serialNumber);
     return combatEquipmentRepository.deleteBySerialNumber(serialNumber);
-  }
-
-  private Specification<CombatEquipment> generateSpecification(
-      String type, String category, String unit) {
-    Specification<CombatEquipment> spec = null;
-    if (Objects.nonNull(type)) {
-      spec = (root, query, builder) -> builder.like(root.get("type").get("name"), "%" + type + "%");
-    }
-    if (Objects.nonNull(category)) {
-      Specification<CombatEquipment> newSpec =
-          (root, query, builder) ->
-              builder.like(root.get("type").get("category").get("name"), "%" + category + "%");
-      spec = Objects.isNull(spec) ? newSpec : spec.and(newSpec);
-    }
-    if (Objects.nonNull(unit)) {
-      Specification<CombatEquipment> newSpec =
-          (root, query, builder) -> builder.like(root.get("unit").get("name"), "%" + unit + "%");
-      spec = Objects.isNull(spec) ? newSpec : spec.and(newSpec);
-    }
-    return spec;
   }
 
   @Override
   public Object resolveReference(@NonNull Map<String, Object> reference) {
+    log.info("Resolve combat equipment reference: reference={}", reference);
     if (reference.get("serialNumber") instanceof String serialNumber) {
       return getBySerialNumber(serialNumber);
     }

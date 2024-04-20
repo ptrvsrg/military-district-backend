@@ -6,7 +6,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
-import ru.nsu.ccfit.petrov.database.military_district.formation.dto.CorpsDto;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.CorpsInput;
 import ru.nsu.ccfit.petrov.database.military_district.formation.persistence.entity.Corps;
 
 @Mapper(
@@ -17,8 +17,8 @@ public interface CorpsMapper {
   @Mapping(target = "armies", ignore = true)
   @Mapping(target = "units", ignore = true)
   @Mapping(source = "commander", target = "commander.mbn")
-  Corps toEntity(CorpsDto corpsDto);
+  Corps toEntity(CorpsInput corpsInput);
 
   @InheritConfiguration(name = "toEntity")
-  void partialUpdate(CorpsDto corpsDto, @MappingTarget Corps corps);
+  void partialUpdate(CorpsInput corpsInput, @MappingTarget Corps corps);
 }

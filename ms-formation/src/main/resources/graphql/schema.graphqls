@@ -79,124 +79,138 @@ type Unit @key(fields: "name") {
     corps: [Corps!]!
 }
 
+input ArmyFilter {
+    name: String
+    commander: String
+}
+
+input BrigadeFilter {
+    name: String
+    commander: String
+}
+
+input CompanyFilter {
+    name: String
+    commander: String
+}
+
+input CorpsFilter {
+    name: String
+    commander: String
+}
+
+input DivisionFilter {
+    name: String
+    commander: String
+}
+
+input PlatoonsFilter {
+    name: String
+    commander: String
+    company: String
+}
+
+input SquadFilter {
+    name: String
+    commander: String
+    platoon: String
+}
+
+input UnitFilter {
+    name: String
+    address: String
+    commander: String
+}
+
+input Pagination {
+    page: Int!
+    pageSize: Int!
+}
+
+input Sort {
+    field: String!
+    sortAsc: Boolean!
+}
+
 type Query {
     getArmies(
-        name: String
+        filter: ArmyFilter
         commander: String
-        page: Int
-        pageSize: Int
-        sort: String
-        sortAsc: Boolean
+        pagination: Pagination
+        sorts: [Sort!]
     ): [Army!]
     getArmyCount(
-        name: String
-        commander: String
+        filter: ArmyFilter
     ): Int
     getArmy(name: String!): Army
 
     getBrigades(
-        name: String
-        commander: String
-        page: Int
-        pageSize: Int
-        sort: String
-        sortAsc: Boolean
+        filter: BrigadeFilter
+        pagination: Pagination
+        sorts: [Sort!]
     ): [Brigade!]
     getBrigadeCount(
-        name: String
-        commander: String
+        filter: BrigadeFilter
     ): Int
     getBrigade(name: String!): Brigade
 
     getCompanies(
-        name: String
-        commander: String
-        unit: String
-        page: Int
-        pageSize: Int
-        sort: String
-        sortAsc: Boolean
+        filter: CompanyFilter
+        pagination: Pagination
+        sorts: [Sort!]
     ): [Company!]
     getCompanyCount(
-        name: String
-        commander: String
-        unit: String
+        filter: CompanyFilter
     ): Int
     getCompany(name: String!): Company
 
     getCorps(
-        name: String
-        commander: String
-        page: Int
-        pageSize: Int
-        sort: String
-        sortAsc: Boolean
+        filter: CorpsFilter
+        pagination: Pagination
+        sorts: [Sort!]
     ): [Corps!]
     getCorpsCount(
-        name: String
-        commander: String
+        filter: CorpsFilter
     ): Int
     getOneCorps(name: String!): Corps
 
     getDivisions(
-        name: String
-        commander: String
-        page: Int
-        pageSize: Int
-        sort: String
-        sortAsc: Boolean
+        filter: DivisionFilter
+        pagination: Pagination
+        sorts: [Sort!]
     ): [Division!]
     getDivisionCount(
-        name: String
-        commander: String
+        filter: DivisionFilter
     ): Int
     getDivision(name: String!): Division
 
     getPlatoons(
-        name: String
-        commander: String
-        company: String
-        page: Int
-        pageSize: Int
-        sort: String
-        sortAsc: Boolean
+        filter: PlatoonsFilter
+        pagination: Pagination
+        sorts: [Sort!]
     ): [Platoon!]
     getPlatoonCount(
-        name: String
-        commander: String
-        company: String
+        filter: PlatoonsFilter
     ): Int
     getPlatoon(name: String!): Platoon
 
     getSquads(
-        name: String
-        commander: String
-        platoon: String
-        page: Int
-        pageSize: Int
-        sort: String
-        sortAsc: Boolean
+        filter: SquadFilter
+        pagination: Pagination
+        sorts: [Sort!]
     ): [Squad!]
     getSquadCount(
-        name: String
-        commander: String
-        platoon: String
+        filter: SquadFilter
     ): Int
     getSquad(name: String!): Army
 
     getUnits(
-        name: String
-        address: String
-        commander: String
-        page: Int
-        pageSize: Int
-        sort: String
-        sortAsc: Boolean
+        filter: UnitFilter
+        pagination: Pagination
+        sorts: [Sort!]
     ): [Unit!]
     getUnitCount(
-        name: String
-        address: String
-        commander: String
+        filter: UnitFilter
     ): Int
     getUnit(name: String!): Unit
 }

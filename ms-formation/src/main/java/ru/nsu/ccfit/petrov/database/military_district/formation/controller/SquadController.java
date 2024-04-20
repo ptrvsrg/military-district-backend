@@ -9,7 +9,10 @@ import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import ru.nsu.ccfit.petrov.database.military_district.formation.dto.SquadDto;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.Pagination;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.Sorting;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.SquadFilter;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.SquadInput;
 import ru.nsu.ccfit.petrov.database.military_district.formation.persistence.entity.Squad;
 import ru.nsu.ccfit.petrov.database.military_district.formation.service.SquadService;
 
@@ -22,23 +25,16 @@ public class SquadController {
   @QueryMapping
   @PreAuthorize("hasAuthority('READ_FORMATIONS')")
   public List<Squad> getSquads(
-      @Argument("name") String name,
-      @Argument("commander") String commander,
-      @Argument("platoon") String platoon,
-      @Argument("page") Integer page,
-      @Argument("pageSize") Integer pageSize,
-      @Argument("sort") String sortField,
-      @Argument("sortAsc") Boolean sortAsc) {
-    return squadService.getAll(name, commander, platoon, page, pageSize, sortField, sortAsc);
+      @Argument("filter") SquadFilter filter,
+      @Argument("pagination") Pagination pagination,
+      @Argument("sorts") List<Sorting> sorts) {
+    return squadService.getAll(filter, pagination, sorts);
   }
 
   @QueryMapping
   @PreAuthorize("hasAuthority('READ_FORMATIONS')")
-  public long getSquadCount(
-      @Argument("name") String name,
-      @Argument("commander") String commander,
-      @Argument("platoon") String platoon) {
-    return squadService.getAllCount(name, commander, platoon);
+  public long getSquadCount(@Argument("filter") SquadFilter filter) {
+    return squadService.getAllCount(filter);
   }
 
   @QueryMapping
@@ -49,16 +45,16 @@ public class SquadController {
 
   @MutationMapping
   @PreAuthorize("hasAuthority('WRITE_FORMATIONS')")
-  public Squad createSquad(@Argument("input") @Valid @NonNull SquadDto squadDto) {
-    return squadService.create(squadDto);
+  public Squad createSquad(@Argument("input") @Valid @NonNull SquadInput squadInput) {
+    return squadService.create(squadInput);
   }
 
   @MutationMapping
   @PreAuthorize("hasAuthority('WRITE_FORMATIONS')")
   public Squad updateSquad(
       @Argument("name") @NonNull String name,
-      @Argument("input") @Valid @NonNull SquadDto squadDto) {
-    return squadService.update(name, squadDto);
+      @Argument("input") @Valid @NonNull SquadInput squadInput) {
+    return squadService.update(name, squadInput);
   }
 
   @MutationMapping

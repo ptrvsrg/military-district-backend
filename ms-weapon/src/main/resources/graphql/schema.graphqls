@@ -26,34 +26,45 @@ type WeaponType {
     attributes: [Attribute!]
 }
 
+input WeaponFilter {
+    type: String
+    category: String
+    unit: String
+}
+
+input WeaponTypeFilter {
+    name: String
+    category: String
+}
+
+input Pagination {
+    page: Int!
+    pageSize: Int!
+}
+
+input Sort {
+    field: String!
+    sortAsc: Boolean!
+}
+
 type Query {
     getWeapons(
-        type: String
-        category: String
-        unit: String
-        page: Int
-        pageSize: Int
-        sort: String
-        sortAsc: Boolean
+        filter: WeaponFilter
+        pagination: Pagination
+        sorts: [Sort!]
     ): [Weapon!]
     getWeaponCount(
-        type: String
-        category: String
-        unit: String
+        filter: WeaponFilter
     ): Int
     getWeapon(serialNumber: String!): Weapon
 
     getWeaponTypes(
-        name: String
-        category: String
-        page: Int
-        pageSize: Int
-        sort: String
-        sortAsc: Boolean
+        filter: WeaponTypeFilter
+        pagination: Pagination
+        sorts: [Sort!]
     ): [WeaponType!]
     getWeaponTypeCount(
-        name: String
-        category: String
+        filter: WeaponTypeFilter
     ): Int
     getWeaponType(
         name: String!
@@ -61,10 +72,8 @@ type Query {
     ): WeaponType
 
     getWeaponCategories(
-        page: Int
-        pageSize: Int
-        sort: String
-        sortAsc: Boolean
+        pagination: Pagination
+        sorts: [Sort!]
     ): [WeaponCategory!]
     getWeaponCategoryCount: Int
     getWeaponCategory(name: String!): WeaponCategory

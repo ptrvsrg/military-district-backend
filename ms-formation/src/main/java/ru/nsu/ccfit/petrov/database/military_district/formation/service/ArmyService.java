@@ -1,18 +1,21 @@
 package ru.nsu.ccfit.petrov.database.military_district.formation.service;
 
+import static ru.nsu.ccfit.petrov.database.military_district.formation.util.SpecPageSortUtils.generateArmySpec;
 import static ru.nsu.ccfit.petrov.database.military_district.formation.util.SpecPageSortUtils.generatePageable;
 import static ru.nsu.ccfit.petrov.database.military_district.formation.util.SpecPageSortUtils.generateSort;
 
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.domain.Specification;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.nsu.ccfit.petrov.database.military_district.formation.dto.ArmyDto;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.ArmyFilter;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.ArmyInput;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.Pagination;
+import ru.nsu.ccfit.petrov.database.military_district.formation.dto.Sorting;
 import ru.nsu.ccfit.petrov.database.military_district.formation.exception.ArmyAlreadyExistsException;
 import ru.nsu.ccfit.petrov.database.military_district.formation.exception.ArmyNotFoundException;
 import ru.nsu.ccfit.petrov.database.military_district.formation.mapper.ArmyMapper;
@@ -25,6 +28,7 @@ import ru.nsu.ccfit.petrov.database.military_district.formation.persistence.repo
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class ArmyService implements GraphQLService {
 
   private static final List<String> availableSortFields = List.of("commander.mbn", "name");
@@ -35,80 +39,65 @@ public class ArmyService implements GraphQLService {
   private final DivisionRepository divisionRepository;
   private final ArmyMapper armyMapper;
 
-  public List<Army> getAll(
-      String name,
-      String commander,
-      Integer page,
-      Integer pageSize,
-      String sortField,
-      Boolean sortAsc) {
-    var sort = generateSort(sortField, sortAsc, availableSortFields);
-    var pageable = generatePageable(page, pageSize, sort);
-    var spec = generateSpecification(name, commander);
+  public List<Army> getAll(ArmyFilter filter, Pagination pagination, List<Sorting> sorts) {
+    log.info("Get all armies: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
+    var sort = generateSort(sorts, availableSortFields);
+    var pageable = generatePageable(pagination, sort);
+    var spec = generateArmySpec(filter);
     return armyRepository.findAll(spec, pageable, sort);
   }
 
-  public long getAllCount(String name, String commander) {
-    var spec = generateSpecification(name, commander);
-    if (spec == null) {
-      return armyRepository.count();
-    }
+  public long getAllCount(ArmyFilter filter) {
+    log.info("Get all armies count: filter={}", filter);
+    var spec = generateArmySpec(filter);
     return armyRepository.count(spec);
   }
 
   public Army getByName(@NonNull String name) {
+    log.info("Get army by name: name={}", name);
     return armyRepository.findByName(name).orElse(null);
   }
 
   @Transactional
-  public Army create(@Valid @NonNull ArmyDto armyDto) {
-    if (armyRepository.existsByName(armyDto.getName())) {
+  public Army create(@Valid @NonNull ArmyInput armyInput) {
+    log.info("Create army: input={}", armyInput);
+    if (armyRepository.existsByName(armyInput.getName())) {
       throw new ArmyAlreadyExistsException();
     }
 
-    var army = armyMapper.toEntity(armyDto);
-    army.setBrigades(brigadeRepository.findByNameIn(armyDto.getBrigades()));
-    army.setCorps(corpsRepository.findByNameIn(armyDto.getCorps()));
-    army.setDivisions(divisionRepository.findByNameIn(armyDto.getDivisions()));
+    var army = armyMapper.toEntity(armyInput);
+    army.setBrigades(brigadeRepository.findByNameIn(armyInput.getBrigades()));
+    army.setCorps(corpsRepository.findByNameIn(armyInput.getCorps()));
+    army.setDivisions(divisionRepository.findByNameIn(armyInput.getDivisions()));
 
     return armyRepository.save(army);
   }
 
   @Transactional
-  public Army update(@NonNull String name, @Valid @NonNull ArmyDto armyDto) {
+  public Army update(@NonNull String name, @Valid @NonNull ArmyInput armyInput) {
+    log.info("Update army: name={}, input={}", name, armyInput);
     var army = armyRepository.findByName(name).orElseThrow(ArmyNotFoundException::new);
-    if (!name.equals(armyDto.getName()) && armyRepository.existsByName(armyDto.getName())) {
+    if (!name.equals(armyInput.getName()) && armyRepository.existsByName(armyInput.getName())) {
       throw new ArmyAlreadyExistsException();
     }
 
-    armyMapper.partialUpdate(armyDto, army);
-    army.setBrigades(brigadeRepository.findByNameIn(armyDto.getBrigades()));
-    army.setCorps(corpsRepository.findByNameIn(armyDto.getCorps()));
-    army.setDivisions(divisionRepository.findByNameIn(armyDto.getDivisions()));
+    armyMapper.partialUpdate(armyInput, army);
+    army.setBrigades(brigadeRepository.findByNameIn(armyInput.getBrigades()));
+    army.setCorps(corpsRepository.findByNameIn(armyInput.getCorps()));
+    army.setDivisions(divisionRepository.findByNameIn(armyInput.getDivisions()));
 
     return armyRepository.save(army);
   }
 
   @Transactional
   public long delete(@NonNull String name) {
+    log.info("Delete army: name={}", name);
     return armyRepository.deleteByName(name);
-  }
-
-  private Specification<Army> generateSpecification(String name, String commander) {
-    Specification<Army> spec = null;
-    if (Objects.nonNull(name)) {
-      spec = (root, query, builder) -> builder.like(root.get("name"), "%" + name + "%");
-    }
-    if (Objects.nonNull(commander)) {
-      Specification<Army> newSpec =
-          (root, query, builder) -> builder.like(root.get("commander.mbn"), "%" + commander + "%");
-      spec = Objects.isNull(spec) ? newSpec : spec.and(newSpec);
-    }
-    return spec;
   }
 
   @Override
   public Object resolveReference(@NonNull Map<String, Object> reference) {
+    log.info("Resolve reference: reference={}", reference);
     if (reference.get("name") instanceof String name) {
       return getByName(name);
     }

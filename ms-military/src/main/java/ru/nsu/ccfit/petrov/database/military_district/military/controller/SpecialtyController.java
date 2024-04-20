@@ -15,7 +15,7 @@ public class SpecialtyController {
   private final SpecialtyService specialtyService;
 
   @QueryMapping
-  @PreAuthorize("hasAuthority('READ_MILITARIES)")
+  @PreAuthorize("hasAuthority('READ_MILITARIES')")
   public List<Specialty> getSpecialties() {
     return specialtyService.getAll();
   }
