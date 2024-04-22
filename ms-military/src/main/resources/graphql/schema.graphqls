@@ -46,9 +46,7 @@ type Unit @key(fields: "name", resolvable: false) @extends {
 }
 
 input MilitaryFilter {
-    firstName: String
-    lastName: String
-    middleName: String
+    name: String
     rank: String
     unit: String
 }

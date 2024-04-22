@@ -11,9 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class MilitaryFilter {
 
-  private String firstName;
-  private String lastName;
-  private String middleName;
+  private String name;
   private String rank;
   private String unit;
 }
