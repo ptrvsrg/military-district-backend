@@ -63,19 +63,14 @@ public class SpecPageSortUtils {
     }
     return (root, query, builder) -> {
       var spec = builder.conjunction();
-      if (filter.getFirstName() != null) {
-        spec =
-            builder.and(
-                spec, builder.like(root.get("firstName"), "%" + filter.getFirstName() + "%"));
-      }
-      if (filter.getLastName() != null) {
-        spec =
-            builder.and(spec, builder.like(root.get("lastName"), "%" + filter.getLastName() + "%"));
-      }
-      if (filter.getMiddleName() != null) {
-        spec =
-            builder.and(
-                spec, builder.like(root.get("middleName"), "%" + filter.getMiddleName() + "%"));
+      if (filter.getName() != null) {
+        var concatParts =
+                List.of(
+                        builder.concat(root.get("firstName"), " "),
+                        builder.concat(root.get("lastName"), " "),
+                        builder.concat(root.get("middleName"), ""));
+        var nameExpr = concatParts.stream().reduce(builder::concat).get();
+        spec = builder.and(spec, builder.like(nameExpr, "%" + filter.getName() + "%"));
       }
       if (filter.getRank() != null) {
         spec =
