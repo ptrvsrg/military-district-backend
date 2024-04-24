@@ -201,7 +201,7 @@ services:
       timeout: 5s
       retries: 50
     ports:
-      - ${MILITARY_DISTRICT_API_GATEWAY_PORT:-10080}:80
+      - ${MILITARY_DISTRICT_API_GATEWAY_PORT:-10084}:80
     networks:
       - military-district-net
     depends_on:
