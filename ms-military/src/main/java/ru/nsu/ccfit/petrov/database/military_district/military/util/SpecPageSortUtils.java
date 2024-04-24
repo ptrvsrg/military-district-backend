@@ -66,8 +66,8 @@ public class SpecPageSortUtils {
       if (filter.getName() != null) {
         var concatParts =
                 List.of(
-                        builder.concat(root.get("firstName"), " "),
                         builder.concat(root.get("lastName"), " "),
+                        builder.concat(root.get("firstName"), " "),
                         builder.concat(root.get("middleName"), ""));
         var nameExpr = concatParts.stream().reduce(builder::concat).get();
         spec = builder.and(spec, builder.like(nameExpr, "%" + filter.getName() + "%"));
