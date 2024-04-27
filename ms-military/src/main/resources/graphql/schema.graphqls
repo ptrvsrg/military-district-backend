@@ -112,9 +112,9 @@ input MilitaryInput {
 }
 
 type Mutation {
-    createMilitary(militaryInput: MilitaryInput!): Military
+    createMilitary(input: MilitaryInput!): Military
     updateMilitary(
         mbn: String!
-        militaryInput: MilitaryInput!): Military
+        input: MilitaryInput!): Military
     deleteMilitary(mbn: String!): Int
 }
