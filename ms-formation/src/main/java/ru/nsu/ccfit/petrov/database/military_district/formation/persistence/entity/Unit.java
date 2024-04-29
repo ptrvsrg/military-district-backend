@@ -1,8 +1,5 @@
 package ru.nsu.ccfit.petrov.database.military_district.formation.persistence.entity;
 
-import static org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE;
-
-import jakarta.persistence.Cacheable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -19,7 +16,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.Cache;
 
 @Getter
 @Setter
@@ -27,8 +23,6 @@ import org.hibernate.annotations.Cache;
 @AllArgsConstructor
 @Entity
 @Table(name = "units")
-@Cacheable
-@Cache(usage = READ_WRITE)
 public class Unit {
 
   @Id

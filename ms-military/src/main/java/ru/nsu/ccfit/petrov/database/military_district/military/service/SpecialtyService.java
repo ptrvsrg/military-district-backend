@@ -5,6 +5,7 @@ import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.ccfit.petrov.database.military_district.military.persistence.entity.Specialty;
@@ -18,11 +19,13 @@ public class SpecialtyService implements GraphQLService {
 
   private final SpecialtyRepository specialtyRepository;
 
+  @Cacheable("specialties")
   public List<Specialty> getAll() {
     log.info("Get all specialities");
     return specialtyRepository.findAll();
   }
 
+  @Cacheable("specialtyByCode")
   public Specialty getByCode(String code) {
     log.info("Get specialty by code: code={}", code);
     return specialtyRepository.findByCode(code).orElse(null);

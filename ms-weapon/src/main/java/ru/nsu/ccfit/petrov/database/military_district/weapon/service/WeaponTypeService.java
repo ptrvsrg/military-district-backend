@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.ccfit.petrov.database.military_district.weapon.dto.AttributeInput;
@@ -44,6 +45,7 @@ public class WeaponTypeService implements GraphQLService {
   private final WeaponTypeMapper weaponTypeMapper;
   private final AttributeMapper attributeMapper;
 
+  @Cacheable("weaponTypes")
   public List<WeaponType> getAll(
       WeaponTypeFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info("Get all weapon types: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
@@ -53,12 +55,14 @@ public class WeaponTypeService implements GraphQLService {
     return weaponTypeRepository.findAll(spec, pageable, sort);
   }
 
+  @Cacheable("weaponTypeCount")
   public long getAllCount(WeaponTypeFilter filter) {
     log.info("Get all weapon types count: filter={}", filter);
     var spec = generateWeaponTypeSpec(filter);
     return weaponTypeRepository.count(spec);
   }
 
+  @Cacheable("weaponTypeByNameAndCategory")
   public WeaponType getByNameAndCategory(@NonNull String name, @NonNull String category) {
     log.info("Get weapon type: name={}, category={}", name, category);
     return weaponTypeRepository.findByNameAndCategory_Name(name, category).orElse(null);

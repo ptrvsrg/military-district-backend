@@ -1,9 +1,7 @@
 package ru.nsu.ccfit.petrov.database.military_district.infrastructure.persistence.entity;
 
 import static jakarta.persistence.FetchType.LAZY;
-import static org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE;
 
-import jakarta.persistence.Cacheable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,7 +13,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.Cache;
 
 @Getter
 @Setter
@@ -23,8 +20,6 @@ import org.hibernate.annotations.Cache;
 @AllArgsConstructor
 @Entity
 @Table(name = "building_attributes")
-@Cacheable
-@Cache(usage = READ_WRITE)
 public class Attribute {
 
   @Id

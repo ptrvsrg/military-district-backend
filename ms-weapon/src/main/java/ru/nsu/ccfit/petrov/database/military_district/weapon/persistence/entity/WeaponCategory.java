@@ -1,7 +1,5 @@
 package ru.nsu.ccfit.petrov.database.military_district.weapon.persistence.entity;
 
-import static org.hibernate.annotations.CacheConcurrencyStrategy.READ_ONLY;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,8 +12,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.Immutable;
 
 @Getter
 @Setter
@@ -23,8 +19,6 @@ import org.hibernate.annotations.Immutable;
 @AllArgsConstructor
 @Entity
 @Table(name = "weapon_categories")
-@Immutable
-@Cache(usage = READ_ONLY)
 public class WeaponCategory {
 
   @Id

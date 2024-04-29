@@ -1,9 +1,7 @@
 package ru.nsu.ccfit.petrov.database.military_district.weapon.persistence.entity;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
-import static org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE;
 
-import jakarta.persistence.Cacheable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -18,7 +16,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.Cache;
 
 @Getter
 @Setter
@@ -26,8 +23,6 @@ import org.hibernate.annotations.Cache;
 @AllArgsConstructor
 @Entity
 @Table(name = "weapon_types")
-@Cacheable
-@Cache(usage = READ_WRITE)
 public class WeaponType {
 
   @Id

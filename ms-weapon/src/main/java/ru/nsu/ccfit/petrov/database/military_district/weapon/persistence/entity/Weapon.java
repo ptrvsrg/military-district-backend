@@ -1,10 +1,7 @@
 package ru.nsu.ccfit.petrov.database.military_district.weapon.persistence.entity;
 
-import static org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE;
-
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
-import jakarta.persistence.Cacheable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -20,7 +17,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -30,8 +26,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 @AllArgsConstructor
 @Entity
 @Table(name = "weapons")
-@Cacheable
-@Cache(usage = READ_WRITE)
 public class Weapon {
 
   @Id
