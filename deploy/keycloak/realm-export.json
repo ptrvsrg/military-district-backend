@@ -391,6 +391,24 @@
           "clientRole": true,
           "containerId": "22e83704-0004-4bb7-b110-8575c6d0c8c5",
           "attributes": {}
+        },
+        {
+          "id": "8e008983-4a18-4d92-8c90-6f9db6586b1a",
+          "name": "VIEW_REPORTS",
+          "description": "",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "22e83704-0004-4bb7-b110-8575c6d0c8c5",
+          "attributes": {}
+        },
+        {
+          "id": "51d9aa8c-2232-466c-8a6a-9c83a24bf7d4",
+          "name": "BUILD_REPORT",
+          "description": "",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "22e83704-0004-4bb7-b110-8575c6d0c8c5",
+          "attributes": {}
         }
       ],
       "security-admin-console": [],

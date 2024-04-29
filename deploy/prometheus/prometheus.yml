@@ -24,6 +24,11 @@ scrape_configs:
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: [ 'ms-weapon:8085' ]
+  - job_name: 'ms-report'
+    scrape_interval: 5s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'ms-weapon:8086' ]
   - job_name: 'ms-router'
     scrape_interval: 5s
     metrics_path: '/metrics'

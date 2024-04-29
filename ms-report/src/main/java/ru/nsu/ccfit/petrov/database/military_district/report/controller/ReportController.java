@@ -1,0 +1,50 @@
+package ru.nsu.ccfit.petrov.database.military_district.report.controller;
+
+import static org.springframework.http.HttpStatus.OK;
+import static ru.nsu.ccfit.petrov.database.military_district.report.util.ApiPathUtils.BUILD_SUFFIX;
+import static ru.nsu.ccfit.petrov.database.military_district.report.util.ApiPathUtils.GET_REPORT_SUFFIX;
+import static ru.nsu.ccfit.petrov.database.military_district.report.util.ApiPathUtils.REPORT_PREFIX;
+
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import ru.nsu.ccfit.petrov.database.military_district.report.dto.ReportBuildInputDto;
+import ru.nsu.ccfit.petrov.database.military_district.report.dto.ReportBuildOutputDto;
+import ru.nsu.ccfit.petrov.database.military_district.report.dto.ReportOutputDto;
+import ru.nsu.ccfit.petrov.database.military_district.report.service.ReportService;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping(REPORT_PREFIX)
+public class ReportController {
+
+  private final ReportService reportService;
+
+  @GetMapping
+  @PreAuthorize("hasAuthority('VIEW_REPORTS')")
+  public ResponseEntity<List<ReportOutputDto>> getReports(
+      @RequestParam(name = "page", required = false) Integer page,
+      @RequestParam(name = "pageSize", required = false) Integer pageSize) {
+    return ResponseEntity.status(OK).body(reportService.getReports(page, pageSize));
+  }
+
+  @GetMapping(GET_REPORT_SUFFIX)
+  @PreAuthorize("hasAuthority('VIEW_REPORTS')")
+  public ResponseEntity<ReportOutputDto> getReport(@RequestParam("reportName") String reportName) {
+    return ResponseEntity.status(OK).body(reportService.getReport(reportName));
+  }
+
+  @PostMapping(BUILD_SUFFIX)
+  @PreAuthorize("hasAuthority('BUILD_REPORT')")
+  public ResponseEntity<ReportBuildOutputDto> buildReport(
+      @RequestBody ReportBuildInputDto inputDto) {
+    return ResponseEntity.status(OK).body(reportService.buildReport(inputDto));
+  }
+}

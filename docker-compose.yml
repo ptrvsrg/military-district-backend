@@ -122,6 +122,27 @@ services:
         condition: service_completed_successfully
       keycloak:
         condition: service_healthy
+  ms-report:
+    image: ptrvsrg/ms-weapon:latest
+    environment:
+      MILITARY_DISTRICT_MS_WEAPON_DB_URL: postgres-node-0:5432,postgres-node-1:5432,postgres-node-2:5432/military_district?targetServerType=primary
+      MILITARY_DISTRICT_MS_WEAPON_DB_USER: ${MILITARY_DISTRICT_POSTGRES_USER:-user}
+      MILITARY_DISTRICT_MS_WEAPON_DB_PASSWORD: ${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}
+      MILITARY_DISTRICT_MS_WEAPON_OAUTH2_CERT_URL: http://keycloak:8080/realms/military-district/protocol/openid-connect/certs
+    healthcheck:
+      test: [ 'CMD-SHELL', 'wget -T5 -qO- http://localhost:8086/actuator/health | grep UP || exit 1' ]
+      interval: 5s
+      timeout: 5s
+      retries: 50
+    ports:
+      - ${MILITARY_DISTRICT_MS_REPORT_PORT:-58086}:8086
+    networks:
+      - military-district-net
+    depends_on:
+      postgres-migration:
+        condition: service_completed_successfully
+      keycloak:
+        condition: service_healthy
 
   ##########################
   ######### Router #########
@@ -283,6 +304,7 @@ services:
       - ./db/db.changelog-master.xml:/liquibase/db.changelog-master.xml
       - ./db/DDL:/liquibase/DDL
       - ./db/DML:/liquibase/DML
+      - ./db/reports:/liquibase/reports
     networks:
       - military-district-net
     depends_on:

@@ -5,4 +5,5 @@
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
     <includeAll path="/DDL/"/>
     <includeAll path="/DML/"/>
+    <includeAll path="/reports/"/>
 </databaseChangeLog>
