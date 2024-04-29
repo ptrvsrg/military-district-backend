@@ -8,6 +8,7 @@ import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,7 @@ public class CombatEquipmentCategoryService implements GraphQLService {
 
   private final CombatEquipmentCategoryRepository combatEquipmentCategoryRepository;
 
+  @Cacheable("combatEquipmentCategories")
   public List<CombatEquipmentCategory> getAll(
       @Nullable Pagination pagination, @NonNull List<Sorting> sorts) {
     log.info("Get all combat equipment categories: pagination={}, sorts={}", pagination, sorts);
@@ -36,11 +38,13 @@ public class CombatEquipmentCategoryService implements GraphQLService {
     return combatEquipmentCategoryRepository.findAll(null, pageable, sort);
   }
 
+  @Cacheable("combatEquipmentCategoryCount")
   public long getAllCount() {
     log.info("Get all combat equipment category count");
     return combatEquipmentCategoryRepository.count();
   }
 
+  @Cacheable("combatEquipmentCategoryByName")
   public CombatEquipmentCategory getByName(@NonNull String name) {
     log.info("Get combat equipment category by name: name={}", name);
     return combatEquipmentCategoryRepository.findByName(name).orElse(null);

@@ -20,8 +20,6 @@ services:
   ms-military:
     image: ptrvsrg/ms-military:latest
     environment:
-      MILITARY_DISTRICT_MS_MILITARY_REDIS_NODES: redis://redis-node-0:6379,redis://redis-node-1:6379,redis://redis-node-2:6379
-      MILITARY_DISTRICT_MS_MILITARY_REDIS_PASSWORD: ${MILITARY_DISTRICT_REDIS_PASSWORD:-password}
       MILITARY_DISTRICT_MS_MILITARY_DB_URL: postgres-node-0:5432,postgres-node-1:5432,postgres-node-2:5432/military_district?targetServerType=primary
       MILITARY_DISTRICT_MS_MILITARY_DB_USER: ${MILITARY_DISTRICT_POSTGRES_USER:-user}
       MILITARY_DISTRICT_MS_MILITARY_DB_PASSWORD: ${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}
@@ -38,15 +36,11 @@ services:
     depends_on:
       postgres-migration:
         condition: service_completed_successfully
-      redis-cluster:
-        condition: service_started
       keycloak:
         condition: service_healthy
   ms-formation:
     image: ptrvsrg/ms-formation:latest
     environment:
-      MILITARY_DISTRICT_MS_FORMATION_REDIS_NODES: redis://redis-node-0:6379,redis://redis-node-1:6379,redis://redis-node-2:6379
-      MILITARY_DISTRICT_MS_FORMATION_REDIS_PASSWORD: ${MILITARY_DISTRICT_REDIS_PASSWORD:-password}
       MILITARY_DISTRICT_MS_FORMATION_DB_URL: postgres-node-0:5432,postgres-node-1:5432,postgres-node-2:5432/military_district?targetServerType=primary
       MILITARY_DISTRICT_MS_FORMATION_DB_USER: ${MILITARY_DISTRICT_POSTGRES_USER:-user}
       MILITARY_DISTRICT_MS_FORMATION_DB_PASSWORD: ${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}
@@ -63,15 +57,11 @@ services:
     depends_on:
       postgres-migration:
         condition: service_completed_successfully
-      redis-cluster:
-        condition: service_started
       keycloak:
         condition: service_healthy
   ms-infrastructure:
     image: ptrvsrg/ms-infrastructure:latest
     environment:
-      MILITARY_DISTRICT_MS_INFRASTRUCTURE_REDIS_NODES: redis://redis-node-0:6379,redis://redis-node-1:6379,redis://redis-node-2:6379
-      MILITARY_DISTRICT_MS_INFRASTRUCTURE_REDIS_PASSWORD: ${MILITARY_DISTRICT_REDIS_PASSWORD:-password}
       MILITARY_DISTRICT_MS_INFRASTRUCTURE_DB_URL: postgres-node-0:5432,postgres-node-1:5432,postgres-node-2:5432/military_district?targetServerType=primary
       MILITARY_DISTRICT_MS_INFRASTRUCTURE_DB_USER: ${MILITARY_DISTRICT_POSTGRES_USER:-user}
       MILITARY_DISTRICT_MS_INFRASTRUCTURE_DB_PASSWORD: ${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}
@@ -88,15 +78,11 @@ services:
     depends_on:
       postgres-migration:
         condition: service_completed_successfully
-      redis-cluster:
-        condition: service_started
       keycloak:
         condition: service_healthy
   ms-equipment:
     image: ptrvsrg/ms-equipment:latest
     environment:
-      MILITARY_DISTRICT_MS_EQUIPMENT_REDIS_NODES: redis://redis-node-0:6379,redis://redis-node-1:6379,redis://redis-node-2:6379
-      MILITARY_DISTRICT_MS_EQUIPMENT_REDIS_PASSWORD: ${MILITARY_DISTRICT_REDIS_PASSWORD:-password}
       MILITARY_DISTRICT_MS_EQUIPMENT_DB_URL: postgres-node-0:5432,postgres-node-1:5432,postgres-node-2:5432/military_district?targetServerType=primary
       MILITARY_DISTRICT_MS_EQUIPMENT_DB_USER: ${MILITARY_DISTRICT_POSTGRES_USER:-user}
       MILITARY_DISTRICT_MS_EQUIPMENT_DB_PASSWORD: ${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}
@@ -113,15 +99,11 @@ services:
     depends_on:
       postgres-migration:
         condition: service_completed_successfully
-      redis-cluster:
-        condition: service_started
       keycloak:
         condition: service_healthy
   ms-weapon:
     image: ptrvsrg/ms-weapon:latest
     environment:
-      MILITARY_DISTRICT_MS_WEAPON_REDIS_NODES: redis://redis-node-0:6379,redis://redis-node-1:6379,redis://redis-node-2:6379
-      MILITARY_DISTRICT_MS_WEAPON_REDIS_PASSWORD: ${MILITARY_DISTRICT_REDIS_PASSWORD:-password}
       MILITARY_DISTRICT_MS_WEAPON_DB_URL: postgres-node-0:5432,postgres-node-1:5432,postgres-node-2:5432/military_district?targetServerType=primary
       MILITARY_DISTRICT_MS_WEAPON_DB_USER: ${MILITARY_DISTRICT_POSTGRES_USER:-user}
       MILITARY_DISTRICT_MS_WEAPON_DB_PASSWORD: ${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}
@@ -138,8 +120,6 @@ services:
     depends_on:
       postgres-migration:
         condition: service_completed_successfully
-      redis-cluster:
-        condition: service_started
       keycloak:
         condition: service_healthy
 
@@ -339,99 +319,6 @@ services:
       postgres-node-1:
         condition: service_healthy
       postgres-node-2:
-        condition: service_healthy
-
-  #################################
-  ######### Redis Cluster #########
-  #################################
-  redis-node-0:
-    image: redis:7.2.4-alpine
-    restart: always
-    command: redis-server /etc/redis.conf --requirepass ${MILITARY_DISTRICT_REDIS_PASSWORD:-password}
-    healthcheck:
-      test: [ 'CMD-SHELL', 'redis-cli', 'ping' ]
-      interval: 5s
-      timeout: 5s
-      retries: 50
-    ports:
-      - ${MILITARY_DISTRICT_REDIS_0_PORT:-16379}:6379
-    volumes:
-      - ./deploy/redis-cluster/redis.conf:/etc/redis.conf
-    networks:
-      - military-district-net
-  redis-node-1:
-    image: redis:7.2.4-alpine
-    restart: always
-    command: redis-server /etc/redis.conf --requirepass ${MILITARY_DISTRICT_REDIS_PASSWORD:-password}
-    healthcheck:
-      test: [ 'CMD-SHELL', 'redis-cli', 'ping' ]
-      interval: 5s
-      timeout: 5s
-      retries: 50
-    ports:
-      - ${MILITARY_DISTRICT_REDIS_1_PORT:-16380}:6379
-    volumes:
-      - ./deploy/redis-cluster/redis.conf:/etc/redis.conf
-    networks:
-      - military-district-net
-  redis-node-2:
-    image: redis:7.2.4-alpine
-    restart: always
-    command: redis-server /etc/redis.conf --requirepass ${MILITARY_DISTRICT_REDIS_PASSWORD:-password}
-    healthcheck:
-      test: [ 'CMD-SHELL', 'redis-cli', 'ping' ]
-      interval: 5s
-      timeout: 5s
-      retries: 50
-    ports:
-      - ${MILITARY_DISTRICT_REDIS_2_PORT:-16381}:6379
-    volumes:
-      - ./deploy/redis-cluster/redis.conf:/etc/redis.conf
-    networks:
-      - military-district-net
-  redis-cluster:
-    image: redis:7.2.4-alpine
-    command: |-
-      redis-cli --cluster create redis-node-0:6379 redis-node-1:6379 redis-node-2:6379 
-      --cluster-yes -a ${MILITARY_DISTRICT_REDIS_PASSWORD:-password}
-    networks:
-      - military-district-net
-    depends_on:
-      redis-node-0:
-        condition: service_healthy
-      redis-node-1:
-        condition: service_healthy
-      redis-node-2:
-        condition: service_healthy
-
-  ###################################
-  ######### Redis Commander #########
-  ###################################
-  redis-commander:
-    image: rediscommander/redis-commander:latest
-    restart: always
-    environment:
-      REDIS_HOSTS: |-
-        node-0:redis-node-0:6379:0:${MILITARY_DISTRICT_REDIS_PASSWORD:-password},
-        node-1:redis-node-1:6379:0:${MILITARY_DISTRICT_REDIS_PASSWORD:-password},
-        node-2:redis-node-2:6379:0:${MILITARY_DISTRICT_REDIS_PASSWORD:-password}
-      HTTP_USER: ${MILITARY_DISTRICT_REDISCOMMANDER_USER:-user}
-      HTTP_PASSWORD: ${MILITARY_DISTRICT_REDISCOMMANDER_PASSWORD:-password}
-    healthcheck:
-      test: [ 'CMD-SHELL', 'nc -z localhost 8081 || exit 1' ]
-      interval: 5s
-      timeout: 5s
-      retries: 50
-    ports:
-      - ${MILITARY_DISTRICT_REDISCOMMANDER_PORT:-10082}:8081
-    networks:
-      - military-district-net
-    depends_on:
-      redis-node-0:
-        condition: service_healthy
-      redis-node-1:
-        condition: service_healthy
-      redis-node-2:
         condition: service_healthy
 
   ############################

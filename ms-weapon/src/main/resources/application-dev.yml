@@ -11,30 +11,11 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: validate
-    properties:
-      hibernate:
-        cache:
-          use_second_level_cache: true
-          use_query_cache: true
-          region:
-            factory_class: ru.nsu.ccfit.petrov.database.military_district.weapon.config.ClusterRedissonRegionFactory
-          redisson:
-            query:
-              expiration:
-                time_to_live: 60000
-                max_idle_time: 30000
-            timestamp:
-              expiration:
-                time_to_live: 60000
-                max_idle_time: 30000
-            password: ${MILITARY_DISTRICT_MS_WEAPON_REDIS_PASSWORD}
-            node_addresses: ${MILITARY_DISTRICT_MS_WEAPON_REDIS_NODES}
   security:
     oauth2:
       resourceserver:
         jwt:
           jwk-set-uri: ${MILITARY_DISTRICT_MS_WEAPON_OAUTH2_CERT_URL}
-
   graphql:
     graphiql:
       enabled: true
@@ -51,3 +32,6 @@ management:
     metrics:
       export:
         enabled: true
+logging:
+  level:
+    org.springframework.cache: TRACE

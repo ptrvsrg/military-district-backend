@@ -10,6 +10,7 @@ import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.ccfit.petrov.database.military_district.formation.dto.ArmyFilter;
@@ -39,6 +40,7 @@ public class ArmyService implements GraphQLService {
   private final DivisionRepository divisionRepository;
   private final ArmyMapper armyMapper;
 
+  @Cacheable("armies")
   public List<Army> getAll(ArmyFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info("Get all armies: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
     var sort = generateSort(sorts, availableSortFields);
@@ -47,12 +49,14 @@ public class ArmyService implements GraphQLService {
     return armyRepository.findAll(spec, pageable, sort);
   }
 
+  @Cacheable("armyCount")
   public long getAllCount(ArmyFilter filter) {
     log.info("Get all armies count: filter={}", filter);
     var spec = generateArmySpec(filter);
     return armyRepository.count(spec);
   }
 
+  @Cacheable("armyByName")
   public Army getByName(@NonNull String name) {
     log.info("Get army by name: name={}", name);
     return armyRepository.findByName(name).orElse(null);

@@ -1,7 +1,6 @@
 package ru.nsu.ccfit.petrov.database.military_district.military.persistence.entity;
 
 import static jakarta.persistence.FetchType.LAZY;
-import static org.hibernate.annotations.CacheConcurrencyStrategy.READ_ONLY;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,8 +16,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.Immutable;
 
 @Getter
 @Setter
@@ -26,8 +23,6 @@ import org.hibernate.annotations.Immutable;
 @AllArgsConstructor
 @Entity
 @Table(name = "ranks")
-@Immutable
-@Cache(usage = READ_ONLY)
 public class Rank {
 
   @Id
@@ -47,14 +42,4 @@ public class Rank {
 
   @OneToMany(mappedBy = "rank")
   private Set<Attribute> attributes = new LinkedHashSet<>();
-
-  public void addAttribute(Attribute attribute) {
-    attributes.add(attribute);
-    attribute.setRank(this);
-  }
-
-  public void removeAttribute(Attribute attribute) {
-    attributes.remove(attribute);
-    attribute.setRank(null);
-  }
 }

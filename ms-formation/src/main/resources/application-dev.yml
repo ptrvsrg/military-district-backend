@@ -11,24 +11,6 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: validate
-    properties:
-      hibernate:
-        cache:
-          use_second_level_cache: true
-          use_query_cache: true
-          region:
-            factory_class: ru.nsu.ccfit.petrov.database.military_district.formation.config.ClusterRedissonRegionFactory
-          redisson:
-            query:
-              expiration:
-                time_to_live: 60000
-                max_idle_time: 30000
-            timestamp:
-              expiration:
-                time_to_live: 60000
-                max_idle_time: 30000
-            password: ${MILITARY_DISTRICT_MS_FORMATION_REDIS_PASSWORD}
-            node_addresses: ${MILITARY_DISTRICT_MS_FORMATION_REDIS_NODES}
   security:
     oauth2:
       resourceserver:
@@ -52,6 +34,4 @@ management:
         enabled: true
 logging:
   level:
-    org:
-      springframework:
-        security: DEBUG
+    org.springframework.cache: TRACE

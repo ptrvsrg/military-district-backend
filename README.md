@@ -29,12 +29,10 @@ Military District - информационная система военного
 + Keycloak 24.0
 + PostgreSQL 16
 + Liquibase 4.27
-+ Redis 7.2.4
 + Nginx 3.18
 + Prometheus v2.51.1
 + Grafana 10.3.4
 + PGAdmin4 8.5
-+ Redis Commander
 
 ## Архитектура
 
@@ -43,8 +41,6 @@ Military District - информационная система военного
 Prometheus и Grafana используются для получения и отображения метрик API шлюза, роутера и микросервисов-подграфов.
 
 PGAdmin4 позволяет следить за метриками кластера PostgreSQL, а также просматривать и модифицировать БД.
-
-Redis Commander - простой и легковесный инструмент для управления хостами Redis
 
 ## Доступные команды
 

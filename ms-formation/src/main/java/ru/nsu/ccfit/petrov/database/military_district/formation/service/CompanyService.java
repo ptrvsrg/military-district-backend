@@ -10,6 +10,7 @@ import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.ccfit.petrov.database.military_district.formation.dto.CompanyFilter;
@@ -39,6 +40,7 @@ public class CompanyService implements GraphQLService {
   private final UnitRepository unitRepository;
   private final CompanyMapper companyMapper;
 
+  @Cacheable("companies")
   public List<Company> getAll(CompanyFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info("Get all companies: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
     var sort = generateSort(sorts, availableSortFields);
@@ -47,12 +49,14 @@ public class CompanyService implements GraphQLService {
     return companyRepository.findAll(spec, pageable, sort);
   }
 
+  @Cacheable("companyCount")
   public long getAllCount(CompanyFilter filter) {
     log.info("Get all companies count: filter={}", filter);
     var spec = generateCompanySpec(filter);
     return companyRepository.count(spec);
   }
 
+  @Cacheable("companyByName")
   public Company getByName(@NonNull String name) {
     log.info("Get company by name: name={}", name);
     return companyRepository.findByName(name).orElse(null);

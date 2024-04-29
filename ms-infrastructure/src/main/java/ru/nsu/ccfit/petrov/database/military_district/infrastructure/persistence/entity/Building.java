@@ -1,11 +1,9 @@
 package ru.nsu.ccfit.petrov.database.military_district.infrastructure.persistence.entity;
 
 import static jakarta.persistence.CascadeType.PERSIST;
-import static org.hibernate.annotations.CacheConcurrencyStrategy.READ_WRITE;
 
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
-import jakarta.persistence.Cacheable;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -24,7 +22,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -34,8 +31,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 @AllArgsConstructor
 @Entity
 @Table(name = "buildings")
-@Cacheable
-@Cache(usage = READ_WRITE)
 public class Building {
 
   @Id

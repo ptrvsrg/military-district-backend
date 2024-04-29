@@ -10,6 +10,7 @@ import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.ccfit.petrov.database.military_district.formation.dto.BrigadeFilter;
@@ -37,6 +38,7 @@ public class BrigadeService implements GraphQLService {
   private final UnitRepository unitRepository;
   private final BrigadeMapper brigadeMapper;
 
+  @Cacheable("brigades")
   public List<Brigade> getAll(BrigadeFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info("Get all brigades: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
     var sort = generateSort(sorts, availableSortFields);
@@ -45,12 +47,14 @@ public class BrigadeService implements GraphQLService {
     return brigadeRepository.findAll(spec, pageable, sort);
   }
 
+  @Cacheable("brigadeCount")
   public long getAllCount(BrigadeFilter filter) {
     log.info("Get all brigades count: filter={}", filter);
     var spec = generateBrigadeSpec(filter);
     return brigadeRepository.count(spec);
   }
 
+  @Cacheable("brigadeByName")
   public Brigade getByName(@NonNull String name) {
     log.info("Get brigade: name={}", name);
     return brigadeRepository.findByName(name).orElse(null);
