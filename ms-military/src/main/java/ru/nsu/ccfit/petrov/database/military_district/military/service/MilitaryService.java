@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.ccfit.petrov.database.military_district.military.dto.AttributeInput;
@@ -47,6 +48,7 @@ public class MilitaryService implements GraphQLService {
   private final MilitaryMapper militaryMapper;
   private final AttributeMapper attributeMapper;
 
+  @Cacheable("militaries")
   public List<Military> getAll(MilitaryFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info("Get all militaries: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
     var sort = generateSort(sorts, availableSortFields);
@@ -55,12 +57,14 @@ public class MilitaryService implements GraphQLService {
     return militaryRepository.findAll(spec, pageable, sort);
   }
 
+  @Cacheable("militaryCount")
   public long getAllCount(MilitaryFilter filter) {
     log.info("Get all military count: filter={}", filter);
     var spec = generateMilitarySpec(filter);
     return militaryRepository.count(spec);
   }
 
+  @Cacheable("militaryByMbn")
   public Military getByMbn(@NonNull String mbn) {
     log.info("Get military: mbn={}", mbn);
     return militaryRepository.findByMbn(mbn).orElse(null);

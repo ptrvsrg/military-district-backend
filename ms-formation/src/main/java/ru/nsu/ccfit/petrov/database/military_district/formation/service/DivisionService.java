@@ -10,6 +10,7 @@ import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.ccfit.petrov.database.military_district.formation.dto.DivisionFilter;
@@ -37,6 +38,7 @@ public class DivisionService implements GraphQLService {
   private final UnitRepository unitRepository;
   private final DivisionMapper divisionMapper;
 
+  @Cacheable("divisions")
   public List<Division> getAll(DivisionFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info("Get all divisions: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
     var sort = generateSort(sorts, availableSortFields);
@@ -45,12 +47,14 @@ public class DivisionService implements GraphQLService {
     return divisionRepository.findAll(spec, pageable, sort);
   }
 
+  @Cacheable("divisionCount")
   public long getAllCount(DivisionFilter filter) {
     log.info("Get all divisions count: filter={}", filter);
     var spec = generateDivisionSpec(filter);
     return divisionRepository.count(spec);
   }
 
+  @Cacheable("divisionByName")
   public Division getByName(@NonNull String name) {
     log.info("Get division by name: name={}", name);
     return divisionRepository.findByName(name).orElse(null);

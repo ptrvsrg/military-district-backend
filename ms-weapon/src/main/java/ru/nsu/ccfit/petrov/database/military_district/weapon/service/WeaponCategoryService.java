@@ -8,6 +8,7 @@ import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.ccfit.petrov.database.military_district.weapon.dto.Pagination;
@@ -27,6 +28,7 @@ public class WeaponCategoryService implements GraphQLService {
 
   private final WeaponCategoryRepository weaponCategoryRepository;
 
+  @Cacheable("weaponCategories")
   public List<WeaponCategory> getAll(Pagination pagination, List<Sorting> sorts) {
     log.info("Get all weapon categories: pagination={}, sorts={}", pagination, sorts);
     var sort = generateSort(sorts, availableSortFields);
@@ -34,11 +36,13 @@ public class WeaponCategoryService implements GraphQLService {
     return weaponCategoryRepository.findAll(null, pageable, sort);
   }
 
+  @Cacheable("weaponCategoryCount")
   public long getAllCount() {
     log.info("Get all weapon categories count");
     return weaponCategoryRepository.count();
   }
 
+  @Cacheable("weaponCategoryByName")
   public WeaponCategory getByName(@NonNull String name) {
     log.info("Get weapon category by name: name={}", name);
     return weaponCategoryRepository.findByName(name).orElse(null);

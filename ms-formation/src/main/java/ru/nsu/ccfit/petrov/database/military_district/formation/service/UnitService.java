@@ -10,6 +10,7 @@ import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.ccfit.petrov.database.military_district.formation.dto.Pagination;
@@ -42,6 +43,7 @@ public class UnitService implements GraphQLService {
   private final CompanyRepository companyRepository;
   private final UnitMapper unitMapper;
 
+  @Cacheable("units")
   public List<Unit> getAll(UnitFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info("Get all units: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
     var sort = generateSort(sorts, availableSortFields);
@@ -50,12 +52,14 @@ public class UnitService implements GraphQLService {
     return unitRepository.findAll(spec, pageable, sort);
   }
 
+  @Cacheable("unitCount")
   public long getAllCount(UnitFilter filter) {
     log.info("Get all units count: filter={}", filter);
     var spec = generateUnitSpec(filter);
     return unitRepository.count(spec);
   }
 
+  @Cacheable("unitByName")
   public Unit getByName(@NonNull String name) {
     log.info("Get unit by name: name={}", name);
     return unitRepository.findByName(name).orElse(null);

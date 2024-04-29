@@ -7,6 +7,7 @@ import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.ccfit.petrov.database.military_district.military.dto.AttributeDefinitionFilter;
@@ -21,11 +22,13 @@ public class AttributeDefinitionService implements GraphQLService {
 
   private final AttributeRepository attributeRepository;
 
+  @Cacheable("attributeDefinitions")
   public List<Attribute> getAll(AttributeDefinitionFilter filter) {
     log.info("Get all military attribute definitions: filter={}", filter);
     return attributeRepository.findAll(generateAttributeDefinitionSpec(filter));
   }
 
+  @Cacheable("attributeDefinitionByRankAndName")
   public Attribute getByRankAndName(@NonNull String name, @NonNull String rank) {
     log.info("Get military attribute definition: name={}, rank={}", name, rank);
     return attributeRepository.findByNameAndRank_Name(name, rank).orElse(null);

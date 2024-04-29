@@ -1,7 +1,7 @@
 HOME_DIR = $(shell pwd)
 SAMPLE_ENV_FILE = $(HOME_DIR)/sample.env
 ENV_FILE = $(HOME_DIR)/.env
-MODULES=ms-equipment ms-formation ms-infrastructure ms-military ms-weapon
+MODULES=ms-equipment ms-formation ms-infrastructure ms-military ms-report ms-weapon
 APOLLO_MODULES=rover router
 MAVEN = $(HOME_DIR)/mvnw
 DOCKER = docker

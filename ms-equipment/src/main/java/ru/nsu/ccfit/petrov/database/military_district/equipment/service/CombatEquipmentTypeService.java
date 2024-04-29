@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.ccfit.petrov.database.military_district.equipment.dto.AttributeInput;
@@ -44,6 +45,7 @@ public class CombatEquipmentTypeService implements GraphQLService {
   private final CombatEquipmentTypeMapper combatEquipmentTypeMapper;
   private final AttributeMapper attributeMapper;
 
+  @Cacheable("combatEquipmentTypes")
   public List<CombatEquipmentType> getAll(
       CombatEquipmentTypeFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info(
@@ -57,12 +59,14 @@ public class CombatEquipmentTypeService implements GraphQLService {
     return combatEquipmentTypeRepository.findAll(spec, pageable, sort);
   }
 
+  @Cacheable("combatEquipmentTypeCount")
   public long getAllCount(CombatEquipmentTypeFilter filter) {
     log.info("Get combat equipment types count: filter={}", filter);
     var spec = generateCombatEquipmentTypeSpec(filter);
     return combatEquipmentTypeRepository.count(spec);
   }
 
+  @Cacheable("combatEquipmentTypeByNameAndCategory")
   public CombatEquipmentType getByNameAndCategory(@NonNull String name, @NonNull String category) {
     log.info("Get combat equipment type: name={}, category={}", name, category);
     return combatEquipmentTypeRepository.findByNameAndCategory_Name(name, category).orElse(null);

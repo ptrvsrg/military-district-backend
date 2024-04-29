@@ -7,6 +7,7 @@ import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.ccfit.petrov.database.military_district.military.dto.RankFilter;
@@ -21,11 +22,13 @@ public class RankService implements GraphQLService {
 
   private final RankRepository rankRepository;
 
+  @Cacheable("ranks")
   public List<Rank> getAll(RankFilter filter) {
     log.info("Get all ranks: filter={}", filter);
     return rankRepository.findAll(generateRankSpec(filter));
   }
 
+  @Cacheable("rankByName")
   public Rank getByName(@NonNull String name) {
     log.info("Get rank by name: name={}", name);
     return rankRepository.findByName(name).orElse(null);
