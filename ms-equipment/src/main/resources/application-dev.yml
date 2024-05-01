@@ -1,0 +1,37 @@
+server:
+  port: 58084
+spring:
+  application:
+    name: ms-equipment
+  datasource:
+    url: jdbc:postgresql://${MILITARY_DISTRICT_MS_EQUIPMENT_DB_URL}
+    username: ${MILITARY_DISTRICT_MS_EQUIPMENT_DB_USER}
+    password: ${MILITARY_DISTRICT_MS_EQUIPMENT_DB_PASSWORD}
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${MILITARY_DISTRICT_MS_EQUIPMENT_OAUTH2_CERT_URL}
+  graphql:
+    graphiql:
+      enabled: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  metrics:
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+logging:
+  level:
+    org.springframework.cache: TRACE
