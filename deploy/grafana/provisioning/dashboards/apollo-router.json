@@ -1,0 +1,260 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "prometheus",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ],
+  "__elements": [],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "8.5.0"
+    },
+    {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": false,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "iteration": 1651321517049,
+  "links": [],
+  "liveNow": false,
+  "timepicker": {},
+  "version": 1,
+  "weekStart": "",
+  "gnetId": 16188,
+  "description": "Apollo GraphQL Router.",
+  "id": null,
+  "uid": "ZFSul9UMz",
+  "title": "Apollo Router Metrics",
+  "timezone": "browser",
+  "tags": [
+    "apollo graphql",
+    "apollo router",
+    "prometheus"
+  ],
+  "panels": [
+    {
+      "datasource": "Prometheus",
+      "title": "Durations",
+      "type": "graph",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "apollo_router_span_count{kind=\"busy\", span=\"supergraph\", otel_scope_name=\"apollo/router\"}",
+          "legendFormat": "Busy Supergraph",
+          "refId": "A"
+        },
+        {
+          "expr": "apollo_router_span_count{kind=\"duration\", span=\"execution\", otel_scope_name=\"apollo/router\"}",
+          "legendFormat": "Execution Duration",
+          "refId": "B"
+        },
+        {
+          "expr": "apollo_router_span_count{kind=\"duration\", span=\"query_planning\", otel_scope_name=\"apollo/router\"}",
+          "legendFormat": "Query Planning Duration",
+          "refId": "C"
+        },
+        {
+          "expr": "apollo_router_span_count{kind=\"duration\", span=\"request\", otel_scope_name=\"apollo/router\"}",
+          "legendFormat": "Request Duration",
+          "refId": "D"
+        },
+        {
+          "expr": "apollo_router_span_count{kind=\"duration\", span=\"subgraph\", otel_scope_name=\"apollo/router\"}",
+          "legendFormat": "Subgraph Duration",
+          "refId": "E"
+        },
+        {
+          "expr": "apollo_router_span_count{kind=\"duration\", span=\"supergraph\", otel_scope_name=\"apollo/router\"}",
+          "legendFormat": "Supergraph Duration",
+          "refId": "F"
+        }
+      ],
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": true,
+        "max": true,
+        "min": true,
+        "rightSide": true,
+        "show": true,
+        "total": true,
+        "values": true
+      },
+      "timeFrom": null,
+      "timeShift": null,
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": "Prometheus",
+      "title": "HTTP Request Counters",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 16,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "apollo_router_http_requests_total{status=\"200\",subgraph=\"ms-military\",otel_scope_name=\"apollo/router\"}",
+          "legendFormat": "MS Military Requests",
+          "refId": "M"
+        },
+        {
+          "expr": "apollo_router_http_requests_total{status=\"200\",subgraph=\"ms-formation\",otel_scope_name=\"apollo/router\"}",
+          "legendFormat": "MS Formation Requests",
+          "refId": "F"
+        },
+        {
+          "expr": "apollo_router_http_requests_total{status=\"200\",subgraph=\"ms-infrastructure\",otel_scope_name=\"apollo/router\"}",
+          "legendFormat": "MS Infrastructure Requests",
+          "refId": "I"
+        },
+        {
+          "expr": "apollo_router_http_requests_total{status=\"200\",subgraph=\"ms-equipment\",otel_scope_name=\"apollo/router\"}",
+          "legendFormat": "MS Equipment Requests",
+          "refId": "E"
+        },
+        {
+          "expr": "apollo_router_http_requests_total{status=\"200\",subgraph=\"ms-weapon\",otel_scope_name=\"apollo/router\"}",
+          "legendFormat": "MS Weapon Requests",
+          "refId": "W"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "text": {}
+      }
+    },
+    {
+      "datasource": "Prometheus",
+      "title": "Cache Counters",
+      "type": "stat",
+      "gridPos": {
+        "x": 16,
+        "y": 8,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "apollo_router_cache_hit_count_total{kind=\"query planner\",storage=\"memory\",otel_scope_name=\"apollo/router\"}",
+          "legendFormat": "Cache Hits",
+          "refId": "G"
+        },
+        {
+          "expr": "apollo_router_cache_miss_count_total{kind=\"query planner\",storage=\"memory\",otel_scope_name=\"apollo/router\"}",
+          "legendFormat": "Cache Misses",
+          "refId": "H"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {}
+      }
+    }
+  ],
+  "schemaVersion": 27,
+  "time": {
+    "from": "now-5m",
+    "to": "now"
+  }
+}
