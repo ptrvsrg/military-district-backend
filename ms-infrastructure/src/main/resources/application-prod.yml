@@ -1,0 +1,30 @@
+server:
+  port: 8083
+spring:
+  application:
+    name: ms-infrastructure
+  datasource:
+    url: jdbc:postgresql://${MILITARY_DISTRICT_MS_INFRASTRUCTURE_DB_URL}
+    username: ${MILITARY_DISTRICT_MS_INFRASTRUCTURE_DB_USER}
+    password: ${MILITARY_DISTRICT_MS_INFRASTRUCTURE_DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${MILITARY_DISTRICT_MS_INFRASTRUCTURE_OAUTH2_CERT_URL}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  metrics:
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
