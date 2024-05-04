@@ -1,22 +1,22 @@
 HOME_DIR = $(shell pwd)
 SAMPLE_ENV_FILE = $(HOME_DIR)/sample.env
 ENV_FILE = $(HOME_DIR)/.env
-MODULES=ms-equipment ms-formation ms-infrastructure ms-military ms-report ms-weapon
-APOLLO_MODULES=rover router
+MS_MODULES=ms-equipment ms-formation ms-infrastructure ms-military ms-report ms-weapon
+OTHER_MODULES=apollo-rover apollo-router
 MAVEN = $(HOME_DIR)/mvnw
 DOCKER = docker
 DOCKER_COMPOSE = docker compose
 
-define build_module_image
+define build_ms_module_image
 $(DOCKER) build \
 -t $(2)$(1):latest \
 -t $(2)$(1):$(shell $(MAVEN) help:evaluate -Dexpression=project.version -q -DforceStdout) \
 $(HOME_DIR)/$(1);
 endef
 
-define build_apollo_module_image
+define build_other_module_image
 $(DOCKER) build \
--t $(2)apollographql-$(1):latest \
+-t $(2)$(1):latest \
 $(HOME_DIR)/$(1);
 endef
 
@@ -29,9 +29,9 @@ build:
 	$(MAVEN) clean install spring-boot:repackage
 
 .PHONY: build-images
-build-images: build
-	$(foreach module,$(MODULES),$(call build_module_image,$(module),$(IMAGE_PREFIX)))
-	$(foreach module,$(APOLLO_MODULES),$(call build_apollo_module_image,$(module),$(IMAGE_PREFIX)))
+build-images:
+	$(foreach module,$(MS_MODULES),$(call build_ms_module_image,$(module),$(IMAGE_PREFIX)))
+	$(foreach module,$(OTHER_MODULES),$(call build_other_module_image,$(module),$(IMAGE_PREFIX)))
 
 .PHONY: env
 env:

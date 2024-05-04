@@ -19,6 +19,7 @@ services:
   #################################
   ms-military:
     image: ptrvsrg/ms-military:latest
+    restart: unless-stopped
     environment:
       MILITARY_DISTRICT_MS_MILITARY_DB_URL: postgres-node-0:5432,postgres-node-1:5432,postgres-node-2:5432/military_district?targetServerType=primary
       MILITARY_DISTRICT_MS_MILITARY_DB_USER: ${MILITARY_DISTRICT_POSTGRES_USER:-user}
@@ -40,6 +41,7 @@ services:
         condition: service_healthy
   ms-formation:
     image: ptrvsrg/ms-formation:latest
+    restart: unless-stopped
     environment:
       MILITARY_DISTRICT_MS_FORMATION_DB_URL: postgres-node-0:5432,postgres-node-1:5432,postgres-node-2:5432/military_district?targetServerType=primary
       MILITARY_DISTRICT_MS_FORMATION_DB_USER: ${MILITARY_DISTRICT_POSTGRES_USER:-user}
@@ -61,6 +63,7 @@ services:
         condition: service_healthy
   ms-infrastructure:
     image: ptrvsrg/ms-infrastructure:latest
+    restart: unless-stopped
     environment:
       MILITARY_DISTRICT_MS_INFRASTRUCTURE_DB_URL: postgres-node-0:5432,postgres-node-1:5432,postgres-node-2:5432/military_district?targetServerType=primary
       MILITARY_DISTRICT_MS_INFRASTRUCTURE_DB_USER: ${MILITARY_DISTRICT_POSTGRES_USER:-user}
@@ -82,6 +85,7 @@ services:
         condition: service_healthy
   ms-equipment:
     image: ptrvsrg/ms-equipment:latest
+    restart: unless-stopped
     environment:
       MILITARY_DISTRICT_MS_EQUIPMENT_DB_URL: postgres-node-0:5432,postgres-node-1:5432,postgres-node-2:5432/military_district?targetServerType=primary
       MILITARY_DISTRICT_MS_EQUIPMENT_DB_USER: ${MILITARY_DISTRICT_POSTGRES_USER:-user}
@@ -103,6 +107,7 @@ services:
         condition: service_healthy
   ms-weapon:
     image: ptrvsrg/ms-weapon:latest
+    restart: unless-stopped
     environment:
       MILITARY_DISTRICT_MS_WEAPON_DB_URL: postgres-node-0:5432,postgres-node-1:5432,postgres-node-2:5432/military_district?targetServerType=primary
       MILITARY_DISTRICT_MS_WEAPON_DB_USER: ${MILITARY_DISTRICT_POSTGRES_USER:-user}
@@ -124,8 +129,9 @@ services:
         condition: service_healthy
   ms-report:
     image: ptrvsrg/ms-report:latest
+    restart: unless-stopped
     environment:
-      MILITARY_DISTRICT_MS_REPORT_DB_URL: postgres-node-0:5432,postgres-node-1:5432,postgres-node-2:5432/military_district?targetServerType=primary
+      MILITARY_DISTRICT_MS_REPORT_DB_URL: postgres-node-0:5432,postgres-node-1:5432,postgres-node-2:5432/military_district?targetServerType=preferSecondary
       MILITARY_DISTRICT_MS_REPORT_DB_USER: ${MILITARY_DISTRICT_POSTGRES_USER:-user}
       MILITARY_DISTRICT_MS_REPORT_DB_PASSWORD: ${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}
       MILITARY_DISTRICT_MS_REPORT_OAUTH2_CERT_URL: http://keycloak:8080/realms/military-district/protocol/openid-connect/certs
@@ -148,7 +154,7 @@ services:
   ######### Router #########
   ##########################
   supergraph:
-    image: ptrvsrg/apollographql-rover:latest
+    image: ptrvsrg/apollo-rover:latest
     command: supergraph compose --config /opt/supergraph/supergraph.yaml --output /opt/supergraph/supergraph.graphqls --elv2-license=accept
     deploy:
       restart_policy:
@@ -171,7 +177,8 @@ services:
       ms-weapon:
         condition: service_healthy
   ms-router:
-    image: ptrvsrg/apollographql-router:latest
+    image: ptrvsrg/apollo-router:latest
+    restart: unless-stopped
     command: -c config/router.yaml -s config/supergraph/supergraph.graphqls
     healthcheck:
       test: [ 'CMD-SHELL', 'wget -T5 -qO- http://localhost:8088/health | grep UP || exit 1' ]
@@ -194,6 +201,7 @@ services:
   ###############################
   api-gateway:
     image: nginx:alpine
+    restart: unless-stopped
     volumes:
       - ./deploy/api-gateway/nginx.conf:/etc/nginx/nginx.conf
     healthcheck:
@@ -212,7 +220,7 @@ services:
         condition: service_healthy
   api-gateway-prometheus-exporter:
     image: nginx/nginx-prometheus-exporter:1.1
-    restart: always
+    restart: unless-stopped
     command: -nginx.scrape-uri=http://api-gateway/api/v0/gateway/metrics
     networks:
       - military-district-net
@@ -322,6 +330,7 @@ services:
   ###########################
   pgadmin:
     image: dpage/pgadmin4:8.5
+    restart: unless-stopped
     environment:
       PGADMIN_DEFAULT_EMAIL: ${MILITARY_DISTRICT_PGADMIN_EMAIL:-user@mail.ru}
       PGADMIN_DEFAULT_PASSWORD: ${MILITARY_DISTRICT_PGADMIN_PASSWORD:-password}
@@ -350,6 +359,7 @@ services:
   ############################
   keycloak:
     image: keycloak/keycloak:24.0
+    restart: unless-stopped
     command: start-dev --import-realm
     environment:
       KC_DB: postgres
@@ -386,6 +396,7 @@ services:
   ##############################
   prometheus:
     image: prom/prometheus:v2.51.1
+    restart: unless-stopped
     command: --config.file=/etc/prometheus/prometheus.yml
     healthcheck:
       test: [ "CMD-SHELL", "nc -z localhost 9090" ]
@@ -401,6 +412,7 @@ services:
       - military-district-net
   grafana:
     image: grafana/grafana:10.3.4
+    restart: unless-stopped
     environment:
       GF_SECURITY_ADMIN_USER: ${MILITARY_DISTRICT_GRAFANA_USER:-user}
       GF_SECURITY_ADMIN_PASSWORD: ${MILITARY_DISTRICT_GRAFANA_PASSWORD:-password}
