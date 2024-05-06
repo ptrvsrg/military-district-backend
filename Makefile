@@ -29,7 +29,7 @@ build:
 	$(MAVEN) clean install spring-boot:repackage
 
 .PHONY: build-images
-build-images:
+build-images: build
 	$(foreach module,$(MS_MODULES),$(call build_ms_module_image,$(module),$(IMAGE_PREFIX)))
 	$(foreach module,$(OTHER_MODULES),$(call build_other_module_image,$(module),$(IMAGE_PREFIX)))
 
@@ -48,14 +48,14 @@ supergraph:
 .PHONY: up
 up:
 ifeq ($(shell [ -e ./.env ] && echo 1 || echo 0), 1)
-	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -p military-district up -d
+	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -p military-district-backend up -d
 else
-	$(DOCKER_COMPOSE) -p military-district up -d
+	$(DOCKER_COMPOSE) -p military-district-backend up -d
 endif
 
 .PHONY: down
 down:
-	$(DOCKER_COMPOSE) -p military-district down
+	$(DOCKER_COMPOSE) -p military-district-backend down --remove-orphans
 
 .PHONY: help
 help:
