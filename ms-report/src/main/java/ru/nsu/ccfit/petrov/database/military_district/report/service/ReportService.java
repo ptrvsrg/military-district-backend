@@ -1,7 +1,6 @@
 package ru.nsu.ccfit.petrov.database.military_district.report.service;
 
 import java.util.List;
-
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -60,7 +60,7 @@ public class ExceptionCatcher {
     var message = getMessage("exception.endpoint-not-found", request);
     log.warn("handleNoHandlerFoundException: {}", message);
     return ResponseEntity.status(NOT_FOUND)
-            .body(ErrorDto.builder().createdAt(Instant.now()).message(message).build());
+        .body(ErrorDto.builder().createdAt(Instant.now()).message(message).build());
   }
 
   @ExceptionHandler(NoResourceFoundException.class)
@@ -68,7 +68,7 @@ public class ExceptionCatcher {
     var message = getMessage("exception.endpoint-not-found", request);
     log.warn("handleNoResourceFoundException: {}", message);
     return ResponseEntity.status(NOT_FOUND)
-            .body(ErrorDto.builder().createdAt(Instant.now()).message(message).build());
+        .body(ErrorDto.builder().createdAt(Instant.now()).message(message).build());
   }
 
   @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
