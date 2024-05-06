@@ -57,19 +57,21 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
             .map(ConstraintViolation::getMessage)
             .reduce((m1, m2) -> m1 + " " + m2)
             .orElse("");
+    log.warn("handleConstraintViolationException: {}", errors);
     return GraphQLError.newError().errorType(BAD_REQUEST).message(errors).build();
   }
 
   private GraphQLError handleBuildingAlreadyExistsException(
       BuildingAlreadyExistsException e, DataFetchingEnvironment env) {
-    return GraphQLError.newError()
-        .errorType(BAD_REQUEST)
-        .message(getMessage("exception.building-already-exists", env))
-        .build();
+    var message = getMessage("exception.building-already-exists", env);
+    log.warn("handleBuildingAlreadyExistsException: {}", message);
+    return GraphQLError.newError().errorType(BAD_REQUEST).message(message).build();
   }
 
   private GraphQLError handleBuildingNotFoundException(
       BuildingNotFoundException e, DataFetchingEnvironment env) {
+    var message = getMessage("exception.building-not-found", env);
+    log.warn("handleBuildingNotFoundException: {}", message);
     return GraphQLError.newError()
         .errorType(NOT_FOUND)
         .message(getMessage("exception.building-not-found", env))
@@ -82,7 +84,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
       return handleException(e, env);
     }
 
-    log.error(e.getMessage());
+    log.error("handleDataIntegrityViolationException", e);
     var sql = ((org.hibernate.exception.ConstraintViolationException) e.getCause()).getSQL();
     return GraphQLError.newError()
         .errorType(getErrorTypeBySql(sql))
@@ -92,6 +94,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleAccessDeniedException(
       AccessDeniedException e, DataFetchingEnvironment env) {
+    log.warn("handleAccessDeniedException: {}", e.getMessage());
     return GraphQLError.newError()
         .errorType(FORBIDDEN)
         .message(getMessage("exception.access-denied", env))
@@ -99,7 +102,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
   }
 
   private GraphQLError handleException(Throwable e, DataFetchingEnvironment env) {
-    log.error(e.getMessage(), e);
+    log.error("handleException", e);
     return GraphQLError.newError()
         .errorType(INTERNAL_ERROR)
         .message(getMessage("exception.internal-server-error", env))

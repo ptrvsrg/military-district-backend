@@ -24,6 +24,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import ru.nsu.ccfit.petrov.database.military_district.report.dto.ErrorDto;
 import ru.nsu.ccfit.petrov.database.military_district.report.exception.ReportNotFoundException;
@@ -44,7 +45,7 @@ public class ExceptionCatcher {
                 Collectors.groupingBy(
                     FieldError::getField,
                     Collectors.mapping(FieldError::getDefaultMessage, Collectors.joining(" "))));
-
+    log.warn("handleMethodArgumentNotValidException: {}", errors);
     return ResponseEntity.status(BAD_REQUEST)
         .body(
             ErrorDto.builder()
@@ -56,76 +57,70 @@ public class ExceptionCatcher {
 
   @ExceptionHandler(NoHandlerFoundException.class)
   public ResponseEntity<ErrorDto> handleNoHandlerFoundException(HttpServletRequest request) {
+    var message = getMessage("exception.endpoint-not-found", request);
+    log.warn("handleNoHandlerFoundException: {}", message);
     return ResponseEntity.status(NOT_FOUND)
-        .body(
-            ErrorDto.builder()
-                .createdAt(Instant.now())
-                .message(getMessage("exception.endpoint-not-found", request))
-                .build());
+            .body(ErrorDto.builder().createdAt(Instant.now()).message(message).build());
+  }
+
+  @ExceptionHandler(NoResourceFoundException.class)
+  public ResponseEntity<ErrorDto> handleNoResourceFoundException(HttpServletRequest request) {
+    var message = getMessage("exception.endpoint-not-found", request);
+    log.warn("handleNoResourceFoundException: {}", message);
+    return ResponseEntity.status(NOT_FOUND)
+            .body(ErrorDto.builder().createdAt(Instant.now()).message(message).build());
   }
 
   @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
   public ResponseEntity<ErrorDto> handleHttpRequestMethodNotSupportedException(
       HttpServletRequest request) {
+    var message = getMessage("exception.method-not-supported", request);
+    log.warn("handleHttpRequestMethodNotSupportedException: {}", message);
     return ResponseEntity.status(METHOD_NOT_ALLOWED)
-        .body(
-            ErrorDto.builder()
-                .createdAt(Instant.now())
-                .message(getMessage("exception.method-not-supported", request))
-                .build());
+        .body(ErrorDto.builder().createdAt(Instant.now()).message(message).build());
   }
 
   @ExceptionHandler(HttpMessageNotReadableException.class)
   public ResponseEntity<ErrorDto> handleHttpMessageNotReadableException(
       HttpServletRequest request) {
+    var message = getMessage("exception.invalid-json-format", request);
+    log.warn("handleHttpMessageNotReadableException: {}", message);
     return ResponseEntity.status(BAD_REQUEST)
-        .body(
-            ErrorDto.builder()
-                .createdAt(Instant.now())
-                .message(getMessage("exception.invalid-json-format", request))
-                .build());
+        .body(ErrorDto.builder().createdAt(Instant.now()).message(message).build());
   }
 
   @ExceptionHandler(MissingServletRequestParameterException.class)
   public ResponseEntity<ErrorDto> handleMissingServletRequestParameterException(
       HttpServletRequest request) {
+    var message = getMessage("exception.missing-request-parameter", request);
+    log.warn("handleMissingServletRequestParameterException: {}", message);
     return ResponseEntity.status(BAD_REQUEST)
-        .body(
-            ErrorDto.builder()
-                .createdAt(Instant.now())
-                .message(getMessage("exception.missing-request-parameter", request))
-                .build());
+        .body(ErrorDto.builder().createdAt(Instant.now()).message(message).build());
   }
 
   @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
   public ResponseEntity<ErrorDto> handleHttpMediaTypeNotSupportedException(
       HttpServletRequest request) {
+    var message = getMessage("exception.unsupported-media-type", request);
+    log.warn("handleHttpMediaTypeNotSupportedException: {}", message);
     return ResponseEntity.status(UNSUPPORTED_MEDIA_TYPE)
-        .body(
-            ErrorDto.builder()
-                .createdAt(Instant.now())
-                .message(getMessage("exception.unsupported-media-type", request))
-                .build());
+        .body(ErrorDto.builder().createdAt(Instant.now()).message(message).build());
   }
 
   @ExceptionHandler(AccessDeniedException.class)
   public ResponseEntity<ErrorDto> handleAccessDeniedException(HttpServletRequest request) {
+    var message = getMessage("exception.access-denied", request);
+    log.warn("handleAccessDeniedException: {}", message);
     return ResponseEntity.status(FORBIDDEN)
-        .body(
-            ErrorDto.builder()
-                .createdAt(Instant.now())
-                .message(getMessage("exception.access-denied", request))
-                .build());
+        .body(ErrorDto.builder().createdAt(Instant.now()).message(message).build());
   }
 
   @ExceptionHandler(ReportNotFoundException.class)
   public ResponseEntity<ErrorDto> handleReportNotFoundException(HttpServletRequest request) {
+    var message = getMessage("exception.report-not-found", request);
+    log.warn("handleReportNotFoundException: {}", message);
     return ResponseEntity.status(NOT_FOUND)
-        .body(
-            ErrorDto.builder()
-                .createdAt(Instant.now())
-                .message(getMessage("exception.report-not-found", request))
-                .build());
+        .body(ErrorDto.builder().createdAt(Instant.now()).message(message).build());
   }
 
   @ExceptionHandler(Exception.class)

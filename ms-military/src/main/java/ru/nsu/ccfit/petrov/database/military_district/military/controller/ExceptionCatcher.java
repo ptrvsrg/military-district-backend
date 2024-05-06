@@ -56,41 +56,34 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleConstraintViolationException(
       ConstraintViolationException e, DataFetchingEnvironment env) {
-    log.warn("handleConstraintViolationException", e);
     var errors =
         e.getConstraintViolations().stream()
             .map(ConstraintViolation::getMessage)
             .reduce((m1, m2) -> m1 + " " + m2)
             .orElse("");
+    log.warn("handleConstraintViolationException: {}", errors);
     return GraphQLError.newError().errorType(BAD_REQUEST).message(errors).build();
   }
 
   private GraphQLError handleMilitaryAlreadyExistsException(
       MilitaryAlreadyExistsException e, DataFetchingEnvironment env) {
-    log.warn("handleMilitaryAlreadyExistsException", e);
-    return GraphQLError.newError()
-        .errorType(BAD_REQUEST)
-        .message(
-            messageSource.getMessage("exception.military-already-exists", null, env.getLocale()))
-        .build();
+    var message = getMessage("exception.military-already-exists", env);
+    log.warn("handleMilitaryAlreadyExistsException: {}", message);
+    return GraphQLError.newError().errorType(BAD_REQUEST).message(message).build();
   }
 
   private GraphQLError handleMilitaryNotFoundException(
       MilitaryNotFoundException e, DataFetchingEnvironment env) {
-    log.warn("handleMilitaryNotFoundException", e);
-    return GraphQLError.newError()
-        .errorType(NOT_FOUND)
-        .message(messageSource.getMessage("exception.military-not-found", null, env.getLocale()))
-        .build();
+    var message = getMessage("exception.military-not-found", env);
+    log.warn("handleMilitaryNotFoundException: {}", message);
+    return GraphQLError.newError().errorType(NOT_FOUND).message(message).build();
   }
 
   private GraphQLError handleRankNotFoundException(
       RankNotFoundException e, DataFetchingEnvironment env) {
-    log.warn("handleRankNotFoundException", e);
-    return GraphQLError.newError()
-        .errorType(NOT_FOUND)
-        .message(getMessage("exception.rank-not-found", env))
-        .build();
+    var message = getMessage("exception.rank-not-found", env);
+    log.warn("handleRankNotFoundException: {}", message);
+    return GraphQLError.newError().errorType(NOT_FOUND).message(message).build();
   }
 
   private GraphQLError handleDataIntegrityViolationException(
@@ -109,7 +102,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleAccessDeniedException(
       AccessDeniedException e, DataFetchingEnvironment env) {
-    log.warn("handleAccessDeniedException", e);
+    log.warn("handleAccessDeniedException: {}", e.getMessage());
     return GraphQLError.newError()
         .errorType(FORBIDDEN)
         .message(getMessage("exception.access-denied", env))

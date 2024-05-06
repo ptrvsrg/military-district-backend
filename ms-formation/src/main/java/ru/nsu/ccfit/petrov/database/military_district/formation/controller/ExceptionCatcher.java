@@ -108,157 +108,125 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleConstraintViolationException(
       ConstraintViolationException e, DataFetchingEnvironment env) {
-    log.warn("handleConstraintViolationException: ", e);
     var errors =
         e.getConstraintViolations().stream()
             .map(ConstraintViolation::getMessage)
             .reduce((m1, m2) -> m1 + " " + m2)
             .orElse("");
+    log.warn("handleConstraintViolationException: {}", errors);
     return GraphQLError.newError().errorType(BAD_REQUEST).message(errors).build();
   }
 
   private GraphQLError handleArmyAlreadyExistsException(
       ArmyAlreadyExistsException e, DataFetchingEnvironment env) {
-    log.warn("handleArmyAlreadyExistsException: ", e);
-    return GraphQLError.newError()
-        .errorType(BAD_REQUEST)
-        .message(getMessage("exception.army-already-exists", env))
-        .build();
+    var message = getMessage("exception.army-already-exists", env);
+    log.warn("handleArmyAlreadyExistsException: {}", message);
+    return GraphQLError.newError().errorType(BAD_REQUEST).message(message).build();
   }
 
   private GraphQLError handleArmyNotFoundException(
       ArmyNotFoundException e, DataFetchingEnvironment env) {
-    log.warn("handleArmyNotFoundException: ", e);
-    return GraphQLError.newError()
-        .errorType(NOT_FOUND)
-        .message(getMessage("exception.army-not-found", env))
-        .build();
+    var message = getMessage("exception.army-not-found", env);
+    log.warn("handleArmyNotFoundException: {}", message);
+    return GraphQLError.newError().errorType(NOT_FOUND).message(message).build();
   }
 
   private GraphQLError handleBrigadeAlreadyExistsException(
       BrigadeAlreadyExistsException e, DataFetchingEnvironment env) {
-    log.warn("handleBrigadeAlreadyExistsException: ", e);
-    return GraphQLError.newError()
-        .errorType(BAD_REQUEST)
-        .message(getMessage("exception.brigade-already-exists", env))
-        .build();
+    var message = getMessage("exception.brigade-already-exists", env);
+    log.warn("handleBrigadeAlreadyExistsException: {}", message);
+    return GraphQLError.newError().errorType(BAD_REQUEST).message(message).build();
   }
 
   private GraphQLError handleBrigadeNotFoundException(
       BrigadeNotFoundException e, DataFetchingEnvironment env) {
-    log.warn("handleBrigadeNotFoundException: ", e);
-    return GraphQLError.newError()
-        .errorType(NOT_FOUND)
-        .message(getMessage("exception.brigade-not-found", env))
-        .build();
+    var message = getMessage("exception.brigade-not-found", env);
+    log.warn("handleBrigadeNotFoundException: {}", message);
+    return GraphQLError.newError().errorType(NOT_FOUND).message(message).build();
   }
 
   private GraphQLError handleCompanyAlreadyExistsException(
       CompanyAlreadyExistsException e, DataFetchingEnvironment env) {
-    log.warn("handleCompanyAlreadyExistsException: ", e);
-    return GraphQLError.newError()
-        .errorType(BAD_REQUEST)
-        .message(getMessage("exception.company-already-exists", env))
-        .build();
+    var message = getMessage("exception.company-already-exists", env);
+    log.warn("handleCompanyAlreadyExistsException: {}", message);
+    return GraphQLError.newError().errorType(BAD_REQUEST).message(message).build();
   }
 
   private GraphQLError handleCompanyNotFoundException(
       CompanyNotFoundException e, DataFetchingEnvironment env) {
-    log.warn("handleCompanyNotFoundException: ", e);
-    return GraphQLError.newError()
-        .errorType(NOT_FOUND)
-        .message(getMessage("exception.company-not-found", env))
-        .build();
+    var message = getMessage("exception.company-not-found", env);
+    log.warn("handleCompanyNotFoundException: {}", message);
+    return GraphQLError.newError().errorType(NOT_FOUND).message(message).build();
   }
 
   private GraphQLError handleCorpsAlreadyExistsException(
       CorpsAlreadyExistsException e, DataFetchingEnvironment env) {
-    log.warn("handleCorpsAlreadyExistsException: ", e);
-    return GraphQLError.newError()
-        .errorType(BAD_REQUEST)
-        .message(getMessage("exception.corps-already-exists", env))
-        .build();
+    var message = getMessage("exception.corps-already-exists", env);
+    log.warn("handleCorpsAlreadyExistsException: {}", message);
+    return GraphQLError.newError().errorType(BAD_REQUEST).message(message).build();
   }
 
   private GraphQLError handleCorpsNotFoundException(
       CorpsNotFoundException e, DataFetchingEnvironment env) {
-    log.warn("handleCorpsNotFoundException: ", e);
-    return GraphQLError.newError()
-        .errorType(NOT_FOUND)
-        .message(getMessage("exception.corps-not-found", env))
-        .build();
+    var message = getMessage("exception.corps-not-found", env);
+    log.warn("handleCorpsNotFoundException: {}", message);
+    return GraphQLError.newError().errorType(NOT_FOUND).message(message).build();
   }
 
   private GraphQLError handleDivisionAlreadyExistsException(
       DivisionAlreadyExistsException e, DataFetchingEnvironment env) {
-    log.warn("handleDivisionAlreadyExistsException: ", e);
-    return GraphQLError.newError()
-        .errorType(BAD_REQUEST)
-        .message(getMessage("exception.division-already-exists", env))
-        .build();
+    var message = getMessage("exception.division-already-exists", env);
+    log.warn("handleDivisionAlreadyExistsException: {}", message);
+    return GraphQLError.newError().errorType(BAD_REQUEST).message(message).build();
   }
 
   private GraphQLError handleDivisionNotFoundException(
       DivisionNotFoundException e, DataFetchingEnvironment env) {
-    log.warn("handleDivisionNotFoundException: ", e);
-    return GraphQLError.newError()
-        .errorType(NOT_FOUND)
-        .message(getMessage("exception.division-not-found", env))
-        .build();
+    var message = getMessage("exception.division-not-found", env);
+    log.warn("handleDivisionNotFoundException: {}", message);
+    return GraphQLError.newError().errorType(NOT_FOUND).message(message).build();
   }
 
   private GraphQLError handlePlatoonAlreadyExistsException(
       PlatoonAlreadyExistsException e, DataFetchingEnvironment env) {
-    log.warn("handlePlatoonAlreadyExistsException: ", e);
-    return GraphQLError.newError()
-        .errorType(BAD_REQUEST)
-        .message(getMessage("exception.platoon-already-exists", env))
-        .build();
+    var message = getMessage("exception.platoon-already-exists", env);
+    log.warn("handlePlatoonAlreadyExistsException: {}", message);
+    return GraphQLError.newError().errorType(BAD_REQUEST).message(message).build();
   }
 
   private GraphQLError handlePlatoonNotFoundException(
       PlatoonNotFoundException e, DataFetchingEnvironment env) {
-    log.warn("handlePlatoonNotFoundException: ", e);
-    return GraphQLError.newError()
-        .errorType(NOT_FOUND)
-        .message(getMessage("exception.platoon-not-found", env))
-        .build();
+    var message = getMessage("exception.platoon-not-found", env);
+    log.warn("handlePlatoonNotFoundException: {}", message);
+    return GraphQLError.newError().errorType(NOT_FOUND).message(message).build();
   }
 
   private GraphQLError handleSquadAlreadyExistsException(
       SquadAlreadyExistsException e, DataFetchingEnvironment env) {
-    log.warn("handleSquadAlreadyExistsException: ", e);
-    return GraphQLError.newError()
-        .errorType(BAD_REQUEST)
-        .message(getMessage("exception.squad-already-exists", env))
-        .build();
+    var message = getMessage("exception.squad-already-exists", env);
+    log.warn("handleSquadAlreadyExistsException: {}", message);
+    return GraphQLError.newError().errorType(BAD_REQUEST).message(message).build();
   }
 
   private GraphQLError handleSquadNotFoundException(
       SquadNotFoundException e, DataFetchingEnvironment env) {
-    log.warn("handleSquadNotFoundException: ", e);
-    return GraphQLError.newError()
-        .errorType(NOT_FOUND)
-        .message(getMessage("exception.squad-not-found", env))
-        .build();
+    var message = getMessage("exception.squad-not-found", env);
+    log.warn("handleSquadNotFoundException: {}", message);
+    return GraphQLError.newError().errorType(NOT_FOUND).message(message).build();
   }
 
   private GraphQLError handleUnitAlreadyExistsException(
       UnitAlreadyExistsException e, DataFetchingEnvironment env) {
-    log.warn("handleUnitAlreadyExistsException: ", e);
-    return GraphQLError.newError()
-        .errorType(BAD_REQUEST)
-        .message(getMessage("exception.unit-already-exists", env))
-        .build();
+    var message = getMessage("exception.unit-already-exists", env);
+    log.warn("handleUnitAlreadyExistsException: {}", message);
+    return GraphQLError.newError().errorType(BAD_REQUEST).message(message).build();
   }
 
   private GraphQLError handleUnitNotFoundException(
       UnitNotFoundException e, DataFetchingEnvironment env) {
-    log.warn("handleUnitNotFoundException: ", e);
-    return GraphQLError.newError()
-        .errorType(NOT_FOUND)
-        .message(getMessage("exception.unit-not-found", env))
-        .build();
+    var message = getMessage("exception.unit-not-found", env);
+    log.warn("handleUnitNotFoundException: {}", message);
+    return GraphQLError.newError().errorType(NOT_FOUND).message(message).build();
   }
 
   private GraphQLError handleDataIntegrityViolationException(
@@ -267,7 +235,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
       return handleException(e, env);
     }
 
-    log.error("handleDataIntegrityViolationException: ", e);
+    log.error("handleDataIntegrityViolationException", e);
     var sql = ((org.hibernate.exception.ConstraintViolationException) e.getCause()).getSQL();
     return GraphQLError.newError()
         .errorType(getErrorTypeBySql(sql))
@@ -277,7 +245,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleAccessDeniedException(
       AccessDeniedException e, DataFetchingEnvironment env) {
-    log.warn("handleAccessDeniedException: ", e);
+    log.warn("handleAccessDeniedException: {}", e.getMessage());
     return GraphQLError.newError()
         .errorType(FORBIDDEN)
         .message(getMessage("exception.access-denied", env))
@@ -285,7 +253,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
   }
 
   private GraphQLError handleException(Throwable e, DataFetchingEnvironment env) {
-    log.error("handleException: ", e);
+    log.error("handleException", e);
     return GraphQLError.newError()
         .errorType(INTERNAL_ERROR)
         .message(getMessage("exception.internal-server-error", env))

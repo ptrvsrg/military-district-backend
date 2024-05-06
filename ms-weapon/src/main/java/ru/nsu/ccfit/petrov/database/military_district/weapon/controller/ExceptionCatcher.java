@@ -45,24 +45,24 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
     if (e instanceof WeaponNotFoundException) {
       return handleWeaponNotFoundException((WeaponNotFoundException) e, env);
     }
-    if (e instanceof WeaponTypeNotFoundException) {
-      return handleWeaponTypeNotFoundException((WeaponTypeNotFoundException) e, env);
-    }
     if (e instanceof WeaponTypeAlreadyExistsException) {
       return handleWeaponTypeAlreadyExistsException((WeaponTypeAlreadyExistsException) e, env);
     }
-    if (e instanceof WeaponCategoryNotFoundException) {
-      return handleWeaponCategoryNotFoundException((WeaponCategoryNotFoundException) e, env);
+    if (e instanceof WeaponTypeNotFoundException) {
+      return handleWeaponTypeNotFoundException((WeaponTypeNotFoundException) e, env);
     }
     if (e instanceof WeaponCategoryAlreadyExistsException) {
       return handleWeaponCategoryAlreadyExistsException(
           (WeaponCategoryAlreadyExistsException) e, env);
     }
-    if (e instanceof DataIntegrityViolationException) {
-      return handleDataIntegrityViolationException((DataIntegrityViolationException) e, env);
+    if (e instanceof WeaponCategoryNotFoundException) {
+      return handleWeaponCategoryNotFoundException((WeaponCategoryNotFoundException) e, env);
     }
     if (e instanceof AccessDeniedException) {
       return handleAccessDeniedException((AccessDeniedException) e, env);
+    }
+    if (e instanceof DataIntegrityViolationException) {
+      return handleDataIntegrityViolationException((DataIntegrityViolationException) e, env);
     }
     return handleException(e, env);
   }
@@ -74,55 +74,50 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
             .map(ConstraintViolation::getMessage)
             .reduce((m1, m2) -> m1 + " " + m2)
             .orElse("");
+    log.warn("handleConstraintViolationException: {}", errors);
     return GraphQLError.newError().errorType(BAD_REQUEST).message(errors).build();
   }
 
   private GraphQLError handleWeaponAlreadyExistsException(
       WeaponAlreadyExistsException e, DataFetchingEnvironment env) {
-    return GraphQLError.newError()
-        .errorType(BAD_REQUEST)
-        .message(getMessage("exception.weapon.already-exists", env))
-        .build();
-  }
-
-  private GraphQLError handleWeaponNotFoundException(
-      WeaponNotFoundException e, DataFetchingEnvironment env) {
-    return GraphQLError.newError()
-        .errorType(NOT_FOUND)
-        .message(getMessage("exception.weapon.not-found", env))
-        .build();
-  }
-
-  private GraphQLError handleWeaponTypeNotFoundException(
-      WeaponTypeNotFoundException e, DataFetchingEnvironment env) {
-    return GraphQLError.newError()
-        .errorType(NOT_FOUND)
-        .message(getMessage("exception.weapon-type.not-found", env))
-        .build();
+    var message = getMessage("exception.combat-weapon.already-exists", env);
+    log.warn("handleWeaponAlreadyExistsException: {}", message);
+    return GraphQLError.newError().errorType(BAD_REQUEST).message(message).build();
   }
 
   private GraphQLError handleWeaponTypeAlreadyExistsException(
       WeaponTypeAlreadyExistsException e, DataFetchingEnvironment env) {
-    return GraphQLError.newError()
-        .errorType(BAD_REQUEST)
-        .message(getMessage("exception.weapon-type.already-exists", env))
-        .build();
+    var message = getMessage("exception.combat-weapon-type.already-exists", env);
+    log.warn("handleWeaponTypeAlreadyExistsException: {}", message);
+    return GraphQLError.newError().errorType(BAD_REQUEST).message(message).build();
   }
 
-  private GraphQLError handleWeaponCategoryNotFoundException(
-      WeaponCategoryNotFoundException e, DataFetchingEnvironment env) {
-    return GraphQLError.newError()
-        .errorType(NOT_FOUND)
-        .message(getMessage("exception.weapon-category.not-found", env))
-        .build();
+  private GraphQLError handleWeaponNotFoundException(
+      WeaponNotFoundException e, DataFetchingEnvironment env) {
+    var message = getMessage("exception.combat-weapon.not-found", env);
+    log.warn("handleWeaponNotFoundException: {}", message);
+    return GraphQLError.newError().errorType(NOT_FOUND).message(message).build();
+  }
+
+  private GraphQLError handleWeaponTypeNotFoundException(
+      WeaponTypeNotFoundException e, DataFetchingEnvironment env) {
+    var message = getMessage("exception.combat-weapon-type.not-found", env);
+    log.warn("handleWeaponTypeNotFoundException: {}", message);
+    return GraphQLError.newError().errorType(NOT_FOUND).message(message).build();
   }
 
   private GraphQLError handleWeaponCategoryAlreadyExistsException(
       WeaponCategoryAlreadyExistsException e, DataFetchingEnvironment env) {
-    return GraphQLError.newError()
-        .errorType(BAD_REQUEST)
-        .message(getMessage("exception.weapon-category.already-exists", env))
-        .build();
+    var message = getMessage("exception.combat-weapon-category.already-exists", env);
+    log.warn("handleWeaponCategoryAlreadyExistsException: {}", message);
+    return GraphQLError.newError().errorType(BAD_REQUEST).message(message).build();
+  }
+
+  private GraphQLError handleWeaponCategoryNotFoundException(
+      WeaponCategoryNotFoundException e, DataFetchingEnvironment env) {
+    var message = getMessage("exception.combat-weapon-category.not-found", env);
+    log.warn("handleWeaponCategoryNotFoundException: {}", message);
+    return GraphQLError.newError().errorType(NOT_FOUND).message(message).build();
   }
 
   private GraphQLError handleDataIntegrityViolationException(
@@ -131,7 +126,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
       return handleException(e, env);
     }
 
-    log.error(e.getMessage());
+    log.error("handleDataIntegrityViolationException", e);
     var sql = ((org.hibernate.exception.ConstraintViolationException) e.getCause()).getSQL();
     return GraphQLError.newError()
         .errorType(getErrorTypeBySql(sql))
@@ -141,6 +136,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
 
   private GraphQLError handleAccessDeniedException(
       AccessDeniedException e, DataFetchingEnvironment env) {
+    log.warn("handleAccessDeniedException: {}", e.getMessage());
     return GraphQLError.newError()
         .errorType(FORBIDDEN)
         .message(getMessage("exception.access-denied", env))
@@ -148,7 +144,7 @@ public class ExceptionCatcher extends DataFetcherExceptionResolverAdapter {
   }
 
   private GraphQLError handleException(Throwable e, DataFetchingEnvironment env) {
-    log.error(e.getMessage(), e);
+    log.error("handleException", e);
     return GraphQLError.newError()
         .errorType(INTERNAL_ERROR)
         .message(getMessage("exception.internal-server-error", env))
