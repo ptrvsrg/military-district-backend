@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS brigades_units
 (
-    brigade_id INTEGER NOT NULL REFERENCES brigades (id) ON DELETE CASCADE,
-    unit_id    INTEGER NOT NULL REFERENCES units (id) ON DELETE CASCADE,
+    brigade_id INTEGER NOT NULL REFERENCES brigades (id) ON DELETE CASCADE ON UPDATE CASCADE,
+    unit_id    INTEGER NOT NULL REFERENCES units (id) ON DELETE CASCADE ON UPDATE CASCADE,
     PRIMARY KEY (brigade_id, unit_id)
 );
 

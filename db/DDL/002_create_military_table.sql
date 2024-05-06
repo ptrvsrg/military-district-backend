@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS militaries
     last_name   VARCHAR(255) NOT NULL,
     middle_name VARCHAR(255),
     birth_date  DATE         NOT NULL,
-    rank_id     INTEGER      REFERENCES ranks (id) ON DELETE SET NULL,
+    rank_id     INTEGER REFERENCES ranks (id) ON DELETE SET NULL ON UPDATE CASCADE,
     created_at  TIMESTAMPTZ  NOT NULL,
     updated_at  TIMESTAMPTZ  NOT NULL,
     unit_name   VARCHAR(255)

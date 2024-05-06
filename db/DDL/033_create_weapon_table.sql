@@ -2,8 +2,8 @@ CREATE TABLE IF NOT EXISTS weapons
 (
     id            SERIAL PRIMARY KEY,
     serial_number VARCHAR(255) NOT NULL UNIQUE,
-    type_id       INTEGER      REFERENCES weapon_types (id) ON DELETE SET NULL,
-    unit_name     VARCHAR(255) REFERENCES units (name) ON DELETE SET NULL,
+    type_id       INTEGER REFERENCES weapon_types (id) ON DELETE SET NULL ON UPDATE CASCADE,
+    unit_name     VARCHAR(255) REFERENCES units (name) ON DELETE SET NULL ON UPDATE CASCADE,
     created_at    TIMESTAMPTZ  NOT NULL,
     updated_at    TIMESTAMPTZ  NOT NULL
 );

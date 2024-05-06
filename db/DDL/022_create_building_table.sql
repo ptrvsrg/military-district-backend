@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS buildings
     name       VARCHAR(255) NOT NULL,
     coordinate COORDINATE,
     address    ADDRESS,
-    unit_name  VARCHAR(255) REFERENCES units (name) ON DELETE SET NULL,
+    unit_name  VARCHAR(255) REFERENCES units (name) ON DELETE SET NULL ON UPDATE CASCADE,
     created_at TIMESTAMPTZ  NOT NULL,
     updated_at TIMESTAMPTZ  NOT NULL,
     UNIQUE (name, unit_name)
