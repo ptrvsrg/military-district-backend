@@ -19,23 +19,24 @@ public class RankCategoryService implements GraphQLService {
 
   private final RankCategoryRepository rankCategoryRepository;
 
-  @Cacheable("rankCategories")
+  @Cacheable(value = "rankCategories", sync = true)
   public List<RankCategory> getAll() {
     log.info("Get all rank categories");
     return rankCategoryRepository.findAll();
   }
 
-  @Cacheable("rankCategoryByName")
+  @Cacheable(value = "rankCategoryByName", key = "#a0", sync = true)
   public RankCategory getByName(@NonNull String name) {
     log.info("Get rank category by name: name={}", name);
     return rankCategoryRepository.findByName(name).orElse(null);
   }
 
   @Override
-  public Object resolveReference(@NonNull Map<String, Object> reference) {
+  @Cacheable(value = "reference", key = "#a0", sync = true)
+  public RankCategory resolveReference(@NonNull Map<String, Object> reference) {
     log.info("Resolve reference: reference={}", reference);
     if (reference.get("name") instanceof String name) {
-      return getByName(name);
+      return rankCategoryRepository.findByName(name).orElse(null);
     }
     return null;
   }

@@ -1,6 +1,8 @@
 package ru.nsu.ccfit.petrov.database.military_district.report.service;
 
 import java.util.List;
+
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -21,7 +23,7 @@ public class ReportService {
   private final ReportDao reportDao;
   private final ReportMapper reportMapper;
 
-  @Cacheable("reports")
+  @Cacheable(value = "reports", key = "#a0 + '_' + #a1", sync = true)
   public List<ReportOutputDto> getReports(Integer page, Integer pageSize) {
     log.info("Get reports: page={}, pageSize={}", page, pageSize);
     if (ObjectUtils.anyNull(page, pageSize)) {
@@ -30,21 +32,21 @@ public class ReportService {
     return reportDao.findAll(page, pageSize).stream().map(reportMapper::toOutputDto).toList();
   }
 
-  @Cacheable("report_count")
+  @Cacheable(value = "report_count", sync = true)
   public long getReportCount() {
     log.info("Get report count");
     return reportDao.count();
   }
 
-  @Cacheable("report")
-  public ReportOutputDto getReport(String name) {
+  @Cacheable(value = "report", key = "#a0", sync = true)
+  public ReportOutputDto getReport(@NonNull String name) {
     log.info("Get report: name={}", name);
     var report = reportDao.findByName(name).orElseThrow(ReportNotFoundException::new);
     return reportMapper.toOutputDto(report);
   }
 
-  @Cacheable("build_report")
-  public ReportBuildOutputDto buildReport(ReportBuildInputDto inputDto) {
+  @Cacheable(value = "build_report", key = "#a0", sync = true)
+  public ReportBuildOutputDto buildReport(@NonNull ReportBuildInputDto inputDto) {
     log.info("Build report: input={}", inputDto);
     var report =
         reportDao

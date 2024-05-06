@@ -10,7 +10,10 @@ import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.ccfit.petrov.database.military_district.formation.dto.Pagination;
@@ -43,7 +46,7 @@ public class UnitService implements GraphQLService {
   private final CompanyRepository companyRepository;
   private final UnitMapper unitMapper;
 
-  @Cacheable("units")
+  @Cacheable(value = "units", key = "#a0 + '_' + #a1 + '_' + #a2", sync = true)
   public List<Unit> getAll(UnitFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info("Get all units: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
     var sort = generateSort(sorts, availableSortFields);
@@ -52,20 +55,26 @@ public class UnitService implements GraphQLService {
     return unitRepository.findAll(spec, pageable, sort);
   }
 
-  @Cacheable("unitCount")
+  @Cacheable(value = "unitCount", key = "'filter_' + #a0", sync = true)
   public long getAllCount(UnitFilter filter) {
     log.info("Get all units count: filter={}", filter);
     var spec = generateUnitSpec(filter);
     return unitRepository.count(spec);
   }
 
-  @Cacheable("unitByName")
+  @Cacheable(value = "unitByName", key = "#a0", sync = true)
   public Unit getByName(@NonNull String name) {
     log.info("Get unit by name: name={}", name);
     return unitRepository.findByName(name).orElse(null);
   }
 
   @Transactional
+  @Caching(
+      put = @CachePut(value = "unitByName", key = "#a0.name"),
+      evict = {
+        @CacheEvict(value = "units", allEntries = true),
+        @CacheEvict(value = "unitCount", allEntries = true)
+      })
   public Unit create(@Valid @NonNull UnitInput unitInput) {
     log.info("Create unit: input={}", unitInput);
     if (unitRepository.existsByName(unitInput.getName())) {
@@ -82,6 +91,12 @@ public class UnitService implements GraphQLService {
   }
 
   @Transactional
+  @Caching(
+      put = @CachePut(value = "unitByName", key = "#a0"),
+      evict = {
+        @CacheEvict(value = "units", allEntries = true),
+        @CacheEvict(value = "unitCount", allEntries = true)
+      })
   public Unit update(@NonNull String name, @Valid @NonNull UnitInput unitInput) {
     log.info("Update unit: name={}, input={}", name, unitInput);
     var unit = unitRepository.findByName(name).orElseThrow(UnitNotFoundException::new);
@@ -99,13 +114,20 @@ public class UnitService implements GraphQLService {
   }
 
   @Transactional
-  public long delete(String name) {
+  @Caching(
+      evict = {
+        @CacheEvict(value = "units", allEntries = true),
+        @CacheEvict(value = "unitCount", allEntries = true),
+        @CacheEvict(value = "unitByName", key = "#a0")
+      })
+  public long delete(@NonNull String name) {
     log.info("Delete unit: name={}", name);
     return unitRepository.deleteByName(name);
   }
 
   @Override
-  public Object resolveReference(@NonNull Map<String, Object> reference) {
+  @Cacheable(value = "reference", key = "#a0", sync = true)
+  public Unit resolveReference(@NonNull Map<String, Object> reference) {
     log.info("Resolve reference: reference={}", reference);
     if (reference.get("name") instanceof String name) {
       return getByName(name);

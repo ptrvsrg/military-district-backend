@@ -10,7 +10,10 @@ import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.ccfit.petrov.database.military_district.formation.dto.DivisionFilter;
@@ -38,7 +41,7 @@ public class DivisionService implements GraphQLService {
   private final UnitRepository unitRepository;
   private final DivisionMapper divisionMapper;
 
-  @Cacheable("divisions")
+  @Cacheable(value = "divisions", key = "#a0 + '_' + #a1 + '_' + #a2", sync = true)
   public List<Division> getAll(DivisionFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info("Get all divisions: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
     var sort = generateSort(sorts, availableSortFields);
@@ -47,20 +50,26 @@ public class DivisionService implements GraphQLService {
     return divisionRepository.findAll(spec, pageable, sort);
   }
 
-  @Cacheable("divisionCount")
+  @Cacheable(value = "divisionCount", key = "'filter_' + #a0", sync = true)
   public long getAllCount(DivisionFilter filter) {
     log.info("Get all divisions count: filter={}", filter);
     var spec = generateDivisionSpec(filter);
     return divisionRepository.count(spec);
   }
 
-  @Cacheable("divisionByName")
+  @Cacheable(value = "divisionByName", key = "#a0", sync = true)
   public Division getByName(@NonNull String name) {
     log.info("Get division by name: name={}", name);
     return divisionRepository.findByName(name).orElse(null);
   }
 
   @Transactional
+  @Caching(
+      put = @CachePut(value = "divisionByName", key = "#a0.name"),
+      evict = {
+        @CacheEvict(value = "divisions", allEntries = true),
+        @CacheEvict(value = "divisionCount", allEntries = true)
+      })
   public Division create(@Valid @NonNull DivisionInput divisionInput) {
     log.info("Create new division: input={}", divisionInput);
     if (divisionRepository.existsByName(divisionInput.getName())) {
@@ -75,6 +84,12 @@ public class DivisionService implements GraphQLService {
   }
 
   @Transactional
+  @Caching(
+      put = @CachePut(value = "divisionByName", key = "#a0"),
+      evict = {
+        @CacheEvict(value = "divisions", allEntries = true),
+        @CacheEvict(value = "divisionCount", allEntries = true)
+      })
   public Division update(@NonNull String name, @Valid @NonNull DivisionInput divisionInput) {
     log.info("Update division: name={}, input={}", name, divisionInput);
     var division = divisionRepository.findByName(name).orElseThrow(DivisionNotFoundException::new);
@@ -91,13 +106,20 @@ public class DivisionService implements GraphQLService {
   }
 
   @Transactional
+  @Caching(
+      evict = {
+        @CacheEvict(value = "divisions", allEntries = true),
+        @CacheEvict(value = "divisionCount", allEntries = true),
+        @CacheEvict(value = "divisionByName", key = "#a0")
+      })
   public long delete(@NonNull String name) {
     log.info("Delete division: name={}", name);
     return divisionRepository.deleteByName(name);
   }
 
   @Override
-  public Object resolveReference(@NonNull Map<String, Object> reference) {
+  @Cacheable(value = "reference", key = "#a0", sync = true)
+  public Division resolveReference(@NonNull Map<String, Object> reference) {
     log.info("Resolve reference: reference={}", reference);
     if (reference.get("name") instanceof String name) {
       return getByName(name);

@@ -22,24 +22,25 @@ public class AttributeDefinitionService implements GraphQLService {
 
   private final AttributeRepository attributeRepository;
 
-  @Cacheable("attributeDefinitions")
+  @Cacheable(value = "attributeDefinitions", key = "'filter_' + #a0", sync = true)
   public List<Attribute> getAll(AttributeDefinitionFilter filter) {
     log.info("Get all military attribute definitions: filter={}", filter);
     return attributeRepository.findAll(generateAttributeDefinitionSpec(filter));
   }
 
-  @Cacheable("attributeDefinitionByRankAndName")
+  @Cacheable(value = "attributeDefinitionByRankAndName", key = "#a0 + '_' + #a1", sync = true)
   public Attribute getByRankAndName(@NonNull String name, @NonNull String rank) {
     log.info("Get military attribute definition: name={}, rank={}", name, rank);
     return attributeRepository.findByNameAndRank_Name(name, rank).orElse(null);
   }
 
   @Override
-  public Object resolveReference(@NonNull Map<String, Object> reference) {
+  @Cacheable(value = "reference", key = "#a0", sync = true)
+  public Attribute resolveReference(@NonNull Map<String, Object> reference) {
     log.info("Resolve reference: reference={}", reference);
     if (reference.get("rank") instanceof String rank
         && reference.get("name") instanceof String name) {
-      return getByRankAndName(name, rank);
+      return attributeRepository.findByNameAndRank_Name(name, rank).orElse(null);
     }
     return null;
   }

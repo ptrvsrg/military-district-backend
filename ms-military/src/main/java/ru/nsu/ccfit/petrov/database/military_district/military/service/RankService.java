@@ -22,23 +22,24 @@ public class RankService implements GraphQLService {
 
   private final RankRepository rankRepository;
 
-  @Cacheable("ranks")
+  @Cacheable(value = "ranks", key = "'filter_' + #a0", sync = true)
   public List<Rank> getAll(RankFilter filter) {
     log.info("Get all ranks: filter={}", filter);
     return rankRepository.findAll(generateRankSpec(filter));
   }
 
-  @Cacheable("rankByName")
+  @Cacheable(value = "rankByName", key = "#a0", sync = true)
   public Rank getByName(@NonNull String name) {
     log.info("Get rank by name: name={}", name);
     return rankRepository.findByName(name).orElse(null);
   }
 
   @Override
-  public Object resolveReference(@NonNull Map<String, Object> reference) {
+  @Cacheable(value = "reference", key = "#a0", sync = true)
+  public Rank resolveReference(@NonNull Map<String, Object> reference) {
     log.info("Resolve reference: reference={}", reference);
     if (reference.get("name") instanceof String name) {
-      return getByName(name);
+      return rankRepository.findByName(name).orElse(null);
     }
     return null;
   }

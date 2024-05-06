@@ -12,7 +12,10 @@ import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.ccfit.petrov.database.military_district.military.dto.AttributeInput;
@@ -48,7 +51,7 @@ public class MilitaryService implements GraphQLService {
   private final MilitaryMapper militaryMapper;
   private final AttributeMapper attributeMapper;
 
-  @Cacheable("militaries")
+  @Cacheable(value = "militaries", key = "#a0 + '_' + #a1 + '_' + #a2", sync = true)
   public List<Military> getAll(MilitaryFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info("Get all militaries: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
     var sort = generateSort(sorts, availableSortFields);
@@ -57,20 +60,26 @@ public class MilitaryService implements GraphQLService {
     return militaryRepository.findAll(spec, pageable, sort);
   }
 
-  @Cacheable("militaryCount")
+  @Cacheable(value = "militaryCount", key = "'filter_' + #a0", sync = true)
   public long getAllCount(MilitaryFilter filter) {
     log.info("Get all military count: filter={}", filter);
     var spec = generateMilitarySpec(filter);
     return militaryRepository.count(spec);
   }
 
-  @Cacheable("militaryByMbn")
+  @Cacheable(value = "militaryByMbn", key = "#a0", sync = true)
   public Military getByMbn(@NonNull String mbn) {
     log.info("Get military: mbn={}", mbn);
     return militaryRepository.findByMbn(mbn).orElse(null);
   }
 
   @Transactional
+  @Caching(
+      put = @CachePut(value = "militaryByMbn", key = "#a0.mbn"),
+      evict = {
+        @CacheEvict(value = "militaries", allEntries = true),
+        @CacheEvict(value = "militaryCount", allEntries = true)
+      })
   public Military create(@Valid @NonNull MilitaryInput militaryInput) {
     log.info("Create military: input={}", militaryInput);
     if (militaryRepository.existsByMbn(militaryInput.getMbn())) {
@@ -94,6 +103,12 @@ public class MilitaryService implements GraphQLService {
   }
 
   @Transactional
+  @Caching(
+      put = @CachePut(value = "militaryByMbn", key = "#a0"),
+      evict = {
+        @CacheEvict(value = "militaries", allEntries = true),
+        @CacheEvict(value = "militaryCount", allEntries = true)
+      })
   public Military update(@NonNull String mbn, @Valid @NonNull MilitaryInput militaryInput) {
     log.info("Update military: mbn={}, input={}", mbn, militaryInput);
     var military = militaryRepository.findByMbn(mbn).orElseThrow(MilitaryNotFoundException::new);
@@ -116,16 +131,23 @@ public class MilitaryService implements GraphQLService {
   }
 
   @Transactional
+  @Caching(
+      evict = {
+        @CacheEvict(value = "militaries", allEntries = true),
+        @CacheEvict(value = "militaryCount", allEntries = true),
+        @CacheEvict(value = "militaryByMbn", key = "#a0")
+      })
   public long delete(@NonNull String mbn) {
     log.info("Delete military: mbn={}", mbn);
     return militaryRepository.deleteByMbn(mbn);
   }
 
   @Override
-  public Object resolveReference(@NonNull Map<String, Object> reference) {
+  @Cacheable(value = "reference", key = "#a0", sync = true)
+  public Military resolveReference(@NonNull Map<String, Object> reference) {
     log.info("Resolve reference: reference={}", reference);
     if (reference.get("mbn") instanceof String mbn) {
-      return getByMbn(mbn);
+      return militaryRepository.findByMbn(mbn).orElse(null);
     }
     return null;
   }

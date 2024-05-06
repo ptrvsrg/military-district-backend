@@ -10,7 +10,10 @@ import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.ccfit.petrov.database.military_district.formation.dto.Pagination;
@@ -38,7 +41,7 @@ public class SquadService implements GraphQLService {
   private final PlatoonRepository platoonRepository;
   private final SquadMapper squadMapper;
 
-  @Cacheable("squads")
+  @Cacheable(value = "squads", key = "#a0 + '_' + #a1 + '_' + #a2", sync = true)
   public List<Squad> getAll(SquadFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info("Get all squads: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
     var sort = generateSort(sorts, availableSortFields);
@@ -47,20 +50,26 @@ public class SquadService implements GraphQLService {
     return squadRepository.findAll(spec, pageable, sort);
   }
 
-  @Cacheable("squadCount")
+  @Cacheable(value = "squadCount", key = "'filter_' + #a0", sync = true)
   public long getAllCount(SquadFilter filter) {
     log.info("Get all squads count: filter={}", filter);
     var spec = generateSquadSpec(filter);
     return squadRepository.count(spec);
   }
 
-  @Cacheable("squadByName")
+  @Cacheable(value = "squadByName", key = "#a0", sync = true)
   public Squad getByName(@NonNull String name) {
     log.info("Get squad by name: name={}", name);
     return squadRepository.findByName(name).orElse(null);
   }
 
   @Transactional
+  @Caching(
+      put = @CachePut(value = "squadByName", key = "#a0.name"),
+      evict = {
+        @CacheEvict(value = "squads", allEntries = true),
+        @CacheEvict(value = "squadCount", allEntries = true)
+      })
   public Squad create(@Valid @NonNull SquadInput squadInput) {
     log.info("Create squad: input={}", squadInput);
     if (squadRepository.existsByName(squadInput.getName())) {
@@ -77,6 +86,12 @@ public class SquadService implements GraphQLService {
   }
 
   @Transactional
+  @Caching(
+      put = @CachePut(value = "squadByName", key = "#a0"),
+      evict = {
+        @CacheEvict(value = "squads", allEntries = true),
+        @CacheEvict(value = "squadCount", allEntries = true)
+      })
   public Squad update(@NonNull String name, @Valid @NonNull SquadInput squadInput) {
     log.info("Update squad: name={}, input={}", name, squadInput);
     var squad = squadRepository.findByName(name).orElseThrow(SquadNotFoundException::new);
@@ -94,13 +109,20 @@ public class SquadService implements GraphQLService {
   }
 
   @Transactional
+  @Caching(
+      evict = {
+        @CacheEvict(value = "squads", allEntries = true),
+        @CacheEvict(value = "squadCount", allEntries = true),
+        @CacheEvict(value = "squadByName", key = "#a0")
+      })
   public long delete(@NonNull String name) {
     log.info("Delete squad: name={}", name);
     return squadRepository.deleteByName(name);
   }
 
   @Override
-  public Object resolveReference(@NonNull Map<String, Object> reference) {
+  @Cacheable(value = "reference", key = "#a0", sync = true)
+  public Squad resolveReference(@NonNull Map<String, Object> reference) {
     log.info("Resolve reference: reference={}", reference);
     if (reference.get("name") instanceof String name) {
       return getByName(name);

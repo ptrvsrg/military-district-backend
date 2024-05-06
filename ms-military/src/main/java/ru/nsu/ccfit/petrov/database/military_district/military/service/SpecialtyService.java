@@ -19,23 +19,24 @@ public class SpecialtyService implements GraphQLService {
 
   private final SpecialtyRepository specialtyRepository;
 
-  @Cacheable("specialties")
+  @Cacheable(value = "specialties", sync = true)
   public List<Specialty> getAll() {
     log.info("Get all specialities");
     return specialtyRepository.findAll();
   }
 
-  @Cacheable("specialtyByCode")
-  public Specialty getByCode(String code) {
+  @Cacheable(value = "specialtyByCode", key = "#a0", sync = true)
+  public Specialty getByCode(@NonNull String code) {
     log.info("Get specialty by code: code={}", code);
     return specialtyRepository.findByCode(code).orElse(null);
   }
 
   @Override
-  public Object resolveReference(@NonNull Map<String, Object> reference) {
+  @Cacheable(value = "reference", key = "#a0", sync = true)
+  public Specialty resolveReference(@NonNull Map<String, Object> reference) {
     log.info("Resolve reference: reference={}", reference);
     if (reference.get("code") instanceof String code) {
-      return getByCode(code);
+      return specialtyRepository.findByCode(code).orElse(null);
     }
     return null;
   }

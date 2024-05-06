@@ -10,7 +10,10 @@ import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.ccfit.petrov.database.military_district.equipment.dto.CombatEquipmentFilter;
@@ -38,7 +41,7 @@ public class CombatEquipmentService implements GraphQLService {
   private final CombatEquipmentTypeRepository combatEquipmentTypeRepository;
   private final CombatEquipmentMapper combatEquipmentMapper;
 
-  @Cacheable("combatEquipments")
+  @Cacheable(value = "combatEquipments", key = "#a0 + '_' + #a1 + '_' + #a2", sync = true)
   public List<CombatEquipment> getAll(
       CombatEquipmentFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info(
@@ -49,20 +52,26 @@ public class CombatEquipmentService implements GraphQLService {
     return combatEquipmentRepository.findAll(spec, pageable, sort);
   }
 
-  @Cacheable("combatEquipmentCount")
+  @Cacheable(value = "combatEquipmentCount", key = "'filter_' + #a0", sync = true)
   public long getAllCount(CombatEquipmentFilter filter) {
     log.info("Get all combat equipments count: filter={}", filter);
     var spec = generateCombatEquipmentSpec(filter);
     return combatEquipmentRepository.count(spec);
   }
 
-  @Cacheable("combatEquipmentBySerialNumber")
+  @Cacheable(value = "combatEquipmentBySerialNumber", key = "#a0", sync = true)
   public CombatEquipment getBySerialNumber(@NonNull String serialNumber) {
     log.info("Get combat equipment by serial number: serialNumber={}", serialNumber);
     return combatEquipmentRepository.findBySerialNumber(serialNumber).orElse(null);
   }
 
   @Transactional
+  @Caching(
+      put = @CachePut(value = "combatEquipmentBySerialNumber", key = "#a0.serialNumber"),
+      evict = {
+        @CacheEvict(value = "combatEquipments", allEntries = true),
+        @CacheEvict(value = "combatEquipmentCount", allEntries = true)
+      })
   public CombatEquipment create(@Valid @NonNull CombatEquipmentInput combatEquipmentInput) {
     log.info("Create combat equipment: input={}", combatEquipmentInput);
     if (combatEquipmentRepository.existsBySerialNumber(combatEquipmentInput.getSerialNumber())) {
@@ -81,6 +90,12 @@ public class CombatEquipmentService implements GraphQLService {
   }
 
   @Transactional
+  @Caching(
+      put = @CachePut(value = "combatEquipmentBySerialNumber", key = "#a0"),
+      evict = {
+        @CacheEvict(value = "combatEquipments", allEntries = true),
+        @CacheEvict(value = "combatEquipmentCount", allEntries = true)
+      })
   public CombatEquipment update(
       @NonNull String serialNumber, @Valid @NonNull CombatEquipmentInput combatEquipmentInput) {
     log.info(
@@ -102,16 +117,23 @@ public class CombatEquipmentService implements GraphQLService {
   }
 
   @Transactional
+  @Caching(
+      evict = {
+        @CacheEvict(value = "combatEquipments", allEntries = true),
+        @CacheEvict(value = "combatEquipmentCount", allEntries = true),
+        @CacheEvict(value = "combatEquipmentBySerialNumber", key = "#a0")
+      })
   public long delete(@NonNull String serialNumber) {
     log.info("Delete combat equipment: serialNumber={}", serialNumber);
     return combatEquipmentRepository.deleteBySerialNumber(serialNumber);
   }
 
   @Override
-  public Object resolveReference(@NonNull Map<String, Object> reference) {
+  @Cacheable(value = "reference", key = "#a0", sync = true)
+  public CombatEquipment resolveReference(@NonNull Map<String, Object> reference) {
     log.info("Resolve combat equipment reference: reference={}", reference);
     if (reference.get("serialNumber") instanceof String serialNumber) {
-      return getBySerialNumber(serialNumber);
+      return combatEquipmentRepository.findBySerialNumber(serialNumber).orElse(null);
     }
     return null;
   }

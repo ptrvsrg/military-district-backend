@@ -10,7 +10,10 @@ import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.ccfit.petrov.database.military_district.formation.dto.CompanyFilter;
@@ -40,7 +43,7 @@ public class CompanyService implements GraphQLService {
   private final UnitRepository unitRepository;
   private final CompanyMapper companyMapper;
 
-  @Cacheable("companies")
+  @Cacheable(value = "companies", key = "#a0 + '_' + #a1 + '_' + #a2", sync = true)
   public List<Company> getAll(CompanyFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info("Get all companies: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
     var sort = generateSort(sorts, availableSortFields);
@@ -49,20 +52,26 @@ public class CompanyService implements GraphQLService {
     return companyRepository.findAll(spec, pageable, sort);
   }
 
-  @Cacheable("companyCount")
+  @Cacheable(value = "companyCount", key = "'filter_' + #a0", sync = true)
   public long getAllCount(CompanyFilter filter) {
     log.info("Get all companies count: filter={}", filter);
     var spec = generateCompanySpec(filter);
     return companyRepository.count(spec);
   }
 
-  @Cacheable("companyByName")
+  @Cacheable(value = "companyByName", key = "#a0", sync = true)
   public Company getByName(@NonNull String name) {
     log.info("Get company by name: name={}", name);
     return companyRepository.findByName(name).orElse(null);
   }
 
   @Transactional
+  @Caching(
+      put = @CachePut(value = "companyByName", key = "#a0.name"),
+      evict = {
+        @CacheEvict(value = "companies", allEntries = true),
+        @CacheEvict(value = "companyCount", allEntries = true)
+      })
   public Company create(@Valid @NonNull CompanyInput companyInput) {
     log.info("Create company: input={}", companyInput);
     if (companyRepository.existsByName(companyInput.getName())) {
@@ -78,6 +87,12 @@ public class CompanyService implements GraphQLService {
   }
 
   @Transactional
+  @Caching(
+      put = @CachePut(value = "companyByName", key = "#a0"),
+      evict = {
+        @CacheEvict(value = "companies", allEntries = true),
+        @CacheEvict(value = "companyCount", allEntries = true)
+      })
   public Company update(@NonNull String name, @Valid @NonNull CompanyInput companyInput) {
     log.info("Update company: name={}, input={}", name, companyInput);
     var company = companyRepository.findByName(name).orElseThrow(CompanyNotFoundException::new);
@@ -95,13 +110,20 @@ public class CompanyService implements GraphQLService {
   }
 
   @Transactional
+  @Caching(
+      evict = {
+        @CacheEvict(value = "companies", allEntries = true),
+        @CacheEvict(value = "companyCount", allEntries = true),
+        @CacheEvict(value = "companyByName", key = "#a0")
+      })
   public long delete(@NonNull String name) {
     log.info("Delete company: name={}", name);
     return companyRepository.deleteByName(name);
   }
 
   @Override
-  public Object resolveReference(@NonNull Map<String, Object> reference) {
+  @Cacheable(value = "reference", key = "#a0", sync = true)
+  public Company resolveReference(@NonNull Map<String, Object> reference) {
     log.info("Resolve reference: reference={}", reference);
     if (reference.get("name") instanceof String name) {
       return getByName(name);

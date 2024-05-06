@@ -10,7 +10,10 @@ import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.ccfit.petrov.database.military_district.formation.dto.ArmyFilter;
@@ -40,7 +43,7 @@ public class ArmyService implements GraphQLService {
   private final DivisionRepository divisionRepository;
   private final ArmyMapper armyMapper;
 
-  @Cacheable("armies")
+  @Cacheable(value = "armies", key = "#a0 + '_' + #a1 + '_' + #a2", sync = true)
   public List<Army> getAll(ArmyFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info("Get all armies: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
     var sort = generateSort(sorts, availableSortFields);
@@ -49,20 +52,26 @@ public class ArmyService implements GraphQLService {
     return armyRepository.findAll(spec, pageable, sort);
   }
 
-  @Cacheable("armyCount")
+  @Cacheable(value = "armyCount", key = "'filter_' + #a0", sync = true)
   public long getAllCount(ArmyFilter filter) {
     log.info("Get all armies count: filter={}", filter);
     var spec = generateArmySpec(filter);
     return armyRepository.count(spec);
   }
 
-  @Cacheable("armyByName")
+  @Cacheable(value = "armyByName", key = "#a0", sync = true)
   public Army getByName(@NonNull String name) {
     log.info("Get army by name: name={}", name);
     return armyRepository.findByName(name).orElse(null);
   }
 
   @Transactional
+  @Caching(
+      put = @CachePut(value = "armyByName", key = "#a0.name"),
+      evict = {
+        @CacheEvict(value = "armies", allEntries = true),
+        @CacheEvict(value = "armyCount", allEntries = true)
+      })
   public Army create(@Valid @NonNull ArmyInput armyInput) {
     log.info("Create army: input={}", armyInput);
     if (armyRepository.existsByName(armyInput.getName())) {
@@ -78,6 +87,12 @@ public class ArmyService implements GraphQLService {
   }
 
   @Transactional
+  @Caching(
+      put = @CachePut(value = "armyByName", key = "#a0"),
+      evict = {
+        @CacheEvict(value = "armies", allEntries = true),
+        @CacheEvict(value = "armyCount", allEntries = true)
+      })
   public Army update(@NonNull String name, @Valid @NonNull ArmyInput armyInput) {
     log.info("Update army: name={}, input={}", name, armyInput);
     var army = armyRepository.findByName(name).orElseThrow(ArmyNotFoundException::new);
@@ -94,16 +109,23 @@ public class ArmyService implements GraphQLService {
   }
 
   @Transactional
+  @Caching(
+      evict = {
+        @CacheEvict(value = "armies", allEntries = true),
+        @CacheEvict(value = "armyCount", allEntries = true),
+        @CacheEvict(value = "armyByName", key = "#a0")
+      })
   public long delete(@NonNull String name) {
     log.info("Delete army: name={}", name);
     return armyRepository.deleteByName(name);
   }
 
   @Override
-  public Object resolveReference(@NonNull Map<String, Object> reference) {
+  @Cacheable(value = "reference", key = "#a0", sync = true)
+  public Army resolveReference(@NonNull Map<String, Object> reference) {
     log.info("Resolve reference: reference={}", reference);
     if (reference.get("name") instanceof String name) {
-      return getByName(name);
+      return armyRepository.findByName(name).orElse(null);
     }
     return null;
   }

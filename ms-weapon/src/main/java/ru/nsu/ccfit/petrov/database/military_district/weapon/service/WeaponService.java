@@ -10,7 +10,10 @@ import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.ccfit.petrov.database.military_district.weapon.dto.Pagination;
@@ -38,31 +41,38 @@ public class WeaponService implements GraphQLService {
   private final WeaponTypeRepository weaponTypeRepository;
   private final WeaponMapper weaponMapper;
 
-  @Cacheable("weapons")
+  @Cacheable(value = "weapons", key = "#a0 + '_' + #a1 + '_' + #a2", sync = true)
   public List<Weapon> getAll(WeaponFilter filter, Pagination pagination, List<Sorting> sorts) {
-    log.info("Get all weapons: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
+    log.info(
+        "Get all combat weapons: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
     var sort = generateSort(sorts, availableSortFields);
     var pageable = generatePageable(pagination, sort);
     var spec = generateWeaponSpec(filter);
     return weaponRepository.findAll(spec, pageable, sort);
   }
 
-  @Cacheable("weaponCount")
+  @Cacheable(value = "weaponCount", key = "'filter_' + #a0", sync = true)
   public long getAllCount(WeaponFilter filter) {
-    log.info("Get all weapons count: filter={}", filter);
+    log.info("Get all combat weapons count: filter={}", filter);
     var spec = generateWeaponSpec(filter);
     return weaponRepository.count(spec);
   }
 
-  @Cacheable("weaponBySerialNumber")
+  @Cacheable(value = "weaponBySerialNumber", key = "#a0", sync = true)
   public Weapon getBySerialNumber(@NonNull String serialNumber) {
-    log.info("Get weapon by serial number: serialNumber={}", serialNumber);
+    log.info("Get combat weapon by serial number: serialNumber={}", serialNumber);
     return weaponRepository.findBySerialNumber(serialNumber).orElse(null);
   }
 
   @Transactional
+  @Caching(
+      put = @CachePut(value = "weaponBySerialNumber", key = "#a0.serialNumber"),
+      evict = {
+        @CacheEvict(value = "weapons", allEntries = true),
+        @CacheEvict(value = "weaponCount", allEntries = true)
+      })
   public Weapon create(@Valid @NonNull WeaponInput weaponInput) {
-    log.info("Create weapon: input={}", weaponInput);
+    log.info("Create combat weapon: input={}", weaponInput);
     if (weaponRepository.existsBySerialNumber(weaponInput.getSerialNumber())) {
       throw new WeaponAlreadyExistsException();
     }
@@ -79,8 +89,14 @@ public class WeaponService implements GraphQLService {
   }
 
   @Transactional
+  @Caching(
+      put = @CachePut(value = "weaponBySerialNumber", key = "#a0"),
+      evict = {
+        @CacheEvict(value = "weapons", allEntries = true),
+        @CacheEvict(value = "weaponCount", allEntries = true)
+      })
   public Weapon update(@NonNull String serialNumber, @Valid @NonNull WeaponInput weaponInput) {
-    log.info("Update weapon: serialNumber={}, input={}", serialNumber, weaponInput);
+    log.info("Update combat weapon: serialNumber={}, input={}", serialNumber, weaponInput);
     var weapon =
         weaponRepository.findBySerialNumber(serialNumber).orElseThrow(WeaponNotFoundException::new);
 
@@ -96,16 +112,23 @@ public class WeaponService implements GraphQLService {
   }
 
   @Transactional
+  @Caching(
+      evict = {
+        @CacheEvict(value = "weapons", allEntries = true),
+        @CacheEvict(value = "weaponCount", allEntries = true),
+        @CacheEvict(value = "weaponBySerialNumber", key = "#a0")
+      })
   public long delete(@NonNull String serialNumber) {
-    log.info("Delete weapon: serialNumber={}", serialNumber);
+    log.info("Delete combat weapon: serialNumber={}", serialNumber);
     return weaponRepository.deleteBySerialNumber(serialNumber);
   }
 
   @Override
-  public Object resolveReference(@NonNull Map<String, Object> reference) {
-    log.info("Resolve reference: reference={}", reference);
+  @Cacheable(value = "reference", key = "#a0", sync = true)
+  public Weapon resolveReference(@NonNull Map<String, Object> reference) {
+    log.info("Resolve combat weapon reference: reference={}", reference);
     if (reference.get("serialNumber") instanceof String serialNumber) {
-      return getBySerialNumber(serialNumber);
+      return weaponRepository.findBySerialNumber(serialNumber).orElse(null);
     }
     return null;
   }

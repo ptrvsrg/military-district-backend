@@ -11,7 +11,10 @@ import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.ccfit.petrov.database.military_district.infrastructure.dto.BuildingFilter;
@@ -39,7 +42,7 @@ public class BuildingService implements GraphQLService {
   private final AttributeMapper attributeMapper;
   private final BuildingMapper buildingMapper;
 
-  @Cacheable("buildings")
+  @Cacheable(value = "buildings", key = "#a0 + '_' + #a1 + '_' + #a2", sync = true)
   public List<Building> getAll(BuildingFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info("Get all buildings: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
     var sort = generateSort(sorts, availableSortFields);
@@ -48,20 +51,26 @@ public class BuildingService implements GraphQLService {
     return buildingRepository.findAll(spec, pageable, sort);
   }
 
-  @Cacheable("buildingCount")
+  @Cacheable(value = "buildingCount", key = "'filter_' + #a0", sync = true)
   public long getAllCount(BuildingFilter filter) {
     log.info("Get all buildings count: filter={}", filter);
     var spec = generateBuildingSpec(filter);
     return buildingRepository.count(spec);
   }
 
-  @Cacheable("buildingByNameAndUnit")
+  @Cacheable(value = "buildingByNameAndUnit", key = "#a0 + '_' + #a1", sync = true)
   public Building getByNameAndUnit(@NonNull String name, String unit) {
     log.info("Get building: name={}, unit={}", name, unit);
     return buildingRepository.findByNameAndUnit_Name(name, unit).orElse(null);
   }
 
   @Transactional
+  @Caching(
+      put = @CachePut(value = "buildingByNameAndUnit", key = "#a0.name + '_' + #a0.unit"),
+      evict = {
+        @CacheEvict(value = "buildings", allEntries = true),
+        @CacheEvict(value = "buildingCount", allEntries = true)
+      })
   public Building create(@Valid @NonNull BuildingInput buildingInput) {
     log.info("Create building: input={}", buildingInput);
     if (buildingRepository.existsByNameAndUnit_Name(
@@ -74,6 +83,12 @@ public class BuildingService implements GraphQLService {
   }
 
   @Transactional
+  @Caching(
+      put = @CachePut(value = "buildingByNameAndUnit", key = "#a0 + '_' + #a1"),
+      evict = {
+        @CacheEvict(value = "buildings", allEntries = true),
+        @CacheEvict(value = "buildingCount", allEntries = true)
+      })
   public Building update(
       @NonNull String name, String unit, @Valid @NonNull BuildingInput buildingInput) {
     log.info("Update building: name={}, unit={}, input={}", name, unit, buildingInput);
@@ -100,13 +115,20 @@ public class BuildingService implements GraphQLService {
   }
 
   @Transactional
+  @Caching(
+      evict = {
+        @CacheEvict(value = "buildings", allEntries = true),
+        @CacheEvict(value = "buildingCount", allEntries = true),
+        @CacheEvict(value = "buildingByNameAndUnit", key = "#a0 + '_' + #a1")
+      })
   public long delete(@NonNull String name, String unit) {
     log.info("Delete building: name={}, unit={}", name, unit);
     return buildingRepository.deleteByNameAndUnit_Name(name, unit);
   }
 
   @Override
-  public Object resolveReference(@NonNull Map<String, Object> reference) {
+  @Cacheable(value = "reference", key = "#a0", sync = true)
+  public Building resolveReference(@NonNull Map<String, Object> reference) {
     log.info("Resolve reference: reference={}", reference);
     if (reference.get("name") instanceof String name
         && reference.get("unit") instanceof String unit) {

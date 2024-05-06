@@ -12,7 +12,10 @@ import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.ccfit.petrov.database.military_district.weapon.dto.AttributeInput;
@@ -45,90 +48,109 @@ public class WeaponTypeService implements GraphQLService {
   private final WeaponTypeMapper weaponTypeMapper;
   private final AttributeMapper attributeMapper;
 
-  @Cacheable("weaponTypes")
+  @Cacheable(value = "weaponTypes", key = "#a0 + '_' + #a1 + '_' + #a2", sync = true)
   public List<WeaponType> getAll(
       WeaponTypeFilter filter, Pagination pagination, List<Sorting> sorts) {
-    log.info("Get all weapon types: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
+    log.info(
+        "Get combat weapon types: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
     var sort = generateSort(sorts, availableSortFields);
     var pageable = generatePageable(pagination, sort);
     var spec = generateWeaponTypeSpec(filter);
     return weaponTypeRepository.findAll(spec, pageable, sort);
   }
 
-  @Cacheable("weaponTypeCount")
+  @Cacheable(value = "weaponTypeCount", key = "'filter_' + #a0", sync = true)
   public long getAllCount(WeaponTypeFilter filter) {
-    log.info("Get all weapon types count: filter={}", filter);
+    log.info("Get combat weapon types count: filter={}", filter);
     var spec = generateWeaponTypeSpec(filter);
     return weaponTypeRepository.count(spec);
   }
 
-  @Cacheable("weaponTypeByNameAndCategory")
+  @Cacheable(value = "weaponTypeByNameAndCategory", key = "#a0 + '_' + #a1", sync = true)
   public WeaponType getByNameAndCategory(@NonNull String name, @NonNull String category) {
-    log.info("Get weapon type: name={}, category={}", name, category);
+    log.info("Get combat weapon type: name={}, category={}", name, category);
     return weaponTypeRepository.findByNameAndCategory_Name(name, category).orElse(null);
   }
 
   @Transactional
-  public WeaponType create(@Valid @NonNull WeaponTypeInput typeDto) {
-    log.info("Create weapon type: input={}", typeDto);
-    if (weaponTypeRepository.existsByNameAndCategory_Name(
-        typeDto.getName(), typeDto.getCategory())) {
+  @Caching(
+      put = @CachePut(value = "weaponTypeByNameAndCategory", key = "#a0.name + '_' + #a0.category"),
+      evict = {
+        @CacheEvict(value = "weaponTypes", allEntries = true),
+        @CacheEvict(value = "weaponTypeCount", allEntries = true)
+      })
+  public WeaponType create(@Valid @NonNull WeaponTypeInput input) {
+    log.info("Create combat weapon type: input={}", input);
+    if (weaponTypeRepository.existsByNameAndCategory_Name(input.getName(), input.getCategory())) {
       throw new WeaponTypeAlreadyExistsException();
     }
 
-    var type = weaponTypeMapper.toEntity(typeDto);
+    var type = weaponTypeMapper.toEntity(input);
     type.setCategory(
         weaponCategoryRepository
-            .findByName(typeDto.getCategory())
+            .findByName(input.getCategory())
             .orElseThrow(WeaponCategoryNotFoundException::new));
 
-    var attributes = toEntities(typeDto.getAttributes(), type);
+    var attributes = toEntities(input.getAttributes(), type);
     type.setAttributes(attributes);
 
     return weaponTypeRepository.save(type);
   }
 
   @Transactional
+  @Caching(
+      put = @CachePut(value = "weaponTypeByNameAndCategory", key = "#a0 + '_' + #a1"),
+      evict = {
+        @CacheEvict(value = "weaponTypes", allEntries = true),
+        @CacheEvict(value = "weaponTypeCount", allEntries = true)
+      })
   public WeaponType update(
-      @NonNull String name, @NonNull String category, @Valid @NonNull WeaponTypeInput typeDto) {
-    log.info("Update weapon type: name={}, category={}, input={}", name, category, typeDto);
+      @NonNull String name, @NonNull String category, @Valid @NonNull WeaponTypeInput input) {
+    log.info("Update combat weapon type: name={}, category={}, input={}", name, category, input);
     var type =
         weaponTypeRepository
             .findByNameAndCategory_Name(name, category)
             .orElseThrow(WeaponTypeNotFoundException::new);
 
-    weaponTypeMapper.partialUpdate(typeDto, type);
+    weaponTypeMapper.partialUpdate(input, type);
     type.setCategory(
         weaponCategoryRepository
-            .findByName(typeDto.getCategory())
+            .findByName(input.getCategory())
             .orElseThrow(WeaponCategoryNotFoundException::new));
 
     weaponAttributeRepository.deleteAllInBatch(type.getAttributes());
-    var attributes = toEntities(typeDto.getAttributes(), type);
+    var attributes = toEntities(input.getAttributes(), type);
     type.setAttributes(attributes);
 
     return weaponTypeRepository.save(type);
   }
 
   @Transactional
+  @Caching(
+      evict = {
+        @CacheEvict(value = "weaponTypes", allEntries = true),
+        @CacheEvict(value = "weaponTypeCount", allEntries = true),
+        @CacheEvict(value = "weaponTypeByNameAndCategory", key = "#a0 + '_' + #a1")
+      })
   public long delete(@NonNull String name, @NonNull String category) {
-    log.info("Delete weapon type: name={}, category={}", name, category);
+    log.info("Delete combat weapon type: name={}, category={}", name, category);
     return weaponTypeRepository.deleteByNameAndCategory_Name(name, category);
   }
 
   @Override
-  public Object resolveReference(@NonNull Map<String, Object> reference) {
-    log.info("Resolve reference: reference={}", reference);
+  @Cacheable(value = "reference", key = "#a0", sync = true)
+  public WeaponType resolveReference(@NonNull Map<String, Object> reference) {
+    log.info("Resolve combat weapon reference: reference={}", reference);
     if (reference.get("name") instanceof String name
         && reference.get("category") instanceof String category) {
-      return getByNameAndCategory(name, category);
+      return weaponTypeRepository.findByNameAndCategory_Name(name, category).orElse(null);
     }
     return null;
   }
 
   private Set<WeaponAttribute> toEntities(Set<AttributeInput> attributeInputs, WeaponType type) {
     return attributeInputs.stream()
-        .map(attributeInput -> toEntity(attributeInput, type))
+        .map(attributeDto -> toEntity(attributeDto, type))
         .collect(Collectors.toSet());
   }
 

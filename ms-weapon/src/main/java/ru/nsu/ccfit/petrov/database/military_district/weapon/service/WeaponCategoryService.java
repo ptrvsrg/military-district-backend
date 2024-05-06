@@ -8,7 +8,11 @@ import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.ccfit.petrov.database.military_district.weapon.dto.Pagination;
@@ -28,29 +32,36 @@ public class WeaponCategoryService implements GraphQLService {
 
   private final WeaponCategoryRepository weaponCategoryRepository;
 
-  @Cacheable("weaponCategories")
-  public List<WeaponCategory> getAll(Pagination pagination, List<Sorting> sorts) {
-    log.info("Get all weapon categories: pagination={}, sorts={}", pagination, sorts);
+  @Cacheable(value = "weaponCategories", key = "#a0 + '_' + #a1", sync = true)
+  public List<WeaponCategory> getAll(
+      @Nullable Pagination pagination, @NonNull List<Sorting> sorts) {
+    log.info("Get all combat weapon categories: pagination={}, sorts={}", pagination, sorts);
     var sort = generateSort(sorts, availableSortFields);
     var pageable = generatePageable(pagination, sort);
     return weaponCategoryRepository.findAll(null, pageable, sort);
   }
 
-  @Cacheable("weaponCategoryCount")
+  @Cacheable(value = "weaponCategoryCount", sync = true)
   public long getAllCount() {
-    log.info("Get all weapon categories count");
+    log.info("Get all combat weapon category count");
     return weaponCategoryRepository.count();
   }
 
-  @Cacheable("weaponCategoryByName")
+  @Cacheable(value = "weaponCategoryByName", key = "#a0", sync = true)
   public WeaponCategory getByName(@NonNull String name) {
-    log.info("Get weapon category by name: name={}", name);
+    log.info("Get combat weapon category by name: name={}", name);
     return weaponCategoryRepository.findByName(name).orElse(null);
   }
 
   @Transactional
+  @Caching(
+      put = @CachePut(value = "weaponCategoryByName", key = "#a0"),
+      evict = {
+        @CacheEvict(value = "weaponCategories", allEntries = true),
+        @CacheEvict(value = "weaponCategoryCount", allEntries = true)
+      })
   public WeaponCategory create(@NonNull String category) {
-    log.info("Create weapon category: input={}", category);
+    log.info("Create combat weapon category: input={}", category);
     if (weaponCategoryRepository.existsByName(category)) {
       throw new WeaponCategoryAlreadyExistsException();
     }
@@ -62,8 +73,14 @@ public class WeaponCategoryService implements GraphQLService {
   }
 
   @Transactional
+  @Caching(
+      put = @CachePut(value = "weaponCategoryByName", key = "#a0"),
+      evict = {
+        @CacheEvict(value = "weaponCategories", allEntries = true),
+        @CacheEvict(value = "weaponCategoryCount", allEntries = true)
+      })
   public WeaponCategory update(@NonNull String name, @NonNull String category) {
-    log.info("Update weapon category: name={}, input={}", name, category);
+    log.info("Update combat weapon category: name={}, input={}", name, category);
     var entity =
         weaponCategoryRepository.findByName(name).orElseThrow(WeaponCategoryNotFoundException::new);
 
@@ -76,16 +93,23 @@ public class WeaponCategoryService implements GraphQLService {
   }
 
   @Transactional
+  @Caching(
+      evict = {
+        @CacheEvict(value = "weaponCategories", allEntries = true),
+        @CacheEvict(value = "weaponCategoryCount", allEntries = true),
+        @CacheEvict(value = "weaponCategoryByName", key = "#a0")
+      })
   public long delete(@NonNull String name) {
-    log.info("Delete weapon category: name={}", name);
+    log.info("Delete combat weapon category: name={}", name);
     return weaponCategoryRepository.deleteByName(name);
   }
 
   @Override
+  @Cacheable(value = "reference", key = "#a0", sync = true)
   public WeaponCategory resolveReference(@NonNull Map<String, Object> reference) {
-    log.info("Resolve reference: reference={}", reference);
+    log.info("Resolve combat weapon category reference: reference={}", reference);
     if (reference.get("name") instanceof String name) {
-      return getByName(name);
+      return weaponCategoryRepository.findByName(name).orElse(null);
     }
     return null;
   }

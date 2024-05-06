@@ -8,7 +8,10 @@ import java.util.Map;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +32,7 @@ public class CombatEquipmentCategoryService implements GraphQLService {
 
   private final CombatEquipmentCategoryRepository combatEquipmentCategoryRepository;
 
-  @Cacheable("combatEquipmentCategories")
+  @Cacheable(value = "combatEquipmentCategories", key = "#a0 + '_' + #a1", sync = true)
   public List<CombatEquipmentCategory> getAll(
       @Nullable Pagination pagination, @NonNull List<Sorting> sorts) {
     log.info("Get all combat equipment categories: pagination={}, sorts={}", pagination, sorts);
@@ -38,19 +41,25 @@ public class CombatEquipmentCategoryService implements GraphQLService {
     return combatEquipmentCategoryRepository.findAll(null, pageable, sort);
   }
 
-  @Cacheable("combatEquipmentCategoryCount")
+  @Cacheable(value = "combatEquipmentCategoryCount", sync = true)
   public long getAllCount() {
     log.info("Get all combat equipment category count");
     return combatEquipmentCategoryRepository.count();
   }
 
-  @Cacheable("combatEquipmentCategoryByName")
+  @Cacheable(value = "combatEquipmentCategoryByName", key = "#a0", sync = true)
   public CombatEquipmentCategory getByName(@NonNull String name) {
     log.info("Get combat equipment category by name: name={}", name);
     return combatEquipmentCategoryRepository.findByName(name).orElse(null);
   }
 
   @Transactional
+  @Caching(
+      put = @CachePut(value = "combatEquipmentCategoryByName", key = "#a0"),
+      evict = {
+        @CacheEvict(value = "combatEquipmentCategories", allEntries = true),
+        @CacheEvict(value = "combatEquipmentCategoryCount", allEntries = true)
+      })
   public CombatEquipmentCategory create(@NonNull String category) {
     log.info("Create combat equipment category: input={}", category);
     if (combatEquipmentCategoryRepository.existsByName(category)) {
@@ -64,6 +73,12 @@ public class CombatEquipmentCategoryService implements GraphQLService {
   }
 
   @Transactional
+  @Caching(
+      put = @CachePut(value = "combatEquipmentCategoryByName", key = "#a0"),
+      evict = {
+        @CacheEvict(value = "combatEquipmentCategories", allEntries = true),
+        @CacheEvict(value = "combatEquipmentCategoryCount", allEntries = true)
+      })
   public CombatEquipmentCategory update(@NonNull String name, @NonNull String category) {
     log.info("Update combat equipment category: name={}, input={}", name, category);
     var entity =
@@ -80,16 +95,23 @@ public class CombatEquipmentCategoryService implements GraphQLService {
   }
 
   @Transactional
+  @Caching(
+      evict = {
+        @CacheEvict(value = "combatEquipmentCategories", allEntries = true),
+        @CacheEvict(value = "combatEquipmentCategoryCount", allEntries = true),
+        @CacheEvict(value = "combatEquipmentCategoryByName", key = "#a0")
+      })
   public long delete(@NonNull String name) {
     log.info("Delete combat equipment category: name={}", name);
     return combatEquipmentCategoryRepository.deleteByName(name);
   }
 
   @Override
+  @Cacheable(value = "reference", key = "#a0", sync = true)
   public CombatEquipmentCategory resolveReference(@NonNull Map<String, Object> reference) {
     log.info("Resolve combat equipment category reference: reference={}", reference);
     if (reference.get("name") instanceof String name) {
-      return getByName(name);
+      return combatEquipmentCategoryRepository.findByName(name).orElse(null);
     }
     return null;
   }
