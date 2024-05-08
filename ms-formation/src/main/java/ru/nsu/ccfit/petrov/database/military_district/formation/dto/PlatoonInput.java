@@ -1,8 +1,6 @@
 package ru.nsu.ccfit.petrov.database.military_district.formation.dto;
 
 import jakarta.validation.constraints.NotNull;
-import java.util.HashSet;
-import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

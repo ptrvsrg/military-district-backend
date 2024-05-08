@@ -11,7 +11,9 @@ import org.hibernate.annotations.Struct;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Struct(name = "address", attributes = {"post_code", "country", "state", "locality", "street", "house_number"})
+@Struct(
+    name = "address",
+    attributes = {"post_code", "country", "state", "locality", "street", "house_number"})
 public class Address implements Serializable {
 
   private Integer postCode;

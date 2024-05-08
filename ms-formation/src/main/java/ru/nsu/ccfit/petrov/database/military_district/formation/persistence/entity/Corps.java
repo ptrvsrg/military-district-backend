@@ -47,9 +47,9 @@ public class Corps {
 
   @ManyToMany
   @JoinTable(
-          name = "armies_corps",
-          joinColumns = @JoinColumn(name = "corps_id"),
-          inverseJoinColumns = @JoinColumn(name = "army_id"))
+      name = "armies_corps",
+      joinColumns = @JoinColumn(name = "corps_id"),
+      inverseJoinColumns = @JoinColumn(name = "army_id"))
   private Set<Army> armies = new LinkedHashSet<>();
 
   @ManyToMany

@@ -27,7 +27,6 @@ import ru.nsu.ccfit.petrov.database.military_district.formation.mapper.PlatoonMa
 import ru.nsu.ccfit.petrov.database.military_district.formation.persistence.entity.Platoon;
 import ru.nsu.ccfit.petrov.database.military_district.formation.persistence.repository.CompanyRepository;
 import ru.nsu.ccfit.petrov.database.military_district.formation.persistence.repository.PlatoonRepository;
-import ru.nsu.ccfit.petrov.database.military_district.formation.persistence.repository.SquadRepository;
 
 @Service
 @RequiredArgsConstructor

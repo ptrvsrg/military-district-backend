@@ -64,15 +64,15 @@ public class Unit {
 
   @ManyToMany
   @JoinTable(
-          name = "corps_units",
-          joinColumns = @JoinColumn(name = "unit_id"),
-          inverseJoinColumns = @JoinColumn(name = "corps_id"))
+      name = "corps_units",
+      joinColumns = @JoinColumn(name = "unit_id"),
+      inverseJoinColumns = @JoinColumn(name = "corps_id"))
   private Set<Corps> corps = new LinkedHashSet<>();
 
   @ManyToMany
   @JoinTable(
-          name = "divisions_units",
-          joinColumns = @JoinColumn(name = "unit_id"),
-          inverseJoinColumns = @JoinColumn(name = "division_id"))
+      name = "divisions_units",
+      joinColumns = @JoinColumn(name = "unit_id"),
+      inverseJoinColumns = @JoinColumn(name = "division_id"))
   private Set<Division> divisions = new LinkedHashSet<>();
 }
