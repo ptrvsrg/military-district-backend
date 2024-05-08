@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS buildings_platoons
 (
-    building_id  INTEGER      NOT NULL REFERENCES buildings (id),
-    platoon_name VARCHAR(255) NOT NULL REFERENCES platoons (name),
+    building_id  INTEGER      NOT NULL REFERENCES buildings (id) ON DELETE CASCADE ON UPDATE CASCADE,
+    platoon_name VARCHAR(255) NOT NULL REFERENCES platoons (name) ON DELETE CASCADE ON UPDATE CASCADE,
     PRIMARY KEY (building_id, platoon_name)
 );
 
