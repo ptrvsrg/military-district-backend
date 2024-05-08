@@ -21,6 +21,7 @@ services:
     image: ptrvsrg/ms-military:latest
     restart: unless-stopped
     environment:
+      MILITARY_DISTRICT_MS_MILITARY_MODE: prod
       MILITARY_DISTRICT_MS_MILITARY_DB_URL: postgres-node-0:5432,postgres-node-1:5432,postgres-node-2:5432/military_district?targetServerType=primary
       MILITARY_DISTRICT_MS_MILITARY_DB_USER: ${MILITARY_DISTRICT_POSTGRES_USER:-user}
       MILITARY_DISTRICT_MS_MILITARY_DB_PASSWORD: ${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}
@@ -43,6 +44,7 @@ services:
     image: ptrvsrg/ms-formation:latest
     restart: unless-stopped
     environment:
+      MILITARY_DISTRICT_MS_FORMATION_MODE: prod
       MILITARY_DISTRICT_MS_FORMATION_DB_URL: postgres-node-0:5432,postgres-node-1:5432,postgres-node-2:5432/military_district?targetServerType=primary
       MILITARY_DISTRICT_MS_FORMATION_DB_USER: ${MILITARY_DISTRICT_POSTGRES_USER:-user}
       MILITARY_DISTRICT_MS_FORMATION_DB_PASSWORD: ${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}
@@ -65,6 +67,7 @@ services:
     image: ptrvsrg/ms-infrastructure:latest
     restart: unless-stopped
     environment:
+      MILITARY_DISTRICT_MS_INFRASTRUCTURE_MODE: prod
       MILITARY_DISTRICT_MS_INFRASTRUCTURE_DB_URL: postgres-node-0:5432,postgres-node-1:5432,postgres-node-2:5432/military_district?targetServerType=primary
       MILITARY_DISTRICT_MS_INFRASTRUCTURE_DB_USER: ${MILITARY_DISTRICT_POSTGRES_USER:-user}
       MILITARY_DISTRICT_MS_INFRASTRUCTURE_DB_PASSWORD: ${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}
@@ -87,6 +90,7 @@ services:
     image: ptrvsrg/ms-equipment:latest
     restart: unless-stopped
     environment:
+      MILITARY_DISTRICT_MS_EQUIPMENT_MODE: prod
       MILITARY_DISTRICT_MS_EQUIPMENT_DB_URL: postgres-node-0:5432,postgres-node-1:5432,postgres-node-2:5432/military_district?targetServerType=primary
       MILITARY_DISTRICT_MS_EQUIPMENT_DB_USER: ${MILITARY_DISTRICT_POSTGRES_USER:-user}
       MILITARY_DISTRICT_MS_EQUIPMENT_DB_PASSWORD: ${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}
@@ -109,6 +113,7 @@ services:
     image: ptrvsrg/ms-weapon:latest
     restart: unless-stopped
     environment:
+      MILITARY_DISTRICT_MS_WEAPON_MODE: prod
       MILITARY_DISTRICT_MS_WEAPON_DB_URL: postgres-node-0:5432,postgres-node-1:5432,postgres-node-2:5432/military_district?targetServerType=primary
       MILITARY_DISTRICT_MS_WEAPON_DB_USER: ${MILITARY_DISTRICT_POSTGRES_USER:-user}
       MILITARY_DISTRICT_MS_WEAPON_DB_PASSWORD: ${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}
@@ -131,6 +136,7 @@ services:
     image: ptrvsrg/ms-report:latest
     restart: unless-stopped
     environment:
+      MILITARY_DISTRICT_MS_REPORT_MODE: prod
       MILITARY_DISTRICT_MS_REPORT_DB_URL: postgres-node-0:5432,postgres-node-1:5432,postgres-node-2:5432/military_district?targetServerType=preferSecondary
       MILITARY_DISTRICT_MS_REPORT_DB_USER: ${MILITARY_DISTRICT_POSTGRES_USER:-user}
       MILITARY_DISTRICT_MS_REPORT_DB_PASSWORD: ${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}

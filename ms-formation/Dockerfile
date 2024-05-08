@@ -45,4 +45,4 @@ USER admin
 
 EXPOSE 8082
 
-ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=prod", "ms-formation.jar"]
+ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=${MILITARY_DISTRICT_MS_FORMATION_MODE:-dev}", "ms-formation.jar"]
