@@ -46,7 +46,10 @@ public class UnitService implements GraphQLService {
   private final CompanyRepository companyRepository;
   private final UnitMapper unitMapper;
 
-  @Cacheable(value = "units", key = "#a0 + '_' + #a1 + '_' + #a2", sync = true)
+  @Cacheable(
+      value = "units",
+      key = "#a0 + '_' + #a1 + '_' + (#a2 != null ? #a2.toString() : 'null')",
+      sync = true)
   public List<Unit> getAll(UnitFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info("Get all units: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
     var sort = generateSort(sorts, availableSortFields);
@@ -55,7 +58,7 @@ public class UnitService implements GraphQLService {
     return unitRepository.findAll(spec, pageable, sort);
   }
 
-  @Cacheable(value = "unitCount", key = "'filter_' + #a0", sync = true)
+  @Cacheable(value = "unitCount", key = "(#a0 != null ? #a0 : 'null')", sync = true)
   public long getAllCount(UnitFilter filter) {
     log.info("Get all units count: filter={}", filter);
     var spec = generateUnitSpec(filter);

@@ -43,7 +43,10 @@ public class CompanyService implements GraphQLService {
   private final UnitRepository unitRepository;
   private final CompanyMapper companyMapper;
 
-  @Cacheable(value = "companies", key = "#a0 + '_' + #a1 + '_' + #a2", sync = true)
+  @Cacheable(
+      value = "companies",
+      key = "#a0 + '_' + #a1 + '_' + (#a2 != null ? #a2.toString() : 'null')",
+      sync = true)
   public List<Company> getAll(CompanyFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info("Get all companies: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
     var sort = generateSort(sorts, availableSortFields);
@@ -52,7 +55,7 @@ public class CompanyService implements GraphQLService {
     return companyRepository.findAll(spec, pageable, sort);
   }
 
-  @Cacheable(value = "companyCount", key = "'filter_' + #a0", sync = true)
+  @Cacheable(value = "companyCount", key = "(#a0 != null ? #a0 : 'null')", sync = true)
   public long getAllCount(CompanyFilter filter) {
     log.info("Get all companies count: filter={}", filter);
     var spec = generateCompanySpec(filter);

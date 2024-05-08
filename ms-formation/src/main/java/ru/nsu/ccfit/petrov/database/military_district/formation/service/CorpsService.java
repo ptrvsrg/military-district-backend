@@ -41,7 +41,10 @@ public class CorpsService implements GraphQLService {
   private final UnitRepository unitRepository;
   private final CorpsMapper corpsMapper;
 
-  @Cacheable(value = "corps", key = "#a0 + '_' + #a1 + '_' + #a2", sync = true)
+  @Cacheable(
+      value = "corps",
+      key = "#a0 + '_' + #a1 + '_' + (#a2 != null ? #a2.toString() : 'null')",
+      sync = true)
   public List<Corps> getAll(CorpsFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info("Get all corps: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
     var sort = generateSort(sorts, availableSortFields);
@@ -50,7 +53,7 @@ public class CorpsService implements GraphQLService {
     return corpsRepository.findAll(spec, pageable, sort);
   }
 
-  @Cacheable(value = "corpsCount", key = "'filter_' + #a0", sync = true)
+  @Cacheable(value = "corpsCount", key = "(#a0 != null ? #a0 : 'null')", sync = true)
   public long getAllCount(CorpsFilter filter) {
     log.info("Get all corps count: filter={}", filter);
     var spec = generateCorpsSpec(filter);

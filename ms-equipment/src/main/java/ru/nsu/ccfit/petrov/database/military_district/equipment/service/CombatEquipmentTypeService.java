@@ -48,7 +48,10 @@ public class CombatEquipmentTypeService implements GraphQLService {
   private final CombatEquipmentTypeMapper combatEquipmentTypeMapper;
   private final AttributeMapper attributeMapper;
 
-  @Cacheable(value = "combatEquipmentTypes", key = "#a0 + '_' + #a1 + '_' + #a2", sync = true)
+  @Cacheable(
+      value = "combatEquipmentTypes",
+      key = "#a0 + '_' + #a1 + '_' + (#a2 != null ? #a2.toString() : 'null')",
+      sync = true)
   public List<CombatEquipmentType> getAll(
       CombatEquipmentTypeFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info(
@@ -62,7 +65,7 @@ public class CombatEquipmentTypeService implements GraphQLService {
     return combatEquipmentTypeRepository.findAll(spec, pageable, sort);
   }
 
-  @Cacheable(value = "combatEquipmentTypeCount", key = "'filter_' + #a0", sync = true)
+  @Cacheable(value = "combatEquipmentTypeCount", key = "(#a0 != null ? #a0 : 'null')", sync = true)
   public long getAllCount(CombatEquipmentTypeFilter filter) {
     log.info("Get combat equipment types count: filter={}", filter);
     var spec = generateCombatEquipmentTypeSpec(filter);

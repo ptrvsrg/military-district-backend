@@ -51,7 +51,10 @@ public class MilitaryService implements GraphQLService {
   private final MilitaryMapper militaryMapper;
   private final AttributeMapper attributeMapper;
 
-  @Cacheable(value = "militaries", key = "#a0 + '_' + #a1 + '_' + #a2", sync = true)
+  @Cacheable(
+      value = "militaries",
+      key = "#a0 + '_' + #a1 + '_' + (#a2 != null ? #a2.toString() : 'null')",
+      sync = true)
   public List<Military> getAll(MilitaryFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info("Get all militaries: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
     var sort = generateSort(sorts, availableSortFields);
@@ -60,7 +63,7 @@ public class MilitaryService implements GraphQLService {
     return militaryRepository.findAll(spec, pageable, sort);
   }
 
-  @Cacheable(value = "militaryCount", key = "'filter_' + #a0", sync = true)
+  @Cacheable(value = "militaryCount", key = "(#a0 != null ? #a0 : 'null')", sync = true)
   public long getAllCount(MilitaryFilter filter) {
     log.info("Get all military count: filter={}", filter);
     var spec = generateMilitarySpec(filter);

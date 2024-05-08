@@ -42,7 +42,10 @@ public class BuildingService implements GraphQLService {
   private final AttributeMapper attributeMapper;
   private final BuildingMapper buildingMapper;
 
-  @Cacheable(value = "buildings", key = "#a0 + '_' + #a1 + '_' + #a2", sync = true)
+  @Cacheable(
+      value = "buildings",
+      key = "#a0 + '_' + #a1 + '_' + (#a2 != null ? #a2.toString() : 'null')",
+      sync = true)
   public List<Building> getAll(BuildingFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info("Get all buildings: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
     var sort = generateSort(sorts, availableSortFields);
@@ -51,7 +54,7 @@ public class BuildingService implements GraphQLService {
     return buildingRepository.findAll(spec, pageable, sort);
   }
 
-  @Cacheable(value = "buildingCount", key = "'filter_' + #a0", sync = true)
+  @Cacheable(value = "buildingCount", key = "(#a0 != null ? #a0 : 'null')", sync = true)
   public long getAllCount(BuildingFilter filter) {
     log.info("Get all buildings count: filter={}", filter);
     var spec = generateBuildingSpec(filter);

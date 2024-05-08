@@ -22,7 +22,7 @@ public class AttributeDefinitionService implements GraphQLService {
 
   private final AttributeRepository attributeRepository;
 
-  @Cacheable(value = "attributeDefinitions", key = "'filter_' + #a0", sync = true)
+  @Cacheable(value = "attributeDefinitions", key = "(#a0 != null ? #a0 : 'null')", sync = true)
   public List<Attribute> getAll(AttributeDefinitionFilter filter) {
     log.info("Get all military attribute definitions: filter={}", filter);
     return attributeRepository.findAll(generateAttributeDefinitionSpec(filter));

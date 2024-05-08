@@ -48,7 +48,10 @@ public class WeaponTypeService implements GraphQLService {
   private final WeaponTypeMapper weaponTypeMapper;
   private final AttributeMapper attributeMapper;
 
-  @Cacheable(value = "weaponTypes", key = "#a0 + '_' + #a1 + '_' + #a2", sync = true)
+  @Cacheable(
+      value = "weaponTypes",
+      key = "#a0 + '_' + #a1 + '_' + (#a2 != null ? #a2.toString() : 'null')",
+      sync = true)
   public List<WeaponType> getAll(
       WeaponTypeFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info(
@@ -59,7 +62,7 @@ public class WeaponTypeService implements GraphQLService {
     return weaponTypeRepository.findAll(spec, pageable, sort);
   }
 
-  @Cacheable(value = "weaponTypeCount", key = "'filter_' + #a0", sync = true)
+  @Cacheable(value = "weaponTypeCount", key = "(#a0 != null ? #a0 : 'null')", sync = true)
   public long getAllCount(WeaponTypeFilter filter) {
     log.info("Get combat weapon types count: filter={}", filter);
     var spec = generateWeaponTypeSpec(filter);

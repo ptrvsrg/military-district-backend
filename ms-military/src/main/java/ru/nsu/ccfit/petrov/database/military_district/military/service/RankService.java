@@ -22,7 +22,7 @@ public class RankService implements GraphQLService {
 
   private final RankRepository rankRepository;
 
-  @Cacheable(value = "ranks", key = "'filter_' + #a0", sync = true)
+  @Cacheable(value = "ranks", key = "(#a0 != null ? #a0 : 'null')", sync = true)
   public List<Rank> getAll(RankFilter filter) {
     log.info("Get all ranks: filter={}", filter);
     return rankRepository.findAll(generateRankSpec(filter));

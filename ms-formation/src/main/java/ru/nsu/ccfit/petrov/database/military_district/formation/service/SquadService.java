@@ -41,7 +41,10 @@ public class SquadService implements GraphQLService {
   private final PlatoonRepository platoonRepository;
   private final SquadMapper squadMapper;
 
-  @Cacheable(value = "squads", key = "#a0 + '_' + #a1 + '_' + #a2", sync = true)
+  @Cacheable(
+      value = "squads",
+      key = "#a0 + '_' + #a1 + '_' + (#a2 != null ? #a2.toString() : 'null')",
+      sync = true)
   public List<Squad> getAll(SquadFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info("Get all squads: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
     var sort = generateSort(sorts, availableSortFields);
@@ -50,7 +53,7 @@ public class SquadService implements GraphQLService {
     return squadRepository.findAll(spec, pageable, sort);
   }
 
-  @Cacheable(value = "squadCount", key = "'filter_' + #a0", sync = true)
+  @Cacheable(value = "squadCount", key = "(#a0 != null ? #a0 : 'null')", sync = true)
   public long getAllCount(SquadFilter filter) {
     log.info("Get all squads count: filter={}", filter);
     var spec = generateSquadSpec(filter);

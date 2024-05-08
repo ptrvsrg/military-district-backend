@@ -43,7 +43,10 @@ public class PlatoonService implements GraphQLService {
   private final SquadRepository squadRepository;
   private final PlatoonMapper platoonMapper;
 
-  @Cacheable(value = "platoons", key = "#a0 + '_' + #a1 + '_' + #a2", sync = true)
+  @Cacheable(
+      value = "platoons",
+      key = "#a0 + '_' + #a1 + '_' + (#a2 != null ? #a2.toString() : 'null')",
+      sync = true)
   public List<Platoon> getAll(PlatoonFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info("Get all platoons: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
     var sort = generateSort(sorts, availableSortFields);
@@ -52,7 +55,7 @@ public class PlatoonService implements GraphQLService {
     return platoonRepository.findAll(spec, pageable, sort);
   }
 
-  @Cacheable(value = "platoonCount", key = "'filter_' + #a0", sync = true)
+  @Cacheable(value = "platoonCount", key = "(#a0 != null ? #a0 : 'null')", sync = true)
   public long getAllCount(PlatoonFilter filter) {
     log.info("Get all platoons count: filter={}", filter);
     var spec = generatePlatoonSpec(filter);

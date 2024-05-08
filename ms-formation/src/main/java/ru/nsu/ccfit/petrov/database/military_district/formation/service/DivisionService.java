@@ -41,7 +41,10 @@ public class DivisionService implements GraphQLService {
   private final UnitRepository unitRepository;
   private final DivisionMapper divisionMapper;
 
-  @Cacheable(value = "divisions", key = "#a0 + '_' + #a1 + '_' + #a2", sync = true)
+  @Cacheable(
+      value = "divisions",
+      key = "#a0 + '_' + #a1 + '_' + (#a2 != null ? #a2.toString() : 'null')",
+      sync = true)
   public List<Division> getAll(DivisionFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info("Get all divisions: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
     var sort = generateSort(sorts, availableSortFields);
@@ -50,7 +53,7 @@ public class DivisionService implements GraphQLService {
     return divisionRepository.findAll(spec, pageable, sort);
   }
 
-  @Cacheable(value = "divisionCount", key = "'filter_' + #a0", sync = true)
+  @Cacheable(value = "divisionCount", key = "(#a0 != null ? #a0 : 'null')", sync = true)
   public long getAllCount(DivisionFilter filter) {
     log.info("Get all divisions count: filter={}", filter);
     var spec = generateDivisionSpec(filter);
