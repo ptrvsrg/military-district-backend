@@ -1,2 +1,2 @@
 ALTER TABLE IF EXISTS militaries
-    ADD FOREIGN KEY (unit_name) REFERENCES units (name);
+    ADD FOREIGN KEY (unit_name) REFERENCES units (name) ON DELETE SET NULL ON UPDATE CASCADE;
