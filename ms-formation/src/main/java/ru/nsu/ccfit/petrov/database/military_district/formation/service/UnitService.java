@@ -25,7 +25,6 @@ import ru.nsu.ccfit.petrov.database.military_district.formation.exception.UnitNo
 import ru.nsu.ccfit.petrov.database.military_district.formation.mapper.UnitMapper;
 import ru.nsu.ccfit.petrov.database.military_district.formation.persistence.entity.Unit;
 import ru.nsu.ccfit.petrov.database.military_district.formation.persistence.repository.BrigadeRepository;
-import ru.nsu.ccfit.petrov.database.military_district.formation.persistence.repository.CompanyRepository;
 import ru.nsu.ccfit.petrov.database.military_district.formation.persistence.repository.CorpsRepository;
 import ru.nsu.ccfit.petrov.database.military_district.formation.persistence.repository.DivisionRepository;
 import ru.nsu.ccfit.petrov.database.military_district.formation.persistence.repository.UnitRepository;
@@ -43,7 +42,6 @@ public class UnitService implements GraphQLService {
   private final BrigadeRepository brigadeRepository;
   private final CorpsRepository corpsRepository;
   private final DivisionRepository divisionRepository;
-  private final CompanyRepository companyRepository;
   private final UnitMapper unitMapper;
 
   @Cacheable(
@@ -88,7 +86,6 @@ public class UnitService implements GraphQLService {
     unit.setBrigades(brigadeRepository.findByNameIn(unitInput.getBrigades()));
     unit.setCorps(corpsRepository.findByNameIn(unitInput.getCorps()));
     unit.setDivisions(divisionRepository.findByNameIn(unitInput.getDivisions()));
-    unit.setCompanies(companyRepository.findByNameIn(unitInput.getCompanies()));
 
     return unitRepository.save(unit);
   }
@@ -111,7 +108,6 @@ public class UnitService implements GraphQLService {
     unit.setBrigades(brigadeRepository.findByNameIn(unitInput.getBrigades()));
     unit.setCorps(corpsRepository.findByNameIn(unitInput.getCorps()));
     unit.setDivisions(divisionRepository.findByNameIn(unitInput.getDivisions()));
-    unit.setCompanies(companyRepository.findByNameIn(unitInput.getCompanies()));
 
     return unitRepository.save(unit);
   }

@@ -19,5 +19,4 @@ public class PlatoonInput {
 
   private String commander;
   private String company;
-  private Set<String> squads = new HashSet<>();
 }

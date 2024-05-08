@@ -21,7 +21,6 @@ public class UnitInput {
   private AddressInput address;
   private String commander;
   private Set<String> brigades = new HashSet<>();
-  private Set<String> companies = new HashSet<>();
   private Set<String> corps = new HashSet<>();
   private Set<String> divisions = new HashSet<>();
 }

@@ -40,7 +40,6 @@ public class PlatoonService implements GraphQLService {
 
   private final PlatoonRepository platoonRepository;
   private final CompanyRepository companyRepository;
-  private final SquadRepository squadRepository;
   private final PlatoonMapper platoonMapper;
 
   @Cacheable(
@@ -82,7 +81,6 @@ public class PlatoonService implements GraphQLService {
     }
 
     var platoon = platoonMapper.toEntity(platoonInput);
-    platoon.setSquads(squadRepository.findByNameIn(platoonInput.getSquads()));
     platoon.setCompany(
         companyRepository
             .findByName(platoonInput.getCompany())
@@ -107,7 +105,6 @@ public class PlatoonService implements GraphQLService {
     }
 
     platoonMapper.partialUpdate(platoonInput, platoon);
-    platoon.setSquads(squadRepository.findByNameIn(platoonInput.getSquads()));
     platoon.setCompany(
         companyRepository
             .findByName(platoonInput.getCompany())

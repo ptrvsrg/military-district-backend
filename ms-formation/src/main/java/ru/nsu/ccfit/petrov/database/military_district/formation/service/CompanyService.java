@@ -26,7 +26,6 @@ import ru.nsu.ccfit.petrov.database.military_district.formation.exception.UnitNo
 import ru.nsu.ccfit.petrov.database.military_district.formation.mapper.CompanyMapper;
 import ru.nsu.ccfit.petrov.database.military_district.formation.persistence.entity.Company;
 import ru.nsu.ccfit.petrov.database.military_district.formation.persistence.repository.CompanyRepository;
-import ru.nsu.ccfit.petrov.database.military_district.formation.persistence.repository.PlatoonRepository;
 import ru.nsu.ccfit.petrov.database.military_district.formation.persistence.repository.UnitRepository;
 
 @Service
@@ -39,7 +38,6 @@ public class CompanyService implements GraphQLService {
       List.of("commander.mbn", "name", "unit.name");
 
   private final CompanyRepository companyRepository;
-  private final PlatoonRepository platoonRepository;
   private final UnitRepository unitRepository;
   private final CompanyMapper companyMapper;
 
@@ -82,7 +80,6 @@ public class CompanyService implements GraphQLService {
     }
 
     var company = companyMapper.toEntity(companyInput);
-    company.setPlatoons(platoonRepository.findByNameIn(companyInput.getPlatoons()));
     company.setUnit(
         unitRepository.findByName(companyInput.getUnit()).orElseThrow(UnitNotFoundException::new));
 
@@ -105,7 +102,6 @@ public class CompanyService implements GraphQLService {
     }
 
     companyMapper.partialUpdate(companyInput, company);
-    company.setPlatoons(platoonRepository.findByNameIn(companyInput.getPlatoons()));
     company.setUnit(
         unitRepository.findByName(companyInput.getUnit()).orElseThrow(UnitNotFoundException::new));
 
