@@ -1,11 +1,15 @@
 HOME_DIR = $(shell pwd)
 SAMPLE_ENV_FILE = $(HOME_DIR)/sample.env
 ENV_FILE = $(HOME_DIR)/.env
+SAMPLE_DEV_ENV_FILE = $(HOME_DIR)/sample.env.development
+DEV_ENV_FILE = $(HOME_DIR)/.env.development
 MS_MODULES=ms-equipment ms-formation ms-infrastructure ms-military ms-report ms-weapon
 OTHER_MODULES=apollo-rover apollo-router
 MAVEN = $(HOME_DIR)/mvnw
 DOCKER = docker
 DOCKER_COMPOSE = docker compose
+DOCKER_COMPOSE_FILE = $(HOME_DIR)/docker-compose.yml
+DOCKER_COMPOSE_DEV_FILE = $(HOME_DIR)/docker-compose-dev.yml
 
 define build_ms_module_image
 $(DOCKER) build \
@@ -37,6 +41,10 @@ build-images: build
 env:
 	@cp $(SAMPLE_ENV_FILE) $(ENV_FILE)
 
+.PHONY: dev-env
+dev-env:
+	@cp $(SAMPLE_DEV_ENV_FILE) $(DEV_ENV_FILE)
+
 .PHONY: supergraph
 supergraph:
 	$(DOCKER) run \
@@ -45,17 +53,26 @@ supergraph:
 	sudo chown $(shell whoami):$(shell whoami) ./supergraph.graphqls
 
 
+.PHONY: dev
+dev:
+ifeq ($(shell [ -e $(DEV_ENV_FILE) ] && echo 1 || echo 0), 1)
+	$(DOCKER_COMPOSE) --env-file $(DEV_ENV_FILE) -f $(DOCKER_COMPOSE_DEV_FILE) -p military-district-backend-dev up
+else
+	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_DEV_FILE) -p military-district-backend-dev up -d
+endif
+
+
 .PHONY: up
 up:
-ifeq ($(shell [ -e ./.env ] && echo 1 || echo 0), 1)
-	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -p military-district-backend up -d
+ifeq ($(shell [ -e $(ENV_FILE) ] && echo 1 || echo 0), 1)
+	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -f $(DOCKER_COMPOSE_FILE) -p military-district-backend up -d
 else
-	$(DOCKER_COMPOSE) -p military-district-backend up -d
+	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) -p military-district-backend up -d
 endif
 
 .PHONY: down
 down:
-	$(DOCKER_COMPOSE) -p military-district-backend down --remove-orphans
+	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) -p military-district-backend down --remove-orphans
 
 .PHONY: help
 help:
@@ -68,12 +85,16 @@ help:
 	@echo "        Build the Docker images"
 	@echo "    make env"
 	@echo "        Create template .env file"
+	@echo "    make dev-env"
+	@echo "        Create template .env.development file"
 	@echo "    make supergraph"
 	@echo "        Generate supergraph schema"
+	@echo "    make dev"
+	@echo "        Deploy to Docker for Development"
 	@echo "    make up"
-	@echo "        Deploy to Docker"
+	@echo "        Deploy to Docker for Production"
 	@echo "    make down"
-	@echo "        Stop application"
+	@echo "        Stop and remove containers for Production"
 	@echo "    make help"
 	@echo "        Display this message"
 
