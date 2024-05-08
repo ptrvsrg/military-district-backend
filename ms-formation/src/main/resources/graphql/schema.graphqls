@@ -92,6 +92,7 @@ input BrigadeFilter {
 input CompanyFilter {
     name: String
     commander: String
+    unit: String
 }
 
 input CorpsFilter {
@@ -104,7 +105,7 @@ input DivisionFilter {
     commander: String
 }
 
-input PlatoonsFilter {
+input PlatoonFilter {
     name: String
     commander: String
     company: String
@@ -185,12 +186,12 @@ type Query {
     getDivision(name: String!): Division
 
     getPlatoons(
-        filter: PlatoonsFilter
+        filter: PlatoonFilter
         pagination: Pagination
         sorts: [Sort!]
     ): [Platoon!]
     getPlatoonCount(
-        filter: PlatoonsFilter
+        filter: PlatoonFilter
     ): Int
     getPlatoon(name: String!): Platoon
 
