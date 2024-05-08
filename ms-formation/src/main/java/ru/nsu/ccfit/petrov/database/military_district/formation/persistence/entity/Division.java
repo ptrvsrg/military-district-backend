@@ -17,6 +17,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Getter
 @Setter
@@ -35,9 +37,11 @@ public class Division {
 
   @Embedded private Military commander;
 
+  @CreationTimestamp
   @Column(name = "created_at")
   private Instant createdAt;
 
+  @UpdateTimestamp
   @Column(name = "updated_at")
   private Instant updatedAt;
 
