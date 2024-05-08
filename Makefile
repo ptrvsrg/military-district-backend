@@ -40,7 +40,7 @@ env:
 .PHONY: supergraph
 supergraph:
 	$(DOCKER) run \
-	-v ./:/data ptrvsrg/apollographql-rover:latest \
+	-v ./:/data ptrvsrg/apollo-rover:latest \
 	supergraph compose --config /data/supergraph.yaml --output /data/supergraph.graphqls --elv2-license=accept;
 	sudo chown $(shell whoami):$(shell whoami) ./supergraph.graphqls
 
