@@ -45,7 +45,11 @@ public class Brigade {
   @Column(name = "updated_at")
   private Instant updatedAt;
 
-  @ManyToMany(mappedBy = "brigades")
+  @ManyToMany
+  @JoinTable(
+      name = "armies_brigades",
+      joinColumns = @JoinColumn(name = "brigade_id"),
+      inverseJoinColumns = @JoinColumn(name = "army_id"))
   private Set<Army> armies = new LinkedHashSet<>();
 
   @ManyToMany

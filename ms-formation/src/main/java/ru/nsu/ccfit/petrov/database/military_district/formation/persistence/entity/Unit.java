@@ -1,11 +1,15 @@
 package ru.nsu.ccfit.petrov.database.military_district.formation.persistence.entity;
 
+import static jakarta.persistence.CascadeType.ALL;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -48,15 +52,27 @@ public class Unit {
   @Column(name = "updated_at")
   private Instant updatedAt;
 
-  @ManyToMany(mappedBy = "units")
+  @ManyToMany
+  @JoinTable(
+      name = "brigades_units",
+      joinColumns = @JoinColumn(name = "unit_id"),
+      inverseJoinColumns = @JoinColumn(name = "brigade_id"))
   private Set<Brigade> brigades = new LinkedHashSet<>();
 
-  @OneToMany(mappedBy = "unit")
+  @OneToMany(mappedBy = "unit", cascade = ALL, orphanRemoval = true)
   private Set<Company> companies = new LinkedHashSet<>();
 
-  @ManyToMany(mappedBy = "units")
+  @ManyToMany
+  @JoinTable(
+          name = "corps_units",
+          joinColumns = @JoinColumn(name = "unit_id"),
+          inverseJoinColumns = @JoinColumn(name = "corps_id"))
   private Set<Corps> corps = new LinkedHashSet<>();
 
-  @ManyToMany(mappedBy = "units")
+  @ManyToMany
+  @JoinTable(
+          name = "divisions_units",
+          joinColumns = @JoinColumn(name = "unit_id"),
+          inverseJoinColumns = @JoinColumn(name = "division_id"))
   private Set<Division> divisions = new LinkedHashSet<>();
 }
