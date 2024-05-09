@@ -1,5 +1,5 @@
 server:
-  port: 58081
+  port: 8081
 spring:
   application:
     name: ms-military

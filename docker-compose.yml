@@ -124,7 +124,7 @@ services:
       timeout: 5s
       retries: 50
     ports:
-      - ${MILITARY_DISTRICT_MS_WEAPON_PORT:-58085}:8085
+      - ${MILITARY_DISTRICT_MS_WEAPON_PORT:-18085}:8085
     networks:
       - military-district-net
     depends_on:
@@ -147,7 +147,7 @@ services:
       timeout: 5s
       retries: 50
     ports:
-      - ${MILITARY_DISTRICT_MS_REPORT_PORT:-58086}:8086
+      - ${MILITARY_DISTRICT_MS_REPORT_PORT:-18086}:8086
     networks:
       - military-district-net
     depends_on:
