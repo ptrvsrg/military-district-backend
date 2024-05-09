@@ -11,7 +11,9 @@ import org.hibernate.annotations.Struct;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Struct(name = "coordinate")
+@Struct(
+    name = "coordinate",
+    attributes = {"lat", "lng"})
 public class Coordinate implements Serializable {
 
   private double lat;

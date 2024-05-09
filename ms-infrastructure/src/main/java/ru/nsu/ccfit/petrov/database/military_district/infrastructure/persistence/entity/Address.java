@@ -2,7 +2,6 @@ package ru.nsu.ccfit.petrov.database.military_district.infrastructure.persistenc
 
 import static java.lang.String.format;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,21 +13,16 @@ import org.hibernate.annotations.Struct;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Struct(name = "address")
+@Struct(
+    name = "address",
+    attributes = {"post_code", "country", "state", "locality", "street", "house_number"})
 public class Address implements Serializable {
 
-  @JsonProperty("post_code")
   private Integer postCode;
-
   private String country;
-
   private String state;
-
   private String locality;
-
   private String street;
-
-  @JsonProperty("house_number")
   private String houseNumber;
 
   public String toString() {
