@@ -154,7 +154,12 @@ public class ReportDaoImpl implements ReportDao {
             row ->
                 row.entrySet().stream()
                     .collect(
-                        Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().toString())))
+                        Collectors.toMap(
+                            Map.Entry::getKey,
+                            entry -> {
+                              var value = entry.getValue();
+                              return value == null ? "—" : value.toString();
+                            })))
         .collect(Collectors.toList());
   }
 
