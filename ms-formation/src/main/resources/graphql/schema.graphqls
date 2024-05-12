@@ -203,7 +203,7 @@ type Query {
     getSquadCount(
         filter: SquadFilter
     ): Int
-    getSquad(name: String!): Army
+    getSquad(name: String!): Squad
 
     getUnits(
         filter: UnitFilter
