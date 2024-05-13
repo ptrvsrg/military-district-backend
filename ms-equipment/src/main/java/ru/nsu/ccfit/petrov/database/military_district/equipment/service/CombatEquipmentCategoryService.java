@@ -12,7 +12,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.ccfit.petrov.database.military_district.equipment.dto.Pagination;
@@ -32,9 +31,11 @@ public class CombatEquipmentCategoryService implements GraphQLService {
 
   private final CombatEquipmentCategoryRepository combatEquipmentCategoryRepository;
 
-  @Cacheable(value = "combatEquipmentCategories", key = "#a0 + '_' + #a1", sync = true)
-  public List<CombatEquipmentCategory> getAll(
-      @Nullable Pagination pagination, @NonNull List<Sorting> sorts) {
+  @Cacheable(
+      value = "combatEquipmentCategories",
+      key = "#a0 + '_' + (#a1 != null ? #a1.toString() : 'null')",
+      sync = true)
+  public List<CombatEquipmentCategory> getAll(Pagination pagination, List<Sorting> sorts) {
     log.info("Get all combat equipment categories: pagination={}, sorts={}", pagination, sorts);
     var sort = generateSort(sorts, availableSortFields);
     var pageable = generatePageable(pagination, sort);
