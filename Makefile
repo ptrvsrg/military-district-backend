@@ -13,8 +13,8 @@ DOCKER_COMPOSE_DEV_FILE = $(HOME_DIR)/docker-compose-dev.yml
 
 define build_ms_module_image
 $(DOCKER) build \
--t $(2)$(1):latest \
--t $(2)$(1):$(shell $(MAVEN) help:evaluate -Dexpression=project.version -q -DforceStdout) \
+-t $(2)military-district-$(1):latest \
+-t $(2)military-district-$(1):$(shell $(MAVEN) help:evaluate -Dexpression=project.version -q -DforceStdout) \
 $(HOME_DIR)/$(1);
 endef
 
@@ -56,7 +56,7 @@ supergraph:
 .PHONY: dev
 dev:
 ifeq ($(shell [ -e $(DEV_ENV_FILE) ] && echo 1 || echo 0), 1)
-	$(DOCKER_COMPOSE) --env-file $(DEV_ENV_FILE) -f $(DOCKER_COMPOSE_DEV_FILE) -p military-district-backend-dev up
+	$(DOCKER_COMPOSE) --env-file $(DEV_ENV_FILE) -f $(DOCKER_COMPOSE_DEV_FILE) -p military-district-backend-dev up -d
 else
 	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_DEV_FILE) -p military-district-backend-dev up -d
 endif

@@ -13,7 +13,9 @@ services:
   ######### Microservices #########
   #################################
   ms-military:
-    image: ptrvsrg/ms-military:latest
+    build:
+      context: ms-military
+    image: ptrvsrg/military-district-ms-military:latest
     restart: unless-stopped
     environment:
       MILITARY_DISTRICT_MS_MILITARY_MODE: dev
@@ -36,7 +38,9 @@ services:
       keycloak:
         condition: service_healthy
   ms-formation:
-    image: ptrvsrg/ms-formation:latest
+    build:
+      context: ms-formation
+    image: ptrvsrg/military-district-formation:latest
     restart: unless-stopped
     environment:
       MILITARY_DISTRICT_MS_FORMATION_MODE: dev
@@ -59,7 +63,9 @@ services:
       keycloak:
         condition: service_healthy
   ms-infrastructure:
-    image: ptrvsrg/ms-infrastructure:latest
+    build:
+      context: ms-infrastructure
+    image: ptrvsrg/military-district-infrastructure:latest
     restart: unless-stopped
     environment:
       MILITARY_DISTRICT_MS_INFRASTRUCTURE_MODE: dev
@@ -82,7 +88,9 @@ services:
       keycloak:
         condition: service_healthy
   ms-equipment:
-    image: ptrvsrg/ms-equipment:latest
+    build:
+      context: ms-equipment
+    image: ptrvsrg/military-district-equipment:latest
     restart: unless-stopped
     environment:
       MILITARY_DISTRICT_MS_EQUIPMENT_MODE: dev
@@ -105,7 +113,9 @@ services:
       keycloak:
         condition: service_healthy
   ms-weapon:
-    image: ptrvsrg/ms-weapon:latest
+    build:
+      context: ms-weapon
+    image: ptrvsrg/military-district-weapon:latest
     restart: unless-stopped
     environment:
       MILITARY_DISTRICT_MS_WEAPON_MODE: dev
@@ -128,7 +138,9 @@ services:
       keycloak:
         condition: service_healthy
   ms-report:
-    image: ptrvsrg/ms-report:latest
+    build:
+      context: ms-report
+    image: ptrvsrg/military-district-report:latest
     restart: unless-stopped
     environment:
       MILITARY_DISTRICT_MS_REPORT_MODE: dev
