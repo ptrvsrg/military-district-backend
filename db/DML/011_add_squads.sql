@@ -14,12 +14,10 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-INSERT INTO squads(name, commander_mbn, platoon_id, created_at, updated_at)
+INSERT INTO squads(name, commander_mbn, platoon_id)
 SELECT ROW_NUMBER() OVER () || '-е отделение' AS name,
        get_random_military_mbn()              AS commander_mbn,
-       p.platoon_id                           AS platoon_id,
-       NOW()                                  AS created_at,
-       NOW()                                  AS updated_at
+       p.platoon_id                           AS platoon_id
 FROM (SELECT p.id AS platoon_id
       FROM platoons p
       UNION ALL

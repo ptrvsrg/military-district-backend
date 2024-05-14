@@ -16,12 +16,10 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-INSERT INTO companies(name, commander_mbn, unit_id, created_at, updated_at)
+INSERT INTO companies(name, commander_mbn, unit_id)
 SELECT ROW_NUMBER() OVER () || '-я рота' AS name,
        get_random_officer_mbn()          AS commander_mbn,
-       u.unit_id                         AS unit_id,
-       NOW()                             AS created_at,
-       NOW()                             AS updated_at
+       u.unit_id                         AS unit_id
 FROM (SELECT u.id AS unit_id
       FROM units u
       UNION ALL

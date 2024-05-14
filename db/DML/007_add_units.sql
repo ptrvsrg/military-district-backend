@@ -193,13 +193,11 @@ WITH locations AS
                          'ул. Лермонтова', '83')::ADDRESS))
                    AS locations(coordinate, address))
 INSERT
-INTO units (name, coordinate, address, commander_mbn, created_at, updated_at)
+INTO units (name, coordinate, address, commander_mbn)
 SELECT ROW_NUMBER() OVER () || '-я воинская часть' AS name,
        l.coordinate                                AS coordinate,
        l.address                                   AS address,
-       get_random_officer_mbn()                    AS commander_mbn,
-       NOW()                                       AS created_at,
-       NOW()                                       AS updated_at
+       get_random_officer_mbn()                    AS commander_mbn
 FROM locations l
 ON CONFLICT
     DO NOTHING;

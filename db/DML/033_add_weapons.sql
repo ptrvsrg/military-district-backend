@@ -19,12 +19,10 @@ $$
         FOR i IN 1..500
             LOOP
                 INSERT
-                INTO weapons (serial_number, type_id, unit_name, created_at, updated_at)
+                INTO weapons (serial_number, type_id, unit_name)
                 SELECT UPPER(LEFT(TRANSLATE(gen_random_uuid()::TEXT, '-', '')::TEXT, 17)) AS serial_number,
                        cet.id                                                             AS type_id,
-                       get_random_unit_name()                                             AS unit_name,
-                       NOW()                                                              AS created_at,
-                       NOW()                                                              AS updated_at
+                       get_random_unit_name()                                             AS unit_name
                 FROM weapon_types cet
                 ON CONFLICT DO NOTHING;
             END LOOP;

@@ -47,15 +47,13 @@ WITH first_names AS (SELECT *
                                    ('Кириллович'),
                                    ('Васильевич')) AS middle_name(middle_name))
 INSERT
-INTO militaries (mbn, first_name, last_name, middle_name, birth_date, rank_id, created_at, updated_at)
+INTO militaries (mbn, first_name, last_name, middle_name, birth_date, rank_id)
 SELECT 'ВС России Э-' || LPAD((ROW_NUMBER() OVER ())::TEXT, 6, '0')                              AS mbn,
        f.first_name                                                                              AS first_name,
        l.last_name                                                                               AS last_name,
        m.middle_name                                                                             AS middle_name,
        date(CURRENT_DATE - INTERVAL '18 years' - INTERVAL '1 days' * FLOOR(RANDOM() * 365 * 50)) AS birth_date,
-       get_random_rank_id()                                                                      AS rank_id,
-       NOW()                                                                                     AS created_at,
-       NOW()                                                                                     AS updated_at
+       get_random_rank_id()                                                                      AS rank_id
 FROM first_names f,
      last_names l,
      middle_names m

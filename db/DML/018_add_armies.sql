@@ -21,11 +21,9 @@ $$
     BEGIN
         FOR i IN 1..4
             LOOP
-                INSERT INTO armies(name, commander_mbn, created_at, updated_at)
+                INSERT INTO armies(name, commander_mbn)
                 SELECT i || '-я армия'          AS name,
-                       get_random_officer_mbn() AS commander_mbn,
-                       NOW()                    AS created_at,
-                       NOW()                    AS updated_at
+                       get_random_officer_mbn() AS commander_mbn
                 ON CONFLICT DO NOTHING;
             END LOOP;
     END

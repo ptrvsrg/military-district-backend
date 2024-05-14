@@ -3,8 +3,8 @@ CREATE TABLE IF NOT EXISTS companies
     id            SERIAL PRIMARY KEY,
     name          VARCHAR(255) NOT NULL UNIQUE,
     commander_mbn VARCHAR(255) REFERENCES militaries (mbn) ON DELETE SET NULL ON UPDATE CASCADE,
-    created_at    TIMESTAMPTZ  NOT NULL,
-    updated_at    TIMESTAMPTZ  NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     unit_id       INTEGER      NOT NULL REFERENCES units (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
