@@ -5,8 +5,8 @@ CREATE TABLE IF NOT EXISTS reports
     description TEXT,
     query       TEXT           NOT NULL,
     parameters  VARCHAR(255)[] NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at  TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMPTZ    NOT NULL DEFAULT NOW()
 );
 
 COMMENT ON TABLE reports IS 'Отчёты';

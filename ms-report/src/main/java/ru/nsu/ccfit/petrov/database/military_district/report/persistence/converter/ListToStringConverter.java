@@ -1,11 +1,10 @@
 package ru.nsu.ccfit.petrov.database.military_district.report.persistence.converter;
 
+import static java.lang.String.format;
+
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
-
 import java.util.List;
-
-import static java.lang.String.format;
 
 @Converter(autoApply = true)
 public class ListToStringConverter implements AttributeConverter<List<String>, String> {

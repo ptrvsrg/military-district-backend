@@ -5,8 +5,8 @@ CREATE TABLE IF NOT EXISTS buildings
     coordinate COORDINATE,
     address    ADDRESS,
     unit_name  VARCHAR(255) REFERENCES units (name) ON DELETE SET NULL ON UPDATE CASCADE,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
     UNIQUE (name, unit_name)
 );
 COMMENT ON TABLE buildings IS 'Сооружения';

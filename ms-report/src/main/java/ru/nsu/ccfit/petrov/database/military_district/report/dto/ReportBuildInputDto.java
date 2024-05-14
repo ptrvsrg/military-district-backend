@@ -1,10 +1,7 @@
 package ru.nsu.ccfit.petrov.database.military_district.report.dto;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

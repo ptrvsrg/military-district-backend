@@ -10,10 +10,10 @@ import org.springframework.data.domain.Sort;
 @UtilityClass
 public class SpecPageSortUtils {
 
-    public static Pageable generatePageable(Integer page, Integer pageSize, @NonNull Sort sort) {
-        if (ObjectUtils.anyNull(page, pageSize)) {
-            return Pageable.unpaged(sort);
-        }
-        return PageRequest.of(page, pageSize, sort);
+  public static Pageable generatePageable(Integer page, Integer pageSize, @NonNull Sort sort) {
+    if (ObjectUtils.anyNull(page, pageSize)) {
+      return Pageable.unpaged(sort);
     }
+    return PageRequest.of(page, pageSize, sort);
+  }
 }

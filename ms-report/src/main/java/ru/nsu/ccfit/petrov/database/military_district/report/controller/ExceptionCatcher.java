@@ -122,7 +122,7 @@ public class ExceptionCatcher {
     var message = getMessage("exception.report-not-found", request);
     log.warn("handleReportNotFoundException: {}", message);
     return ResponseEntity.status(NOT_FOUND)
-            .body(ErrorDto.builder().createdAt(Instant.now()).message(message).build());
+        .body(ErrorDto.builder().createdAt(Instant.now()).message(message).build());
   }
 
   @ExceptionHandler(DuplicateReportException.class)
@@ -130,7 +130,7 @@ public class ExceptionCatcher {
     var message = getMessage("exception.duplicate-report", request);
     log.warn("handleDuplicateReportException: {}", message);
     return ResponseEntity.status(CONFLICT)
-            .body(ErrorDto.builder().createdAt(Instant.now()).message(message).build());
+        .body(ErrorDto.builder().createdAt(Instant.now()).message(message).build());
   }
 
   @ExceptionHandler(Exception.class)
