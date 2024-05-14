@@ -1,18 +1,17 @@
 package ru.nsu.ccfit.petrov.database.military_district.report.dto;
 
-import java.util.ArrayList;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
-public class ReportOutputDto {
+public class ReportInfoOutputDto {
 
   private String name;
-  private List<String> parameters = new ArrayList<>();
+  private String description;
+  private String[] parameters = new String[0];
 }

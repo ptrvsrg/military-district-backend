@@ -17,7 +17,7 @@ public class CsvService {
 
   public InputStream convertToCSV(List<Map<String, String>> data) throws IOException {
     if (CollectionUtils.isEmpty(data)) {
-      throw new IllegalArgumentException("Data list is empty");
+      return new ByteArrayInputStream(new byte[0]);
     }
 
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

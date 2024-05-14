@@ -9,8 +9,6 @@ spring:
     password: ${MILITARY_DISTRICT_MS_REPORT_DB_PASSWORD}
   jpa:
     show-sql: true
-    hibernate:
-      ddl-auto: validate
   security:
     oauth2:
       resourceserver:

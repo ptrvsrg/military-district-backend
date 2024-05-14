@@ -17,6 +17,7 @@ import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.nsu.ccfit.petrov.database.military_district.report.dto.ReportBuildInputDto;
 import ru.nsu.ccfit.petrov.database.military_district.report.dto.ReportBuildOutputDto;
-import ru.nsu.ccfit.petrov.database.military_district.report.dto.ReportOutputDto;
+import ru.nsu.ccfit.petrov.database.military_district.report.dto.ReportInfoOutputDto;
 import ru.nsu.ccfit.petrov.database.military_district.report.service.CsvService;
 import ru.nsu.ccfit.petrov.database.military_district.report.service.ReportService;
 
@@ -38,7 +39,7 @@ public class ReportController {
 
   @GetMapping(GET_ALL_REPORTS_SUFFIX)
   @PreAuthorize("hasAuthority('VIEW_REPORTS')")
-  public ResponseEntity<List<ReportOutputDto>> getReports(
+  public ResponseEntity<List<ReportInfoOutputDto>> getReports(
       @RequestParam(name = "page", required = false) Integer page,
       @RequestParam(name = "pageSize", required = false) Integer pageSize) {
     return ResponseEntity.status(OK).body(reportService.getReports(page, pageSize));
@@ -52,25 +53,29 @@ public class ReportController {
 
   @GetMapping(GET_REPORT_SUFFIX)
   @PreAuthorize("hasAuthority('VIEW_REPORTS')")
-  public ResponseEntity<ReportOutputDto> getReport(@RequestParam("reportName") String reportName) {
-    return ResponseEntity.status(OK).body(reportService.getReport(reportName));
+  public ResponseEntity<ReportInfoOutputDto> getReport(@RequestParam("name") String name) {
+    return ResponseEntity.status(OK).body(reportService.getReport(name));
   }
 
   @PostMapping(BUILD_SUFFIX)
   @PreAuthorize("hasAuthority('BUILD_REPORT')")
   public ResponseEntity<ReportBuildOutputDto> buildReport(
-      @RequestBody ReportBuildInputDto inputDto) {
-    return ResponseEntity.status(OK).body(reportService.buildReport(inputDto));
+      @RequestParam("name") String name, @RequestBody ReportBuildInputDto inputDto) {
+    return ResponseEntity.status(OK).body(reportService.buildReport(name, inputDto));
   }
 
   @PostMapping(value = EXPORT_SUFFIX, produces = "text/csv")
   @PreAuthorize("hasAuthority('BUILD_REPORT')")
-  public void exportReport(@RequestBody ReportBuildInputDto inputDto, HttpServletResponse response)
+  public void exportReport(
+      @RequestParam("name") String name,
+      @RequestBody ReportBuildInputDto inputDto,
+      HttpServletResponse response)
       throws IOException {
-    var outputDto = reportService.buildReport(inputDto);
+    var outputDto = reportService.buildReport(name, inputDto);
     var csvStream = csvService.convertToCSV(outputDto.getData());
+
+    response.setStatus(OK.value());
     IOUtils.copyLarge(csvStream, response.getOutputStream());
     IOUtils.closeQuietly(csvStream);
-    response.setStatus(OK.value());
   }
 }

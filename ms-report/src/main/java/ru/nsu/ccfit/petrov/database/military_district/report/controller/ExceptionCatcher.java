@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.petrov.database.military_district.report.controller;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.METHOD_NOT_ALLOWED;
@@ -27,6 +28,7 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import ru.nsu.ccfit.petrov.database.military_district.report.dto.ErrorDto;
+import ru.nsu.ccfit.petrov.database.military_district.report.exception.DuplicateReportException;
 import ru.nsu.ccfit.petrov.database.military_district.report.exception.ReportNotFoundException;
 
 @RestControllerAdvice
@@ -120,7 +122,15 @@ public class ExceptionCatcher {
     var message = getMessage("exception.report-not-found", request);
     log.warn("handleReportNotFoundException: {}", message);
     return ResponseEntity.status(NOT_FOUND)
-        .body(ErrorDto.builder().createdAt(Instant.now()).message(message).build());
+            .body(ErrorDto.builder().createdAt(Instant.now()).message(message).build());
+  }
+
+  @ExceptionHandler(DuplicateReportException.class)
+  public ResponseEntity<ErrorDto> handleDuplicateReportException(HttpServletRequest request) {
+    var message = getMessage("exception.duplicate-report", request);
+    log.warn("handleDuplicateReportException: {}", message);
+    return ResponseEntity.status(CONFLICT)
+            .body(ErrorDto.builder().createdAt(Instant.now()).message(message).build());
   }
 
   @ExceptionHandler(Exception.class)

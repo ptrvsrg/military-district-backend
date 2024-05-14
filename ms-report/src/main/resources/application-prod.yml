@@ -7,9 +7,6 @@ spring:
     url: jdbc:postgresql://${MILITARY_DISTRICT_MS_REPORT_DB_URL}
     username: ${MILITARY_DISTRICT_MS_REPORT_DB_USER}
     password: ${MILITARY_DISTRICT_MS_REPORT_DB_PASSWORD}
-  jpa:
-    hibernate:
-      ddl-auto: validate
   security:
     oauth2:
       resourceserver:

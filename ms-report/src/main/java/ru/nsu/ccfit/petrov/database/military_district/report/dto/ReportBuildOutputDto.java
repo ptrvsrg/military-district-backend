@@ -14,6 +14,5 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ReportBuildOutputDto {
 
-  private List<String> columns = new ArrayList<>();
   private List<Map<String, String>> data = new ArrayList<>();
 }

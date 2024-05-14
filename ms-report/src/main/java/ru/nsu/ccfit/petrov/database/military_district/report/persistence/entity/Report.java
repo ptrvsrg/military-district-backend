@@ -1,20 +1,45 @@
 package ru.nsu.ccfit.petrov.database.military_district.report.persistence.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import ru.nsu.ccfit.petrov.database.military_district.report.persistence.converter.ListToStringConverter;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Getter
+@Setter
+@Entity
+@Table(name = "reports")
 public class Report {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
+
   private String name;
+
+  private String description;
+
+  private String query;
+
+  @Convert(converter = ListToStringConverter.class)
   private List<String> parameters = new ArrayList<>();
-  private List<String> columns = new ArrayList<>();
-  private List<Map<String, String>> data = new ArrayList<>();
+
+  @CreationTimestamp
+  @Column(name = "created_at")
+  private Instant createdAt;
+
+  @UpdateTimestamp
+  @Column(name = "updated_at")
+  private Instant updatedAt;
 }
