@@ -52,15 +52,17 @@ supergraph:
 	supergraph compose --config /data/supergraph.yaml --output /data/supergraph.graphqls --elv2-license=accept;
 	sudo chown $(shell whoami):$(shell whoami) ./supergraph.graphqls
 
-
-.PHONY: dev
-dev:
+.PHONY: dev-up
+dev-up:
 ifeq ($(shell [ -e $(DEV_ENV_FILE) ] && echo 1 || echo 0), 1)
 	$(DOCKER_COMPOSE) --env-file $(DEV_ENV_FILE) -f $(DOCKER_COMPOSE_DEV_FILE) -p military-district-backend-dev up -d
 else
 	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_DEV_FILE) -p military-district-backend-dev up -d
 endif
 
+.PHONY: dev-down
+dev-down:
+	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) -p military-district-backend-dev down --remove-orphans
 
 .PHONY: up
 up:
@@ -89,8 +91,10 @@ help:
 	@echo "        Create template .env.development file"
 	@echo "    make supergraph"
 	@echo "        Generate supergraph schema"
-	@echo "    make dev"
+	@echo "    make dev-up"
 	@echo "        Deploy to Docker for Development"
+	@echo "    make dev-down"
+	@echo "        Stop and remove containers for Development"
 	@echo "    make up"
 	@echo "        Deploy to Docker for Production"
 	@echo "    make down"
