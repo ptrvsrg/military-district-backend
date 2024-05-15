@@ -1,0 +1,439 @@
+version: '3'
+
+volumes:
+  postgres_node_0_data:
+  postgres_node_1_data:
+  postgres_node_2_data:
+  supergraph_data:
+  pgadmin_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  military-district-net:
+
+services:
+
+  #################################
+  ######### Microservices #########
+  #################################
+  ms-military:
+    image: ptrvsrg/military-district-ms-military:latest
+    restart: unless-stopped
+    environment:
+      MILITARY_DISTRICT_MS_MILITARY_MODE: prod
+      MILITARY_DISTRICT_MS_MILITARY_DB_URL: postgres-node-0:5432,postgres-node-1:5432,postgres-node-2:5432/military_district?targetServerType=primary
+      MILITARY_DISTRICT_MS_MILITARY_DB_USER: ${MILITARY_DISTRICT_POSTGRES_USER:-user}
+      MILITARY_DISTRICT_MS_MILITARY_DB_PASSWORD: ${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}
+      MILITARY_DISTRICT_MS_MILITARY_OAUTH2_CERT_URL: http://keycloak:8080/realms/military-district/protocol/openid-connect/certs
+    healthcheck:
+      test: [ 'CMD-SHELL', 'wget -T5 -qO- http://localhost:8081/actuator/health | grep UP || exit 1' ]
+      interval: 5s
+      timeout: 5s
+      retries: 50
+    ports:
+      - ${MILITARY_DISTRICT_MS_MILITARY_PORT:-18081}:8081
+    networks:
+      - military-district-net
+    depends_on:
+      postgres-migration:
+        condition: service_completed_successfully
+      keycloak:
+        condition: service_healthy
+  ms-formation:
+    image: ptrvsrg/military-district-ms-formation:latest
+    restart: unless-stopped
+    environment:
+      MILITARY_DISTRICT_MS_FORMATION_MODE: prod
+      MILITARY_DISTRICT_MS_FORMATION_DB_URL: postgres-node-0:5432,postgres-node-1:5432,postgres-node-2:5432/military_district?targetServerType=primary
+      MILITARY_DISTRICT_MS_FORMATION_DB_USER: ${MILITARY_DISTRICT_POSTGRES_USER:-user}
+      MILITARY_DISTRICT_MS_FORMATION_DB_PASSWORD: ${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}
+      MILITARY_DISTRICT_MS_FORMATION_OAUTH2_CERT_URL: http://keycloak:8080/realms/military-district/protocol/openid-connect/certs
+    healthcheck:
+      test: [ 'CMD-SHELL', 'wget -T5 -qO- http://localhost:8082/actuator/health | grep UP || exit 1' ]
+      interval: 5s
+      timeout: 5s
+      retries: 50
+    ports:
+      - ${MILITARY_DISTRICT_MS_FORMATION_PORT:-18082}:8082
+    networks:
+      - military-district-net
+    depends_on:
+      postgres-migration:
+        condition: service_completed_successfully
+      keycloak:
+        condition: service_healthy
+  ms-infrastructure:
+    image: ptrvsrg/military-district-ms-infrastructure:latest
+    restart: unless-stopped
+    environment:
+      MILITARY_DISTRICT_MS_INFRASTRUCTURE_MODE: prod
+      MILITARY_DISTRICT_MS_INFRASTRUCTURE_DB_URL: postgres-node-0:5432,postgres-node-1:5432,postgres-node-2:5432/military_district?targetServerType=primary
+      MILITARY_DISTRICT_MS_INFRASTRUCTURE_DB_USER: ${MILITARY_DISTRICT_POSTGRES_USER:-user}
+      MILITARY_DISTRICT_MS_INFRASTRUCTURE_DB_PASSWORD: ${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}
+      MILITARY_DISTRICT_MS_INFRASTRUCTURE_OAUTH2_CERT_URL: http://keycloak:8080/realms/military-district/protocol/openid-connect/certs
+    healthcheck:
+      test: [ 'CMD-SHELL', 'wget -T5 -qO- http://localhost:8083/actuator/health | grep UP || exit 1' ]
+      interval: 5s
+      timeout: 5s
+      retries: 50
+    ports:
+      - ${MILITARY_DISTRICT_MS_INFRASTRUCTURE_PORT:-18083}:8083
+    networks:
+      - military-district-net
+    depends_on:
+      postgres-migration:
+        condition: service_completed_successfully
+      keycloak:
+        condition: service_healthy
+  ms-equipment:
+    image: ptrvsrg/military-district-ms-equipment:latest
+    restart: unless-stopped
+    environment:
+      MILITARY_DISTRICT_MS_EQUIPMENT_MODE: prod
+      MILITARY_DISTRICT_MS_EQUIPMENT_DB_URL: postgres-node-0:5432,postgres-node-1:5432,postgres-node-2:5432/military_district?targetServerType=primary
+      MILITARY_DISTRICT_MS_EQUIPMENT_DB_USER: ${MILITARY_DISTRICT_POSTGRES_USER:-user}
+      MILITARY_DISTRICT_MS_EQUIPMENT_DB_PASSWORD: ${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}
+      MILITARY_DISTRICT_MS_EQUIPMENT_OAUTH2_CERT_URL: http://keycloak:8080/realms/military-district/protocol/openid-connect/certs
+    healthcheck:
+      test: [ 'CMD-SHELL', 'wget -T5 -qO- http://localhost:8084/actuator/health | grep UP || exit 1' ]
+      interval: 5s
+      timeout: 5s
+      retries: 50
+    ports:
+      - ${MILITARY_DISTRICT_MS_EQUIPMENT_PORT:-18084}:8084
+    networks:
+      - military-district-net
+    depends_on:
+      postgres-migration:
+        condition: service_completed_successfully
+      keycloak:
+        condition: service_healthy
+  ms-weapon:
+    image: ptrvsrg/military-district-ms-weapon:latest
+    restart: unless-stopped
+    environment:
+      MILITARY_DISTRICT_MS_WEAPON_MODE: prod
+      MILITARY_DISTRICT_MS_WEAPON_DB_URL: postgres-node-0:5432,postgres-node-1:5432,postgres-node-2:5432/military_district?targetServerType=primary
+      MILITARY_DISTRICT_MS_WEAPON_DB_USER: ${MILITARY_DISTRICT_POSTGRES_USER:-user}
+      MILITARY_DISTRICT_MS_WEAPON_DB_PASSWORD: ${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}
+      MILITARY_DISTRICT_MS_WEAPON_OAUTH2_CERT_URL: http://keycloak:8080/realms/military-district/protocol/openid-connect/certs
+    healthcheck:
+      test: [ 'CMD-SHELL', 'wget -T5 -qO- http://localhost:8085/actuator/health | grep UP || exit 1' ]
+      interval: 5s
+      timeout: 5s
+      retries: 50
+    ports:
+      - ${MILITARY_DISTRICT_MS_WEAPON_PORT:-18085}:8085
+    networks:
+      - military-district-net
+    depends_on:
+      postgres-migration:
+        condition: service_completed_successfully
+      keycloak:
+        condition: service_healthy
+  ms-report:
+    image: ptrvsrg/military-district-ms-report:latest
+    restart: unless-stopped
+    environment:
+      MILITARY_DISTRICT_MS_REPORT_MODE: prod
+      MILITARY_DISTRICT_MS_REPORT_DB_URL: postgres-node-0:5432,postgres-node-1:5432,postgres-node-2:5432/military_district?targetServerType=preferSecondary
+      MILITARY_DISTRICT_MS_REPORT_DB_USER: ${MILITARY_DISTRICT_POSTGRES_USER:-user}
+      MILITARY_DISTRICT_MS_REPORT_DB_PASSWORD: ${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}
+      MILITARY_DISTRICT_MS_REPORT_OAUTH2_CERT_URL: http://keycloak:8080/realms/military-district/protocol/openid-connect/certs
+    healthcheck:
+      test: [ 'CMD-SHELL', 'wget -T5 -qO- http://localhost:8086/actuator/health | grep UP || exit 1' ]
+      interval: 5s
+      timeout: 5s
+      retries: 50
+    ports:
+      - ${MILITARY_DISTRICT_MS_REPORT_PORT:-18086}:8086
+    networks:
+      - military-district-net
+    depends_on:
+      postgres-migration:
+        condition: service_completed_successfully
+      keycloak:
+        condition: service_healthy
+
+  ##########################
+  ######### Router #########
+  ##########################
+  supergraph:
+    image: ptrvsrg/apollo-rover:latest
+    command: supergraph compose --config /opt/supergraph/supergraph.yaml --output /opt/supergraph/supergraph.graphqls --elv2-license=accept
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+    volumes:
+      - supergraph_data:/opt/supergraph
+      - ./deploy/router/supergraph.yaml:/opt/supergraph/supergraph.yaml
+    networks:
+      - military-district-net
+    depends_on:
+      ms-equipment:
+        condition: service_healthy
+      ms-formation:
+        condition: service_healthy
+      ms-infrastructure:
+        condition: service_healthy
+      ms-military:
+        condition: service_healthy
+      ms-weapon:
+        condition: service_healthy
+  ms-router:
+    image: ptrvsrg/apollo-router:latest
+    restart: unless-stopped
+    command: -c config/router.yaml -s config/supergraph/supergraph.graphqls
+    healthcheck:
+      test: [ 'CMD-SHELL', 'wget -T5 -qO- http://localhost:8088/health | grep UP || exit 1' ]
+      interval: 5s
+      timeout: 5s
+      retries: 50
+    ports:
+      - ${MILITARY_DISTRICT_ROUTER_PORT:-18080}:8080
+    volumes:
+      - supergraph_data:/dist/config/supergraph
+      - ./deploy/router/router.yaml:/dist/config/router.yaml
+    networks:
+      - military-district-net
+    depends_on:
+      supergraph:
+        condition: service_completed_successfully
+
+  ###############################
+  ######### API Gateway #########
+  ###############################
+  api-gateway:
+    image: nginx:alpine
+    restart: unless-stopped
+    volumes:
+      - ./deploy/api-gateway/nginx.conf:/etc/nginx/nginx.conf
+    healthcheck:
+      test: [ 'CMD-SHELL', 'nc -z localhost 80 || exit 1' ]
+      interval: 5s
+      timeout: 5s
+      retries: 50
+    ports:
+      - ${MILITARY_DISTRICT_API_GATEWAY_PORT:-10084}:80
+    networks:
+      - military-district-net
+    depends_on:
+      ms-router:
+        condition: service_healthy
+      ms-report:
+        condition: service_healthy
+  api-gateway-prometheus-exporter:
+    image: nginx/nginx-prometheus-exporter:1.1
+    restart: unless-stopped
+    command: -nginx.scrape-uri=http://api-gateway/api/v0/gateway/metrics
+    networks:
+      - military-district-net
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+
+  ######################################
+  ######### PostgreSQL Cluster #########
+  ######################################
+  postgres-node-0:
+    image: bitnami/postgresql-repmgr:16
+    restart: unless-stopped
+    environment:
+      POSTGRESQL_POSTGRES_PASSWORD: ${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}
+      POSTGRESQL_USERNAME: ${MILITARY_DISTRICT_POSTGRES_USER:-user}
+      POSTGRESQL_PASSWORD: ${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}
+      REPMGR_PASSWORD: ${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}
+      REPMGR_PRIMARY_HOST: postgres-node-0
+      REPMGR_PARTNER_NODES: postgres-node-0:5432,postgres-node-1:5432,postgres-node-2:5432
+      REPMGR_NODE_NAME: postgres-node-0
+      REPMGR_NODE_NETWORK_NAME: postgres-node-0
+    healthcheck:
+      test: [ 'CMD-SHELL', '/opt/bitnami/scripts/postgresql-repmgr/entrypoint.sh', 'pg_isready' ]
+      interval: 5s
+      timeout: 5s
+      retries: 50
+    ports:
+      - ${MILITARY_DISTRICT_POSTGRES_0_PORT:-15432}:5432
+    volumes:
+      - postgres_node_0_data:/bitnami/postgresql
+      - ./deploy/postgres-cluster:/docker-entrypoint-initdb.d
+    networks:
+      - military-district-net
+  postgres-node-1:
+    image: bitnami/postgresql-repmgr:16
+    restart: unless-stopped
+    environment:
+      POSTGRESQL_POSTGRES_PASSWORD: ${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}
+      POSTGRESQL_USERNAME: ${MILITARY_DISTRICT_POSTGRES_USER:-user}
+      POSTGRESQL_PASSWORD: ${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}
+      REPMGR_PASSWORD: ${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}
+      REPMGR_PRIMARY_HOST: postgres-node-0
+      REPMGR_PARTNER_NODES: postgres-node-0:5432,postgres-node-1:5432,postgres-node-2:5432
+      REPMGR_NODE_NAME: postgres-node-1
+      REPMGR_NODE_NETWORK_NAME: postgres-node-1
+    healthcheck:
+      test: [ 'CMD-SHELL', '/opt/bitnami/scripts/postgresql-repmgr/entrypoint.sh', 'pg_isready' ]
+      interval: 5s
+      timeout: 5s
+      retries: 50
+    ports:
+      - ${MILITARY_DISTRICT_POSTGRES_1_PORT:-15433}:5432
+    volumes:
+      - postgres_node_1_data:/bitnami/postgresql
+    networks:
+      - military-district-net
+  postgres-node-2:
+    image: bitnami/postgresql-repmgr:16
+    restart: unless-stopped
+    environment:
+      POSTGRESQL_POSTGRES_PASSWORD: ${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}
+      POSTGRESQL_USERNAME: ${MILITARY_DISTRICT_POSTGRES_USER:-user}
+      POSTGRESQL_PASSWORD: ${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}
+      REPMGR_PASSWORD: ${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}
+      REPMGR_PRIMARY_HOST: postgres-node-0
+      REPMGR_PARTNER_NODES: postgres-node-0:5432,postgres-node-1:5432,postgres-node-2:5432
+      REPMGR_NODE_NAME: postgres-node-2
+      REPMGR_NODE_NETWORK_NAME: postgres-node-2
+    healthcheck:
+      test: [ 'CMD-SHELL', '/opt/bitnami/scripts/postgresql-repmgr/entrypoint.sh', 'pg_isready' ]
+      interval: 5s
+      timeout: 5s
+      retries: 50
+    ports:
+      - ${MILITARY_DISTRICT_POSTGRES_2_PORT:-15434}:5432
+    volumes:
+      - postgres_node_2_data:/bitnami/postgresql
+    networks:
+      - military-district-net
+  postgres-migration:
+    image: liquibase/liquibase:4.27-alpine
+    command:
+      - --driver=org.postgresql.Driver
+      - --changeLogFile=db.changelog-master.xml
+      - --url=jdbc:postgresql://postgres-node-0:5432/military_district
+      - --username=${MILITARY_DISTRICT_POSTGRES_USER:-user}
+      - --password=${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}
+      - update
+    volumes:
+      - ./db/db.changelog-master.xml:/liquibase/db.changelog-master.xml
+      - ./db/DDL:/liquibase/DDL
+      - ./db/DML:/liquibase/DML
+      - ./db/reports:/liquibase/reports
+    networks:
+      - military-district-net
+    depends_on:
+      postgres-node-0:
+        condition: service_healthy
+      postgres-node-1:
+        condition: service_healthy
+      postgres-node-2:
+        condition: service_healthy
+
+  ###########################
+  ######### PGAdmin #########
+  ###########################
+  pgadmin:
+    image: dpage/pgadmin4:8.5
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${MILITARY_DISTRICT_PGADMIN_EMAIL:-user@mail.ru}
+      PGADMIN_DEFAULT_PASSWORD: ${MILITARY_DISTRICT_PGADMIN_PASSWORD:-password}
+    healthcheck:
+      test: [ 'CMD-SHELL', 'wget -O - http://localhost:80/misc/ping' ]
+      interval: 5s
+      timeout: 5s
+      retries: 50
+    ports:
+      - ${MILITARY_DISTRICT_PGADMIN_PORT:-10081}:80
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./deploy/pgadmin/servers.json:/pgadmin4/servers.json
+    networks:
+      - military-district-net
+    depends_on:
+      postgres-node-0:
+        condition: service_healthy
+      postgres-node-1:
+        condition: service_healthy
+      postgres-node-2:
+        condition: service_healthy
+
+  ############################
+  ######### Keycloak #########
+  ############################
+  keycloak:
+    image: keycloak/keycloak:24.0
+    restart: unless-stopped
+    command: start-dev --import-realm
+    environment:
+      KC_DB: postgres
+      KC_DB_USERNAME: ${MILITARY_DISTRICT_POSTGRES_USER:-user}
+      KC_DB_PASSWORD: ${MILITARY_DISTRICT_POSTGRES_PASSWORD:-password}
+      KC_DB_URL: |-
+        jdbc:postgresql://postgres-node-0:5432,postgres-node-1:5432,postgres-node-2:5432/keycloak?targetServerType=primary
+      KC_METRICS_ENABLED: true
+      KC_HEALTH_ENABLED: true
+      KC_FEATURES: update-email
+      KEYCLOAK_ADMIN: ${MILITARY_DISTRICT_KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${MILITARY_DISTRICT_KEYCLOAK_PASSWORD:-password}
+    healthcheck:
+      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080;echo -e \"GET /health/ready HTTP/1.1\r\nhost: http://localhost\r\nConnection: close\r\n\r\n\" >&3;grep \"HTTP/1.1 200 OK\" <&3" ]
+      interval: 5s
+      timeout: 5s
+      retries: 50
+    ports:
+      - ${MILITARY_DISTRICT_KEYCLOAK_PORT:-10083}:8080
+    volumes:
+      - ./deploy/keycloak:/opt/keycloak/data/import
+    networks:
+      - military-district-net
+    depends_on:
+      postgres-node-0:
+        condition: service_healthy
+      postgres-node-1:
+        condition: service_healthy
+      postgres-node-2:
+        condition: service_healthy
+
+  ##############################
+  ######### Monitoring #########
+  ##############################
+  prometheus:
+    image: prom/prometheus:v2.51.1
+    restart: unless-stopped
+    command: --config.file=/etc/prometheus/prometheus.yml
+    healthcheck:
+      test: [ "CMD-SHELL", "nc -z localhost 9090" ]
+      interval: 5s
+      timeout: 5s
+      retries: 50
+    ports:
+      - ${MILITARY_DISTRICT_PROMETHEUS_PORT:-19090}:9090
+    volumes:
+      - ./deploy/prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+    networks:
+      - military-district-net
+  grafana:
+    image: grafana/grafana:10.3.4
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${MILITARY_DISTRICT_GRAFANA_USER:-user}
+      GF_SECURITY_ADMIN_PASSWORD: ${MILITARY_DISTRICT_GRAFANA_PASSWORD:-password}
+    healthcheck:
+      test: [ "CMD-SHELL", " curl --fail -s http://localhost:3000/api/health | grep ok || exit 1" ]
+      interval: 5s
+      timeout: 5s
+      retries: 50
+    ports:
+      - ${MILITARY_DISTRICT_GRAFANA_PORT:-13000}:3000
+    volumes:
+      - ./deploy/grafana/provisioning:/etc/grafana/provisioning
+      - grafana_data:/var/lib/grafana
+    networks:
+      - military-district-net
+    depends_on:
+      prometheus:
+        condition: service_healthy
