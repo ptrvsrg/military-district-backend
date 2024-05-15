@@ -12,8 +12,8 @@ public class SpecPageSortUtils {
 
   public static Pageable generatePageable(Integer page, Integer pageSize, @NonNull Sort sort) {
     if (ObjectUtils.anyNull(page, pageSize)) {
-      return Pageable.unpaged(sort);
+      return PageRequest.of(0, Integer.MAX_VALUE).withSort(sort);
     }
-    return PageRequest.of(page, pageSize, sort);
+    return PageRequest.of(page, pageSize).withSort(sort);
   }
 }
