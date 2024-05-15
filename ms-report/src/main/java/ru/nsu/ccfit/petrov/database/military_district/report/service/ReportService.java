@@ -2,6 +2,7 @@ package ru.nsu.ccfit.petrov.database.military_district.report.service;
 
 import static ru.nsu.ccfit.petrov.database.military_district.report.util.SpecPageSortUtils.generatePageable;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -79,6 +80,8 @@ public class ReportService {
                 entry -> {
                   var value = entry.getValue();
                   return value == null ? "—" : value.toString();
-                }));
+                },
+                (existingValue, newValue) -> existingValue,
+                LinkedHashMap::new));
   }
 }
