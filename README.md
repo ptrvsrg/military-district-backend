@@ -1,4 +1,4 @@
-# Military District
+# Military District (Backend)
 
 <p align="center">
    <a href="https://github.com/ptrvsrg/military-district-backend/graphs/contributors">
@@ -55,13 +55,17 @@ PGAdmin4 позволяет следить за метриками класте�
 ## Доступные команды
 
 ```shell
-make clean                                    # Clean generated files
-make build                                    # Build the JAR files
-make build-images IMAGE_PREFIX=<image prefix> # Build the Docker images
-make env                                      # Create template .env file
-make supergraph                               # Generate supergraph schema
-make deploy                                   # Deploy to Docker
-make help                                     # Display this message
+make clean                                      # Clean generated files
+make build                                      # Build the JAR files
+make build-images IMAGE_PREFIX=<image prefix>   # Build the Docker images
+make supergraph                                 # Generate supergraph schema
+make dev-env                                    # Create template .env.development file
+make env                                        # Create template .env file
+make dev-up                                     # Deploy to Docker for Development
+make dev-down                                   # Stop and remove containers for Development
+make up                                         # Deploy to Docker for Production
+make down                                       # Stop and remove containers for Production
+make help                                       # Display this message
 ```
 
 ## Запуск
