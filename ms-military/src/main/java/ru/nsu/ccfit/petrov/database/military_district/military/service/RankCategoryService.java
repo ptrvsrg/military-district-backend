@@ -19,7 +19,7 @@ public class RankCategoryService implements GraphQLService {
 
   private final RankCategoryRepository rankCategoryRepository;
 
-  @Cacheable(value = "rankCategories", sync = true)
+  @Cacheable(value = "rankCategories", unless = "#result.size() > 1000", sync = true)
   public List<RankCategory> getAll() {
     log.info("Get all rank categories");
     return rankCategoryRepository.findAll();

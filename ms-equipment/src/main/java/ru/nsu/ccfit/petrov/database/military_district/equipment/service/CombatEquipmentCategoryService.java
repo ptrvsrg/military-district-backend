@@ -34,6 +34,7 @@ public class CombatEquipmentCategoryService implements GraphQLService {
   @Cacheable(
       value = "combatEquipmentCategories",
       key = "#a0 + '_' + (#a1 != null ? #a1.toString() : 'null')",
+      unless = "#result.size() > 1000",
       sync = true)
   public List<CombatEquipmentCategory> getAll(Pagination pagination, List<Sorting> sorts) {
     log.info("Get all combat equipment categories: pagination={}, sorts={}", pagination, sorts);

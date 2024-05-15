@@ -45,6 +45,7 @@ public class BuildingService implements GraphQLService {
   @Cacheable(
       value = "buildings",
       key = "#a0 + '_' + #a1 + '_' + (#a2 != null ? #a2.toString() : 'null')",
+      unless = "#result.size() > 1000",
       sync = true)
   public List<Building> getAll(BuildingFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info("Get all buildings: filter={}, pagination={}, sorts={}", filter, pagination, sorts);

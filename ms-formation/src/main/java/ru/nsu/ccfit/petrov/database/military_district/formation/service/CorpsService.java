@@ -44,6 +44,7 @@ public class CorpsService implements GraphQLService {
   @Cacheable(
       value = "corps",
       key = "#a0 + '_' + #a1 + '_' + (#a2 != null ? #a2.toString() : 'null')",
+      unless = "#result.size() > 1000",
       sync = true)
   public List<Corps> getAll(CorpsFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info("Get all corps: filter={}, pagination={}, sorts={}", filter, pagination, sorts);

@@ -47,6 +47,7 @@ public class UnitService implements GraphQLService {
   @Cacheable(
       value = "units",
       key = "#a0 + '_' + #a1 + '_' + (#a2 != null ? #a2.toString() : 'null')",
+      unless = "#result.size() > 1000",
       sync = true)
   public List<Unit> getAll(UnitFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info("Get all units: filter={}, pagination={}, sorts={}", filter, pagination, sorts);

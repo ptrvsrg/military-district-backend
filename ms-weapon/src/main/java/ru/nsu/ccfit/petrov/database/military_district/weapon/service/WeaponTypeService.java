@@ -51,6 +51,7 @@ public class WeaponTypeService implements GraphQLService {
   @Cacheable(
       value = "weaponTypes",
       key = "#a0 + '_' + #a1 + '_' + (#a2 != null ? #a2.toString() : 'null')",
+      unless = "#result.size() > 1000",
       sync = true)
   public List<WeaponType> getAll(
       WeaponTypeFilter filter, Pagination pagination, List<Sorting> sorts) {
