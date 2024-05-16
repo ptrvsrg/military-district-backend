@@ -53,7 +53,7 @@ supergraph:
 	sudo chown $(shell whoami):$(shell whoami) ./supergraph.graphqls
 
 .PHONY: dev-up
-dev-up:
+dev-up: build
 ifeq ($(shell [ -e $(DEV_ENV_FILE) ] && echo 1 || echo 0), 1)
 	$(DOCKER_COMPOSE) --env-file $(DEV_ENV_FILE) -f $(DOCKER_COMPOSE_DEV_FILE) -p military-district-backend-dev up -d
 else
