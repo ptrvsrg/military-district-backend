@@ -19,7 +19,7 @@ public class SpecialtyService implements GraphQLService {
 
   private final SpecialtyRepository specialtyRepository;
 
-  @Cacheable(value = "specialties", unless = "#result.size() > 1000", sync = true)
+  @Cacheable(value = "specialties", unless = "#result.size() > 1000")
   public List<Specialty> getAll() {
     log.info("Get all specialities");
     return specialtyRepository.findAll();

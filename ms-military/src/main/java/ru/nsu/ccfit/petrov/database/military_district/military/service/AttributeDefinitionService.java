@@ -25,8 +25,7 @@ public class AttributeDefinitionService implements GraphQLService {
   @Cacheable(
       value = "attributeDefinitions",
       key = "(#a0 != null ? #a0 : 'null')",
-      unless = "#result.size() > 1000",
-      sync = true)
+      unless = "#result.size() > 1000")
   public List<Attribute> getAll(AttributeDefinitionFilter filter) {
     log.info("Get all military attribute definitions: filter={}", filter);
     return attributeRepository.findAll(generateAttributeDefinitionSpec(filter));

@@ -25,8 +25,7 @@ public class RankService implements GraphQLService {
   @Cacheable(
       value = "ranks",
       key = "(#a0 != null ? #a0 : 'null')",
-      unless = "#result.size() > 1000",
-      sync = true)
+      unless = "#result.size() > 1000")
   public List<Rank> getAll(RankFilter filter) {
     log.info("Get all ranks: filter={}", filter);
     return rankRepository.findAll(generateRankSpec(filter));

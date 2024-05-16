@@ -54,8 +54,7 @@ public class MilitaryService implements GraphQLService {
   @Cacheable(
       value = "militaries",
       key = "#a0 + '_' + #a1 + '_' + (#a2 != null ? #a2.toString() : 'null')",
-      unless = "#result.size() > 1000",
-      sync = true)
+      unless = "#result.size() > 1000")
   public List<Military> getAll(MilitaryFilter filter, Pagination pagination, List<Sorting> sorts) {
     log.info("Get all militaries: filter={}, pagination={}, sorts={}", filter, pagination, sorts);
     var sort = generateSort(sorts, availableSortFields);

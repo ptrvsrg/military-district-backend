@@ -35,8 +35,7 @@ public class ReportService {
   @Cacheable(
       value = "reports",
       key = "#a0 + '_' + #a1",
-      unless = "#result.size() > 1000",
-      sync = true)
+      unless = "#result.size() > 1000")
   public List<ReportInfoOutputDto> getReports(Integer page, Integer pageSize) {
     log.info("Get reports: page={}, pageSize={}", page, pageSize);
     var sort = Sort.by("name").ascending();
@@ -62,8 +61,7 @@ public class ReportService {
   @Cacheable(
       value = "build_report",
       key = "#a0 + '_' + #a1",
-      unless = "#result.data.size() > 1000",
-      sync = true)
+      unless = "#result.data.size() > 1000")
   public ReportBuildOutputDto buildReport(
       @NonNull String name, @NonNull ReportBuildInputDto inputDto) {
     log.info("Build report: input={}", inputDto);
