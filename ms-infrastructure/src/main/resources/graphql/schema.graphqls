@@ -1,0 +1,112 @@
+extend schema @link(url: "https://specs.apollo.dev/federation/v2.3",
+    import: ["@key", "@shareable", "@extends", "@external"])
+
+type Address @shareable {
+    postCode: Int
+    country: String
+    state: String
+    locality: String
+    street: String
+    houseNumber: String
+}
+
+type Attribute @shareable {
+    name: String!
+    value: String!
+}
+
+type Building {
+    name: String!
+    coordinate: Coordinate
+    address: Address
+    unit: Unit
+    attributes: [Attribute!]!
+    companies: [Company!]!
+    platoons: [Platoon!]!
+    squads: [Squad!]!
+}
+
+type Company @key(fields: "name", resolvable: false) @extends {
+    name: String! @external
+}
+
+type Coordinate @shareable {
+    lat: Float!
+    lng: Float!
+}
+
+type Platoon @key(fields: "name", resolvable: false) @extends {
+    name: String! @external
+}
+
+type Squad @key(fields: "name", resolvable: false) @extends {
+    name: String! @external
+}
+
+type Unit @key(fields: "name", resolvable: false) @extends {
+    name: String! @external
+}
+
+input BuildingFilter {
+    name: String
+    address: String
+    unit: String
+}
+
+input Pagination {
+    page: Int!
+    pageSize: Int!
+}
+
+input Sort {
+    field: String!
+    sortAsc: Boolean!
+}
+
+type Query {
+    getBuildings(
+        filter: BuildingFilter
+        pagination: Pagination
+        sorts: [Sort!]
+    ): [Building!]
+    getBuildingCount(
+        filter: BuildingFilter
+    ): Int
+    getBuilding(name: String!, unit: String): Building
+}
+
+input AddressInput {
+    postCode: Int
+    country: String
+    state: String
+    locality: String
+    street: String
+    houseNumber: String
+}
+
+input AttributeInput {
+    name: String!
+    value: String!
+}
+
+input BuildingInput {
+    name: String!
+    coordinate: CoordinateInput
+    address: AddressInput
+    unit: String
+    attributes: [AttributeInput!]
+    companies: [String!]
+    platoons: [String!]
+    squads: [String!]
+}
+
+input CoordinateInput {
+    lat: Float!
+    lng: Float!
+}
+
+type Mutation {
+    createBuilding(input: BuildingInput!): Building
+    updateBuilding(name: String!, unit: String, input: BuildingInput!): Building
+    deleteBuilding(name: String!, unit: String): Int
+}
