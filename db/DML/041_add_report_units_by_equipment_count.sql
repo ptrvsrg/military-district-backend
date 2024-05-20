@@ -12,5 +12,8 @@ VALUES ('Воинские части по количеству боевой те
         HAVING (COUNT(DISTINCT ce.serial_number) >= :minCombatEquipmentCount::INTEGER OR :minCombatEquipmentCount::INTEGER IS NULL)
            AND (COUNT(DISTINCT ce.serial_number) <= :maxCombatEquipmentCount::INTEGER OR :maxCombatEquipmentCount::INTEGER IS NULL)
         ORDER BY combat_equipment_count DESC',
-        '{combatEquipmentTypeName,minCombatEquipmentCount,maxCombatEquipmentCount}')
+        ARRAY [
+            ('combatEquipmentTypeName', 'SELECT name FROM combat_equipment_types')::REPORT_PARAMETER,
+            ('minCombatEquipmentCount', NULL)::REPORT_PARAMETER,
+            ('maxCombatEquipmentCount', NULL)::REPORT_PARAMETER])
 ON CONFLICT DO NOTHING;

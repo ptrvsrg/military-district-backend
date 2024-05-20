@@ -52,5 +52,5 @@ VALUES ('Формирования по количеству военных ча�
         SELECT *
         FROM formation_rating_by_unit_count fruc
         ORDER BY fruc.unit_count DESC, fruc.formation_type;',
-        '{}')
+        ARRAY []::REPORT_PARAMETER[])
 ON CONFLICT DO NOTHING;

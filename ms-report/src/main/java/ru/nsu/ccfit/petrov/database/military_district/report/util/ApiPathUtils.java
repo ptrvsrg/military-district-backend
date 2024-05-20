@@ -11,4 +11,5 @@ public class ApiPathUtils {
   public static final String GET_REPORT_SUFFIX = "/one";
   public static final String GET_ALL_REPORTS_SUFFIX = "/all";
   public static final String GET_REPORT_COUNT_SUFFIX = "/count";
+  public static final String GET_REPORT_PARAMETER_VALUES_SUFFIX = "/parameter-values";
 }

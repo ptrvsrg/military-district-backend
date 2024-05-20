@@ -5,6 +5,7 @@ import static ru.nsu.ccfit.petrov.database.military_district.report.util.ApiPath
 import static ru.nsu.ccfit.petrov.database.military_district.report.util.ApiPathUtils.EXPORT_SUFFIX;
 import static ru.nsu.ccfit.petrov.database.military_district.report.util.ApiPathUtils.GET_ALL_REPORTS_SUFFIX;
 import static ru.nsu.ccfit.petrov.database.military_district.report.util.ApiPathUtils.GET_REPORT_COUNT_SUFFIX;
+import static ru.nsu.ccfit.petrov.database.military_district.report.util.ApiPathUtils.GET_REPORT_PARAMETER_VALUES_SUFFIX;
 import static ru.nsu.ccfit.petrov.database.military_district.report.util.ApiPathUtils.GET_REPORT_SUFFIX;
 import static ru.nsu.ccfit.petrov.database.military_district.report.util.ApiPathUtils.REPORT_PREFIX;
 
@@ -54,6 +55,17 @@ public class ReportController {
   @PreAuthorize("hasAuthority('VIEW_REPORTS')")
   public ResponseEntity<ReportInfoOutputDto> getReport(@RequestParam("name") String name) {
     return ResponseEntity.status(OK).body(reportService.getReport(name));
+  }
+
+  @GetMapping(GET_REPORT_PARAMETER_VALUES_SUFFIX)
+  @PreAuthorize("hasAuthority('VIEW_REPORTS')")
+  public ResponseEntity<?> getReportParameterValues(
+      @RequestParam(name = "report", required = true) String report,
+      @RequestParam(name = "parameter", required = false) String parameter) {
+    if (parameter == null) {
+      return ResponseEntity.status(OK).body(reportService.getAllParameterValues(report));
+    }
+    return ResponseEntity.status(OK).body(reportService.getParameterValues(report, parameter));
   }
 
   @PostMapping(BUILD_SUFFIX)

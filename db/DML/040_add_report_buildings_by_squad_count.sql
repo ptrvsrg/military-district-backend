@@ -18,5 +18,8 @@ VALUES ('Сооружения по количеству дислоцирован
         WHERE (b.unit_name = :unitName::VARCHAR            OR :unitName::VARCHAR IS NULL)
           AND (uwsc.squad_count >= :minSquadCount::INTEGER OR :minSquadCount::INTEGER IS NULL)
           AND (uwsc.squad_count <= :maxSquadCount::INTEGER OR :maxSquadCount::INTEGER IS NULL)',
-        '{unitName,minSquadCount,maxSquadCount}')
+        ARRAY [
+            ('unitName', 'SELECT name FROM units')::REPORT_PARAMETER,
+            ('minSquadCount', NULL)::REPORT_PARAMETER,
+            ('maxSquadCount', NULL)::REPORT_PARAMETER])
 ON CONFLICT DO NOTHING;

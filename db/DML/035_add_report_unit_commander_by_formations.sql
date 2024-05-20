@@ -40,5 +40,9 @@ VALUES ('Воинские части и их командиры по форми�
         FROM units_with_commander uwc
                  JOIN militaries m ON m.mbn = uwc.commander_mbn
         ORDER BY uwc.unit_name',
-        '{brigadeName,corpsName,divisionName,armyName}')
+        ARRAY [
+            ('brigadeName', 'SELECT name FROM brigades')::REPORT_PARAMETER,
+            ('corpsName', 'SELECT name FROM corps')::REPORT_PARAMETER,
+            ('divisionName', 'SELECT name FROM divisions')::REPORT_PARAMETER,
+            ('armyName', 'SELECT name FROM armies')::REPORT_PARAMETER])
 ON CONFLICT DO NOTHING;

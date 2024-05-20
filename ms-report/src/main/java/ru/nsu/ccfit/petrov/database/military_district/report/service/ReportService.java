@@ -13,13 +13,16 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.nsu.ccfit.petrov.database.military_district.report.dto.ReportBuildInputDto;
 import ru.nsu.ccfit.petrov.database.military_district.report.dto.ReportBuildOutputDto;
 import ru.nsu.ccfit.petrov.database.military_district.report.dto.ReportInfoOutputDto;
 import ru.nsu.ccfit.petrov.database.military_district.report.exception.ReportNotFoundException;
+import ru.nsu.ccfit.petrov.database.military_district.report.exception.ReportParameterNotFoundException;
 import ru.nsu.ccfit.petrov.database.military_district.report.mapper.ReportMapper;
+import ru.nsu.ccfit.petrov.database.military_district.report.persistence.entity.ReportParameter;
 import ru.nsu.ccfit.petrov.database.military_district.report.persistence.repository.ReportRepository;
 
 @Service
@@ -32,10 +35,7 @@ public class ReportService {
   private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
   private final ReportMapper reportMapper;
 
-  @Cacheable(
-      value = "reports",
-      key = "#a0 + '_' + #a1",
-      unless = "#result.size() > 1000")
+  @Cacheable(value = "reports", key = "#a0 + '_' + #a1", unless = "#result.size() > 1000")
   public List<ReportInfoOutputDto> getReports(Integer page, Integer pageSize) {
     log.info("Get reports: page={}, pageSize={}", page, pageSize);
     var sort = Sort.by("name").ascending();
@@ -58,10 +58,52 @@ public class ReportService {
     return reportMapper.toOutputDto(report);
   }
 
-  @Cacheable(
-      value = "build_report",
-      key = "#a0 + '_' + #a1",
-      unless = "#result.data.size() > 1000")
+  @Cacheable(value = "all_report_parameter_values", key = "#a0", sync = true)
+  public @Nullable Map<String, List<String>> getAllParameterValues(@NonNull String report) {
+    log.info("Get all parameter values: report={}", report);
+
+    var reportEntity =
+        reportRepository.findByName(report).orElseThrow(ReportNotFoundException::new);
+    if (reportEntity.getParameters().isEmpty()) {
+      return null;
+    }
+
+    return reportEntity.getParameters().stream()
+        .collect(
+            Collectors.toMap(
+                ReportParameter::getName,
+                p -> {
+                  if (p.getQueryForValues() == null) {
+                    return List.of();
+                  }
+                  return namedParameterJdbcTemplate.queryForList(
+                      p.getQueryForValues(), Map.of(), String.class);
+                }));
+  }
+
+  @Cacheable(value = "report_parameter_values", key = "#a0 + '_' + #a1", sync = true)
+  public List<String> getParameterValues(@NonNull String report, @NonNull String parameter) {
+    log.info("Get parameter values: report={}, parameter={}", report, parameter);
+
+    var reportEntity =
+        reportRepository.findByName(report).orElseThrow(ReportNotFoundException::new);
+    var parameterEntity =
+        reportEntity.getParameters().stream()
+            .filter(p -> p.getName().equals(parameter))
+            .findFirst();
+    if (parameterEntity.isEmpty()) {
+      throw new ReportParameterNotFoundException();
+    }
+
+    var query = parameterEntity.get().getQueryForValues();
+    if (query == null) {
+      return List.of();
+    }
+
+    return namedParameterJdbcTemplate.queryForList(query, Map.of(), String.class);
+  }
+
+  @Cacheable(value = "build_report", key = "#a0 + '_' + #a1", unless = "#result.data.size() > 1000")
   public ReportBuildOutputDto buildReport(
       @NonNull String name, @NonNull ReportBuildInputDto inputDto) {
     log.info("Build report: input={}", inputDto);
@@ -69,7 +111,7 @@ public class ReportService {
     var report = reportRepository.findByName(name).orElseThrow(ReportNotFoundException::new);
 
     var paramSource = new MapSqlParameterSource();
-    report.getParameters().forEach(param -> paramSource.addValue(param, null));
+    report.getParameters().forEach(param -> paramSource.addValue(param.getName(), null));
     inputDto.getParameters().forEach(paramSource::addValue);
 
     var result = namedParameterJdbcTemplate.queryForList(report.getQuery(), paramSource);

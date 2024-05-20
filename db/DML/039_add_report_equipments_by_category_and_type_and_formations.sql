@@ -38,5 +38,12 @@ VALUES ('Боевая техника по категориям, типам и ф
           AND (:armyName::VARCHAR IS NULL                    OR a.name = :armyName::VARCHAR)
         GROUP BY fce.serial_number, fce.combat_equipment_category_name, fce.combat_equipment_type_name, u.name
         ORDER BY fce.serial_number',
-        '{combatEquipmentCategoryName,combatEquipmentTypeName,unitName,brigadeName,corpsName,divisionName,armyName}')
+        ARRAY [
+            ('combatEquipmentCategoryName', 'SELECT name FROM combat_equipment_categories')::REPORT_PARAMETER,
+            ('combatEquipmentTypeName', 'SELECT name FROM combat_equipment_types')::REPORT_PARAMETER,
+            ('unitName', 'SELECT name FROM units')::REPORT_PARAMETER,
+            ('brigadeName', 'SELECT name FROM brigades')::REPORT_PARAMETER,
+            ('corpsName', 'SELECT name FROM corps')::REPORT_PARAMETER,
+            ('divisionName', 'SELECT name FROM divisions')::REPORT_PARAMETER,
+            ('armyName', 'SELECT name FROM armies')::REPORT_PARAMETER])
 ON CONFLICT DO NOTHING;

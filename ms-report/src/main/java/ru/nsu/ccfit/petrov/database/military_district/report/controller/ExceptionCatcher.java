@@ -30,6 +30,7 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 import ru.nsu.ccfit.petrov.database.military_district.report.dto.ErrorDto;
 import ru.nsu.ccfit.petrov.database.military_district.report.exception.DuplicateReportException;
 import ru.nsu.ccfit.petrov.database.military_district.report.exception.ReportNotFoundException;
+import ru.nsu.ccfit.petrov.database.military_district.report.exception.ReportParameterNotFoundException;
 
 @RestControllerAdvice
 @RequiredArgsConstructor
@@ -117,12 +118,20 @@ public class ExceptionCatcher {
         .body(ErrorDto.builder().createdAt(Instant.now()).message(message).build());
   }
 
+  @ExceptionHandler(ReportParameterNotFoundException.class)
+  public ResponseEntity<ErrorDto> handleReportParameterNotFoundException(HttpServletRequest request) {
+    var message = getMessage("exception.report_parameter-not-found", request);
+    log.warn("handleReportParameterNotFoundException: {}", message);
+    return ResponseEntity.status(NOT_FOUND)
+            .body(ErrorDto.builder().createdAt(Instant.now()).message(message).build());
+  }
+
   @ExceptionHandler(ReportNotFoundException.class)
   public ResponseEntity<ErrorDto> handleReportNotFoundException(HttpServletRequest request) {
     var message = getMessage("exception.report-not-found", request);
     log.warn("handleReportNotFoundException: {}", message);
     return ResponseEntity.status(NOT_FOUND)
-        .body(ErrorDto.builder().createdAt(Instant.now()).message(message).build());
+            .body(ErrorDto.builder().createdAt(Instant.now()).message(message).build());
   }
 
   @ExceptionHandler(DuplicateReportException.class)

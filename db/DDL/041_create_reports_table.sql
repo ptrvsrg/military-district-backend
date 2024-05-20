@@ -1,12 +1,29 @@
+DO
+$$
+    BEGIN
+        CREATE TYPE REPORT_PARAMETER AS
+        (
+            name             VARCHAR(255),
+            query_for_values TEXT
+        );
+
+        COMMENT ON TYPE REPORT_PARAMETER IS 'Параметр отчёта';
+        COMMENT ON COLUMN report_parameter.name IS 'Название';
+        COMMENT ON COLUMN report_parameter.query_for_values IS 'Запрос для получения значений';
+    EXCEPTION
+        WHEN duplicate_object THEN NULL;
+    END
+$$;
+
 CREATE TABLE IF NOT EXISTS reports
 (
     id          SERIAL PRIMARY KEY,
-    name        VARCHAR(255)   NOT NULL UNIQUE,
+    name        VARCHAR(255)       NOT NULL UNIQUE,
     description TEXT,
-    query       TEXT           NOT NULL,
-    parameters  VARCHAR(255)[] NOT NULL,
-    created_at  TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
-    updated_at  TIMESTAMPTZ    NOT NULL DEFAULT NOW()
+    query       TEXT               NOT NULL,
+    parameters  REPORT_PARAMETER[] NOT NULL,
+    created_at  TIMESTAMPTZ        NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMPTZ        NOT NULL DEFAULT NOW()
 );
 
 COMMENT ON TABLE reports IS 'Отчёты';

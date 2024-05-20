@@ -12,5 +12,8 @@ VALUES ('Воинские части по количеству вооружен�
         HAVING (COUNT(DISTINCT w.serial_number) >= :minWeaponCount::INTEGER OR :minWeaponCount::INTEGER IS NULL)
            AND (COUNT(DISTINCT w.serial_number) <= :maxWeaponCount::INTEGER OR :maxWeaponCount::INTEGER IS NULL)
         ORDER BY weapon_count DESC',
-        '{weaponTypeName,minWeaponCount,maxWeaponCount}')
+        ARRAY [
+            ('weaponTypeName', 'SELECT name FROM weapon_types')::REPORT_PARAMETER,
+            ('minWeaponCount', NULL)::REPORT_PARAMETER,
+            ('maxWeaponCount', NULL)::REPORT_PARAMETER])
 ON CONFLICT DO NOTHING;

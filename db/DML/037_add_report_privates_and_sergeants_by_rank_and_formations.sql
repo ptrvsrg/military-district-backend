@@ -45,5 +45,11 @@ VALUES ('Рядовые и сержанты по воинскому званию
           AND (:armyName::VARCHAR IS NULL     OR a.name = :armyName::VARCHAR)
         GROUP BY o.private_or_sergeant_mbn, o.private_or_sergeant_name, o.rank, u.name
         ORDER BY private_or_sergeant_mbn',
-        '{rankName,unitName,brigadeName,corpsName,divisionName,armyName}')
+        ARRAY [
+            ('rankName', 'SELECT name FROM ranks')::REPORT_PARAMETER,
+            ('unitName', 'SELECT name FROM units')::REPORT_PARAMETER,
+            ('brigadeName', 'SELECT name FROM brigades')::REPORT_PARAMETER,
+            ('corpsName', 'SELECT name FROM corps')::REPORT_PARAMETER,
+            ('divisionName', 'SELECT name FROM divisions')::REPORT_PARAMETER,
+            ('armyName', 'SELECT name FROM armies')::REPORT_PARAMETER])
 ON CONFLICT DO NOTHING;

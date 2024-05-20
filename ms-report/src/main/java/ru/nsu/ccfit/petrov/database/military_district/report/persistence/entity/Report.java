@@ -14,7 +14,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import ru.nsu.ccfit.petrov.database.military_district.report.persistence.converter.ListToStringConverter;
+import ru.nsu.ccfit.petrov.database.military_district.report.persistence.converter.ReportParameterListToStringConverter;
 
 @Getter
 @Setter
@@ -32,8 +32,8 @@ public class Report {
 
   private String query;
 
-  @Convert(converter = ListToStringConverter.class)
-  private List<String> parameters = new ArrayList<>();
+  @Convert(converter = ReportParameterListToStringConverter.class)
+  private List<ReportParameter> parameters = new ArrayList<>();
 
   @CreationTimestamp
   @Column(name = "created_at")

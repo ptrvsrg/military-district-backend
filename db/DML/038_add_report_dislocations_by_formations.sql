@@ -26,5 +26,10 @@ VALUES ('Места дислокации по формированиям',
           AND (:divisionName::VARCHAR IS NULL OR d.name = :divisionName::VARCHAR)
           AND (:armyName::VARCHAR IS NULL     OR a.name = :armyName::VARCHAR)
         GROUP BY u.coordinate, u.address, u.name',
-        '{unitName,brigadeName,corpsName,divisionName,armyName}')
+        ARRAY [
+            ('unitName', 'SELECT name FROM units')::REPORT_PARAMETER,
+            ('brigadeName', 'SELECT name FROM brigades')::REPORT_PARAMETER,
+            ('corpsName', 'SELECT name FROM corps')::REPORT_PARAMETER,
+            ('divisionName', 'SELECT name FROM divisions')::REPORT_PARAMETER,
+            ('armyName', 'SELECT name FROM armies')::REPORT_PARAMETER])
 ON CONFLICT DO NOTHING;

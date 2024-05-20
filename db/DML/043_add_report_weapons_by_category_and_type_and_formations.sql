@@ -38,5 +38,12 @@ VALUES ('Вооружение по категориям, типам и форм�
           AND (:armyName::VARCHAR IS NULL           OR a.name = :armyName::VARCHAR)
         GROUP BY fce.serial_number, fce.weapon_type_name, fce.weapon_category_name, u.name
         ORDER BY fce.serial_number',
-        '{weaponCategoryName,weaponTypeName,unitName,brigadeName,corpsName,divisionName,armyName}')
+        ARRAY [
+            ('weaponCategoryName', 'SELECT name FROM weapon_categories')::REPORT_PARAMETER,
+            ('weaponTypeName', 'SELECT name FROM weapon_types')::REPORT_PARAMETER,
+            ('unitName', 'SELECT name FROM units')::REPORT_PARAMETER,
+            ('brigadeName', 'SELECT name FROM brigades')::REPORT_PARAMETER,
+            ('corpsName', 'SELECT name FROM corps')::REPORT_PARAMETER,
+            ('divisionName', 'SELECT name FROM divisions')::REPORT_PARAMETER,
+            ('armyName', 'SELECT name FROM armies')::REPORT_PARAMETER])
 ON CONFLICT DO NOTHING;

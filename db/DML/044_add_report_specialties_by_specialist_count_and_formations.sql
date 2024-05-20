@@ -37,5 +37,12 @@ VALUES ('Военные специальности по количеству с�
         HAVING (COUNT(DISTINCT s.specialist_mbn) >= :minSpecialistCount::INTEGER OR :minSpecialistCount::INTEGER IS NULL)
            AND (COUNT(DISTINCT s.specialist_mbn) <= :maxSpecialistCount::INTEGER OR :maxSpecialistCount::INTEGER IS NULL)
         ORDER BY specialist_count DESC;',
-        '{unitName,brigadeName,corpsName,divisionName,armyName,minSpecialistCount,maxSpecialistCount}')
+        ARRAY [
+            ('unitName', 'SELECT name FROM units')::REPORT_PARAMETER,
+            ('brigadeName', 'SELECT name FROM brigades')::REPORT_PARAMETER,
+            ('corpsName', 'SELECT name FROM corps')::REPORT_PARAMETER,
+            ('divisionName', 'SELECT name FROM divisions')::REPORT_PARAMETER,
+            ('armyName', 'SELECT name FROM armies')::REPORT_PARAMETER,
+            ('minSpecialistCount', NULL)::REPORT_PARAMETER,
+            ('maxSpecialistCount', NULL)::REPORT_PARAMETER])
 ON CONFLICT DO NOTHING;
