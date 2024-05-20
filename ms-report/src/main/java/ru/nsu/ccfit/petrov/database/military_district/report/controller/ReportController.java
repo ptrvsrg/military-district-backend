@@ -53,14 +53,14 @@ public class ReportController {
 
   @GetMapping(GET_REPORT_SUFFIX)
   @PreAuthorize("hasAuthority('VIEW_REPORTS')")
-  public ResponseEntity<ReportInfoOutputDto> getReport(@RequestParam("name") String name) {
-    return ResponseEntity.status(OK).body(reportService.getReport(name));
+  public ResponseEntity<ReportInfoOutputDto> getReport(@RequestParam("report") String report) {
+    return ResponseEntity.status(OK).body(reportService.getReport(report));
   }
 
   @GetMapping(GET_REPORT_PARAMETER_VALUES_SUFFIX)
   @PreAuthorize("hasAuthority('VIEW_REPORTS')")
   public ResponseEntity<?> getReportParameterValues(
-      @RequestParam(name = "report", required = true) String report,
+      @RequestParam("report") String report,
       @RequestParam(name = "parameter", required = false) String parameter) {
     if (parameter == null) {
       return ResponseEntity.status(OK).body(reportService.getAllParameterValues(report));
@@ -71,18 +71,18 @@ public class ReportController {
   @PostMapping(BUILD_SUFFIX)
   @PreAuthorize("hasAuthority('BUILD_REPORT')")
   public ResponseEntity<ReportBuildOutputDto> buildReport(
-      @RequestParam("name") String name, @RequestBody ReportBuildInputDto inputDto) {
-    return ResponseEntity.status(OK).body(reportService.buildReport(name, inputDto));
+      @RequestParam("report") String report, @RequestBody ReportBuildInputDto inputDto) {
+    return ResponseEntity.status(OK).body(reportService.buildReport(report, inputDto));
   }
 
   @PostMapping(value = EXPORT_SUFFIX, produces = "text/csv")
   @PreAuthorize("hasAuthority('BUILD_REPORT')")
   public void exportReport(
-      @RequestParam("name") String name,
+      @RequestParam("report") String report,
       @RequestBody ReportBuildInputDto inputDto,
       HttpServletResponse response)
       throws IOException {
-    var outputDto = reportService.buildReport(name, inputDto);
+    var outputDto = reportService.buildReport(report, inputDto);
     var csvStream = csvService.convertToCSV(outputDto.getData());
 
     response.setStatus(OK.value());

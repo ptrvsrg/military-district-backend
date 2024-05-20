@@ -52,10 +52,11 @@ public class ReportService {
   }
 
   @Cacheable(value = "report", key = "#a0", sync = true)
-  public ReportInfoOutputDto getReport(@NonNull String name) {
-    log.info("Get report: name={}", name);
-    var report = reportRepository.findByName(name).orElseThrow(ReportNotFoundException::new);
-    return reportMapper.toOutputDto(report);
+  public ReportInfoOutputDto getReport(@NonNull String report) {
+    log.info("Get report: report={}", report);
+    var reportEntity =
+        reportRepository.findByName(report).orElseThrow(ReportNotFoundException::new);
+    return reportMapper.toOutputDto(reportEntity);
   }
 
   @Cacheable(value = "all_report_parameter_values", key = "#a0", sync = true)
@@ -78,7 +79,9 @@ public class ReportService {
                   }
                   return namedParameterJdbcTemplate.queryForList(
                       p.getQueryForValues(), Map.of(), String.class);
-                }));
+                },
+                (existingValue, newValue) -> existingValue,
+                LinkedHashMap::new));
   }
 
   @Cacheable(value = "report_parameter_values", key = "#a0 + '_' + #a1", sync = true)
@@ -105,16 +108,17 @@ public class ReportService {
 
   @Cacheable(value = "build_report", key = "#a0 + '_' + #a1", unless = "#result.data.size() > 1000")
   public ReportBuildOutputDto buildReport(
-      @NonNull String name, @NonNull ReportBuildInputDto inputDto) {
+      @NonNull String report, @NonNull ReportBuildInputDto inputDto) {
     log.info("Build report: input={}", inputDto);
 
-    var report = reportRepository.findByName(name).orElseThrow(ReportNotFoundException::new);
+    var reportEntity =
+        reportRepository.findByName(report).orElseThrow(ReportNotFoundException::new);
 
     var paramSource = new MapSqlParameterSource();
-    report.getParameters().forEach(param -> paramSource.addValue(param.getName(), null));
+    reportEntity.getParameters().forEach(param -> paramSource.addValue(param.getName(), null));
     inputDto.getParameters().forEach(paramSource::addValue);
 
-    var result = namedParameterJdbcTemplate.queryForList(report.getQuery(), paramSource);
+    var result = namedParameterJdbcTemplate.queryForList(reportEntity.getQuery(), paramSource);
     var data = result.stream().map(this::processRow).toList();
 
     return ReportBuildOutputDto.builder().data(data).build();

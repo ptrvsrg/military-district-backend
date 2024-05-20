@@ -119,11 +119,12 @@ public class ExceptionCatcher {
   }
 
   @ExceptionHandler(ReportParameterNotFoundException.class)
-  public ResponseEntity<ErrorDto> handleReportParameterNotFoundException(HttpServletRequest request) {
+  public ResponseEntity<ErrorDto> handleReportParameterNotFoundException(
+      HttpServletRequest request) {
     var message = getMessage("exception.report_parameter-not-found", request);
     log.warn("handleReportParameterNotFoundException: {}", message);
     return ResponseEntity.status(NOT_FOUND)
-            .body(ErrorDto.builder().createdAt(Instant.now()).message(message).build());
+        .body(ErrorDto.builder().createdAt(Instant.now()).message(message).build());
   }
 
   @ExceptionHandler(ReportNotFoundException.class)
@@ -131,7 +132,7 @@ public class ExceptionCatcher {
     var message = getMessage("exception.report-not-found", request);
     log.warn("handleReportNotFoundException: {}", message);
     return ResponseEntity.status(NOT_FOUND)
-            .body(ErrorDto.builder().createdAt(Instant.now()).message(message).build());
+        .body(ErrorDto.builder().createdAt(Instant.now()).message(message).build());
   }
 
   @ExceptionHandler(DuplicateReportException.class)
