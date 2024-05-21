@@ -1,0 +1,120 @@
+extend schema @link(url: "https://specs.apollo.dev/federation/v2.3",
+    import: ["@key", "@shareable", "@extends", "@external"])
+
+scalar Date
+
+type MilitaryAttribute {
+    rank: Rank!
+    name: String!
+    value: String!
+}
+
+type MilitaryAttributeDefinition {
+    name: String!
+    rank: Rank!
+}
+
+type Military @key(fields: "mbn") {
+    mbn: String!
+    firstName: String!
+    lastName: String!
+    middleName: String
+    birthDate: Date!
+    rank: Rank
+    specialties: [Specialty!]!
+    attributes: [MilitaryAttribute!]!
+    unit: Unit
+}
+
+type Rank @key(fields: "name") {
+    name: String!
+    level: Int!
+    category: RankCategory!
+}
+
+type RankCategory @key(fields: "name") {
+    name: String!
+}
+
+type Specialty @key(fields: "code"){
+    code: String!
+    name: String!
+}
+
+type Unit @key(fields: "name", resolvable: false) @extends {
+    name: String! @external
+}
+
+input MilitaryFilter {
+    name: String
+    rank: String
+    unit: String
+}
+
+input MilitaryAttributeDefinitionFilter {
+    rank: String
+}
+
+input RankFilter {
+    name: String
+}
+
+input Pagination {
+    page: Int!
+    pageSize: Int!
+}
+
+input Sort {
+    field: String!
+    sortAsc: Boolean!
+}
+
+type Query {
+    getMilitaries(
+        filter: MilitaryFilter
+        pagination: Pagination
+        sorts: [Sort!]
+    ): [Military!]
+    getMilitaryCount(
+        filter: MilitaryFilter
+    ): Int
+    getMilitary(mbn: String!): Military
+
+    getMilitaryAttributeDefinitions(
+        filter: MilitaryAttributeDefinitionFilter
+    ): [MilitaryAttributeDefinition!]
+
+    getRanks(
+        filter: RankFilter
+    ): [Rank!]
+
+    getRankCategories: [RankCategory!]
+
+    getSpecialties: [Specialty!]
+}
+
+input MilitaryAttributeInput {
+    rank: String!
+    name: String!
+    value: String!
+}
+
+input MilitaryInput {
+    mbn: String!
+    firstName: String!
+    lastName: String!
+    middleName: String
+    birthDate: Date!
+    rank: String
+    attributes: [MilitaryAttributeInput!]
+    specialties: [String!]
+    unit: String
+}
+
+type Mutation {
+    createMilitary(input: MilitaryInput!): Military
+    updateMilitary(
+        mbn: String!
+        input: MilitaryInput!): Military
+    deleteMilitary(mbn: String!): Int
+}

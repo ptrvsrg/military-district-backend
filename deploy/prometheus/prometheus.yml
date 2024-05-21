@@ -1,0 +1,45 @@
+scrape_configs:
+  - job_name: 'ms-military'
+    scrape_interval: 5s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'ms-military:8081' ]
+  - job_name: 'ms-formation'
+    scrape_interval: 5s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'ms-formation:8082' ]
+  - job_name: 'ms-infrastructure'
+    scrape_interval: 5s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'ms-infrastructure:8083' ]
+  - job_name: 'ms-equipment'
+    scrape_interval: 5s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'ms-equipment:8084' ]
+  - job_name: 'ms-weapon'
+    scrape_interval: 5s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'ms-weapon:8085' ]
+  - job_name: 'ms-report'
+    scrape_interval: 5s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'ms-report:8086' ]
+  - job_name: 'ms-router'
+    scrape_interval: 5s
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: [ 'ms-router:9090' ]
+  - job_name: 'keycloak'
+    scrape_interval: 5s
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: [ 'keycloak:8080' ]
+  - job_name: 'nginx'
+    scrape_interval: 5s
+    static_configs:
+      - targets: [ 'api-gateway-prometheus-exporter:9113' ]
